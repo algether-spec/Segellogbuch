@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Import – Segellogbuch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .import-card { max-width: 480px; margin: 40px auto; }
+        .import-result { margin-top: 14px; }
+        .file-label {
+            display: inline-block;
+            padding: 10px 18px;
+            background: #0f4c81;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .file-label:active { opacity: 0.75; }
+        #file-input { display: none; }
+        .back-link {
+            display: inline-block;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #0f4c81;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <header>
+        <h1>⛵ Segellogbuch</h1>
+        <p>Törns importieren</p>
+    </header>
+
+    <div class="import-card card">
+        <h2>📂 JSON-Import</h2>
+        <p style="font-size:13px;color:#64748b;margin-bottom:16px;">
+            Wähle eine JSON-Exportdatei aus einem anderen Gerät.
+            Bestehende Daten werden überschrieben.
+        </p>
+
+        <label class="file-label" for="file-input">📂 Datei auswählen</label>
+        <input type="file" id="file-input" accept=".json,application/json">
+
+        <div id="import-result" class="import-result"></div>
+
+        <br>
+        <a href="index.html" class="back-link">← Zurück zur App</a>
+    </div>
+</div>
+
+<script>
+document.getElementById("file-input").addEventListener("change", function () {
+    const file = this.files[0];
+    const result = document.getElementById("import-result");
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        let data;
+        try {
+            data = JSON.parse(e.target.result);
+        } catch {
+            result.innerHTML = '<div class="status-msg status-error">Ungültige JSON-Datei.</div>';
+            return;
+        }
+        if (!Array.isArray(data)) {
+            result.innerHTML = '<div class="status-msg status-error">Fehler: JSON ist kein Array.</div>';
+            return;
+        }
+        localStorage.setItem("segel_logbuch_trips", JSON.stringify(data));
+        result.innerHTML = '<div class="status-msg status-ok">'
+            + data.length + ' Törn' + (data.length !== 1 ? 's' : '')
+            + ' erfolgreich importiert.</div>';
+    };
+    reader.readAsText(file, "UTF-8");
+});
+</script>
+
+</body>
+</html>
