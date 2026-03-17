@@ -108,6 +108,45 @@ button:active { opacity: 0.75; }
     margin-top: 6px;
 }
 
+/* --- Versionszeile ---------------------------------------------- */
+
+.version-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 24px;
+    padding: 0 4px;
+    gap: 10px;
+}
+
+#version-label {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.btn-update {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #e2e8f0;
+    color: #334155;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-update-available {
+    background: #059669;
+    color: #fff;
+    animation: pulse-green 1.5s infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(5,150,105,0.4); }
+    50%       { box-shadow: 0 0 0 6px rgba(5,150,105,0); }
+}
+
 /* --- Karte ------------------------------------------------------ */
 
 .card {

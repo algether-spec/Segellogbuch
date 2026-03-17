@@ -4,6 +4,8 @@
 ====================== */
 
 let aktuellerToern = null;
+let letzterLogWind  = "";
+let letzterLogRuder = "";
 
 /* --- DOM-Elemente ----------------------------------------------- */
 
@@ -145,6 +147,7 @@ function crewListeRendern(crew) {
         del.onclick = () => {
             aktuellerToern.crew = aktuellerToern.crew.filter(c => c.id !== person.id);
             crewListeRendern(aktuellerToern.crew);
+            rudergaengerSelectFuellen();
         };
 
         li.appendChild(info);
@@ -167,6 +170,7 @@ function crewHinzufuegen() {
     };
     aktuellerToern.crew.push(person);
     crewListeRendern(aktuellerToern.crew);
+    rudergaengerSelectFuellen();
     crewInput.value = "";
     crewRole.value  = "Crew";
     crewInput.focus();
@@ -263,6 +267,8 @@ function logEintragSpeichern() {
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+    letzterLogWind  = logWind.value;
+    letzterLogRuder = logRudergaenger.value;
     zeigeLogs();
     logText.value         = "";
     logRudergaenger.value = "";
@@ -753,6 +759,8 @@ document.getElementById("btn-abschluss-druck").onclick = abschlussdrucken;
 btnNeuerLog.onclick = () => {
     logZeitVorbefuellen();
     rudergaengerSelectFuellen();
+    if (letzterLogWind)  logWind.value         = letzterLogWind;
+    if (letzterLogRuder) logRudergaenger.value  = letzterLogRuder;
     logZeit.focus();
 };
 
