@@ -624,9 +624,10 @@ function toernLaden(tripId) {
     const toern = alle.find(t => t.tripId === tripId);
     if (!toern) return;
     aktuellerToern = toern;
-    formularFuellen(aktuellerToern);
     formSection.hidden = false;
     btnToernLoeschen.hidden = false;
+    formularFuellen(aktuellerToern);
+    toernSelectAktualisieren();
 }
 
 function neuerToernAnlegen() {
