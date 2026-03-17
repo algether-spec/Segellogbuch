@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Segellogbuch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <header>
+        <h1>⛵ Segellogbuch</h1>
+        <p>Törns erfassen und verwalten</p>
+    </header>
+
+    <!-- Status -->
+    <div id="status-msg" class="status-msg" hidden></div>
+
+    <!-- Törnauswahl -->
+    <div class="toern-bar">
+        <select id="toern-select" aria-label="Törn auswählen">
+            <option value="">— Törn auswählen —</option>
+        </select>
+        <button type="button" id="btn-neuer-toern" class="btn-primary">+ Neuer Törn</button>
+    </div>
+
+    <!-- Törnübersicht -->
+    <div id="toern-uebersicht"></div>
+
+    <!-- Formular (erst sichtbar wenn Törn aktiv) -->
+    <div id="form-section">
+
+        <!-- Löschen -->
+        <div class="delete-row">
+            <button type="button" id="btn-toern-loeschen" class="btn-danger">Törn löschen</button>
+        </div>
+
+        <!-- Törn-Stammdaten -->
+        <div class="card">
+            <h2>📋 Törn-Stammdaten</h2>
+            <div class="field-group">
+                <div class="field">
+                    <label for="fld-tripname">Törnname *</label>
+                    <input type="text" id="fld-tripname" placeholder="z. B. Ostsee-Runde 2025">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="fld-start-date">Startdatum</label>
+                        <input type="date" id="fld-start-date">
+                    </div>
+                    <div class="field">
+                        <label for="fld-start-time">Startzeit</label>
+                        <input type="time" id="fld-start-time">
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="fld-end-date">Enddatum</label>
+                        <input type="date" id="fld-end-date">
+                    </div>
+                    <div class="field">
+                        <label for="fld-end-time">Endzeit</label>
+                        <input type="time" id="fld-end-time">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="fld-skipper">Schiffsführer *</label>
+                    <input type="text" id="fld-skipper" placeholder="Vor- und Nachname">
+                </div>
+            </div>
+        </div>
+
+        <!-- Crew -->
+        <div class="card">
+            <h2>👥 Crew</h2>
+            <div class="crew-add-row">
+                <div class="field">
+                    <label for="crew-input">Name</label>
+                    <input type="text" id="crew-input" placeholder="Crew-Mitglied">
+                </div>
+                <div class="field field-role">
+                    <label for="crew-role">Rolle</label>
+                    <input type="text" id="crew-role" value="Crew" placeholder="Rolle">
+                </div>
+                <button type="button" id="btn-crew-add">+ Hinzufügen</button>
+            </div>
+            <ul id="crew-list"></ul>
+        </div>
+
+        <!-- Schiffsdaten -->
+        <div class="card">
+            <h2>⚓ Schiffsdaten</h2>
+            <div class="field-group">
+                <div class="field-row">
+                    <div class="field">
+                        <label for="fld-ship-name">Schiffsname</label>
+                        <input type="text" id="fld-ship-name" placeholder="z. B. Albatros">
+                    </div>
+                    <div class="field">
+                        <label for="fld-ship-type">Bootstyp</label>
+                        <input type="text" id="fld-ship-type" placeholder="z. B. Bavaria 38">
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="fld-ship-reg">Kennzeichen</label>
+                        <input type="text" id="fld-ship-reg" placeholder="z. B. WÜ-12345">
+                    </div>
+                    <div class="field">
+                        <label for="fld-ship-engine">Motor</label>
+                        <input type="text" id="fld-ship-engine" placeholder="z. B. Volvo 30 PS">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notizen -->
+        <div class="card">
+            <h2>📝 Notizen</h2>
+            <div class="field">
+                <textarea id="fld-notes" placeholder="Freie Notizen zum Törn…" rows="4"></textarea>
+            </div>
+        </div>
+
+        <!-- Logbuch-Ereignisse -->
+        <div class="card">
+            <h2>📖 Logbuch-Ereignisse</h2>
+
+            <div class="event-add-row">
+                <div class="field">
+                    <label for="event-type">Typ</label>
+                    <select id="event-type">
+                        <option value="">— Typ wählen —</option>
+                        <option>Abfahrt</option>
+                        <option>Ankunft</option>
+                        <option>Ankersetzen</option>
+                        <option>Anker auf</option>
+                        <option>Manöver</option>
+                        <option>Segelwechsel</option>
+                        <option>Reffen</option>
+                        <option>Motorbetrieb</option>
+                        <option>Wetterwechsel</option>
+                        <option>Sichtung</option>
+                        <option>Notfall</option>
+                        <option>Sonstiges</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="event-date">Datum *</label>
+                    <input type="date" id="event-date">
+                </div>
+                <div class="field">
+                    <label for="event-time">Zeit *</label>
+                    <input type="time" id="event-time">
+                </div>
+            </div>
+
+            <div class="event-add-row">
+                <div class="field">
+                    <label for="event-ort">Ort</label>
+                    <input type="text" id="event-ort" placeholder="z. B. Hafen Kiel">
+                </div>
+                <div class="field">
+                    <label for="event-ruder">Rudergänger</label>
+                    <select id="event-ruder">
+                        <option value="">— Rudergänger —</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field" style="margin-bottom: 10px;">
+                <label for="event-note">Notiz</label>
+                <textarea id="event-note" placeholder="Was ist passiert?" rows="2"></textarea>
+            </div>
+
+            <button type="button" id="btn-wetter-toggle" class="btn-wetter-toggle">🌬 Wetter +</button>
+
+            <div id="event-wetter-felder" hidden>
+                <div class="event-add-row" style="margin-top: 10px;">
+                    <div class="field">
+                        <label for="event-wind-force">Wind (Bft)</label>
+                        <input type="number" id="event-wind-force" min="0" max="12" placeholder="0–12">
+                    </div>
+                    <div class="field">
+                        <label for="event-wind-dir">Windrichtung</label>
+                        <input type="text" id="event-wind-dir" placeholder="z. B. NW">
+                    </div>
+                    <div class="field">
+                        <label for="event-wetter-desc">Beschreibung</label>
+                        <input type="text" id="event-wetter-desc" placeholder="z. B. bedeckt">
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="btn-event-add" class="btn-secondary">+ Ereignis hinzufügen</button>
+
+            <ul id="event-list" style="margin-top: 14px;"></ul>
+        </div>
+
+        <!-- Statistik -->
+        <div id="toern-statistik"></div>
+
+        <!-- Abschluss -->
+        <div id="toern-abschluss"></div>
+
+        <!-- Speichern -->
+        <button type="button" id="btn-speichern" class="btn-save">💾 Törn speichern</button>
+        <button type="button" id="btn-csv-export" class="btn-export">⬇ Export CSV</button>
+        <button type="button" id="btn-drucken" class="btn-export">🖨 Drucken / PDF</button>
+        <button type="button" id="btn-abschluss-druck" class="btn-export">📋 Törnabschluss / PDF</button>
+
+    </div><!-- /form-section -->
+
+</div><!-- /app -->
+
+<!-- Druckbereich (nur beim Drucken sichtbar) -->
+<div id="druck-bereich"></div>
+<div id="abschluss-druck-bereich"></div>
+
+<script src="storage.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

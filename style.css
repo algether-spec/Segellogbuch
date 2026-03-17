@@ -1,0 +1,719 @@
+/* ======================
+   STYLE.CSS – Segellogbuch
+====================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    min-height: 100vh;
+    padding: 16px;
+}
+
+.app {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* --- Header ----------------------------------------------------- */
+
+header {
+    background: #0f4c81;
+    color: #fff;
+    border-radius: 14px;
+    padding: 18px 20px 14px;
+    margin-bottom: 16px;
+}
+
+header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+
+header p {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 3px;
+}
+
+/* --- Törnauswahl ------------------------------------------------ */
+
+.toern-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.toern-bar select {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 16px;
+    background: #fff;
+    color: #1e293b;
+}
+
+/* --- Buttons ---------------------------------------------------- */
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    transition: opacity 0.15s;
+}
+
+button:active { opacity: 0.75; }
+
+.btn-primary {
+    background: #0f4c81;
+    color: #fff;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.btn-save {
+    width: 100%;
+    background: #059669;
+    color: #fff;
+    font-size: 16px;
+    padding: 13px;
+    border-radius: 12px;
+    margin-top: 8px;
+}
+
+.btn-export {
+    width: 100%;
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 14px;
+    padding: 11px;
+    border-radius: 12px;
+    margin-top: 6px;
+}
+
+/* --- Karte ------------------------------------------------------ */
+
+.card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.card h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f4c81;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* --- Formular --------------------------------------------------- */
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.field input,
+.field textarea,
+.field select {
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1px solid #cbd5e1;
+    font-size: 16px;
+    font-family: inherit;
+    background: #fff;
+    color: #1e293b;
+    width: 100%;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+    outline: none;
+    border-color: #0f4c81;
+    box-shadow: 0 0 0 3px rgba(15,76,129,0.12);
+}
+
+.field textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+}
+
+/* --- Crew ------------------------------------------------------- */
+
+.crew-add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: flex-end;
+}
+
+.crew-add-row .field {
+    flex: 2;
+}
+
+.crew-add-row .field-role {
+    flex: 1;
+}
+
+.crew-add-row button {
+    padding: 10px 14px;
+    background: #0f4c81;
+    color: #fff;
+    align-self: flex-end;
+    white-space: nowrap;
+}
+
+#crew-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.crew-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.crew-info {
+    font-size: 14px;
+    color: #334155;
+}
+
+.btn-crew-del {
+    padding: 4px 9px;
+    background: #fee2e2;
+    color: #dc2626;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+}
+
+.crew-empty {
+    font-size: 13px;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 6px 0;
+}
+
+/* --- Status ----------------------------------------------------- */
+
+.status-msg {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.status-ok    { background: #d1fae5; color: #065f46; }
+.status-error { background: #fee2e2; color: #991b1b; }
+
+/* --- Löschen-Button Zeile --------------------------------------- */
+
+.delete-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+}
+
+/* --- Ereignisse ------------------------------------------------- */
+
+.event-add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.event-add-row .field:first-child { flex: 2; min-width: 140px; }
+.event-add-row .field:nth-child(2),
+.event-add-row .field:nth-child(3) { flex: 1; min-width: 100px; }
+
+#event-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+.event-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.event-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.event-type {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f4c81;
+}
+
+.event-time-label {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.event-note-text {
+    font-size: 13px;
+    color: #334155;
+    margin-top: 2px;
+}
+
+.event-empty {
+    font-size: 13px;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 6px 0;
+}
+
+.event-wetter-text {
+    font-size: 12px;
+    color: #0369a1;
+    margin-top: 2px;
+}
+
+.btn-wetter-toggle {
+    background: none;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 7px;
+    margin-bottom: 0;
+}
+
+/* --- Törnübersicht ---------------------------------------------- */
+
+.tu-liste {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tu-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f8fafc;
+    transition: border-color 0.15s;
+}
+
+.tu-item.tu-aktiv {
+    border-color: #0f4c81;
+    background: #eff6ff;
+}
+
+.tu-main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    border-radius: 0;
+    text-align: left;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.tu-main:active { opacity: 0.7; }
+
+.tu-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f4c81;
+    flex: 1 1 100%;
+}
+
+.tu-meta {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.tu-badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+.tu-del {
+    padding: 8px 12px;
+    background: none;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 0;
+    border-left: 1px solid #e2e8f0;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+}
+
+.tu-del:hover { background: #fee2e2; color: #dc2626; }
+
+.tu-leer {
+    font-size: 13px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* --- Törnstatistik ---------------------------------------------- */
+
+.stat-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-block {
+    flex: 1;
+    min-width: 140px;
+}
+
+.stat-block-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.stat-gesamt {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f4c81;
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.stat-liste {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-liste li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.stat-typ  { color: #334155; }
+.stat-anz  { font-weight: 700; color: #0f4c81; }
+
+/* --- Responsive ------------------------------------------------- */
+
+@media (max-width: 480px) {
+    body { padding: 10px; }
+    .field-row { grid-template-columns: 1fr; }
+    .crew-add-row { flex-wrap: wrap; }
+    .crew-add-row .field,
+    .crew-add-row .field-role { flex: 1 1 120px; }
+}
+
+/* --- Törnabschluss (Screen) ------------------------------------- */
+
+.ab-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.ab-block { flex: 1; min-width: 150px; }
+
+.ab-block-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.ab-liste {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ab-liste li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13px;
+    padding: 3px 0;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.ab-liste li span:first-child { color: #64748b; white-space: nowrap; }
+
+.ab-tabelle-wrap { overflow-x: auto; }
+
+.ab-tabelle {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.ab-tabelle th {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.ab-tabelle td {
+    border: 1px solid #e2e8f0;
+    padding: 5px 8px;
+    vertical-align: top;
+    color: #334155;
+}
+
+.ab-tabelle tbody tr:nth-child(even) td { background: #f8fafc; }
+
+.ab-leer {
+    text-align: center;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 10px;
+}
+
+/* --- Druckbereich (screen: versteckt) --------------------------- */
+
+#druck-bereich         { display: none; }
+#abschluss-druck-bereich { display: none; }
+
+/* --- Druck-Styles ----------------------------------------------- */
+
+@media print {
+    body > * { display: none !important; }
+    #druck-bereich           { display: block !important; }
+    #abschluss-druck-bereich { display: block !important; }
+
+    body {
+        font-family: Georgia, serif;
+        font-size: 11pt;
+        color: #000;
+        background: #fff;
+        padding: 0;
+        margin: 0;
+    }
+
+    #druck-bereich {
+        padding: 20mm 15mm;
+    }
+
+    .dp-header {
+        margin-bottom: 12mm;
+        border-bottom: 2px solid #000;
+        padding-bottom: 4mm;
+    }
+
+    .dp-header h1 {
+        font-size: 18pt;
+        font-weight: bold;
+        margin-bottom: 3mm;
+    }
+
+    .dp-meta {
+        display: flex;
+        gap: 12mm;
+        font-size: 10pt;
+        color: #333;
+    }
+
+    .dp-tabelle {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+        margin-bottom: 8mm;
+    }
+
+    .dp-tabelle th {
+        background: #e8e8e8;
+        border: 1px solid #999;
+        padding: 3mm 2mm;
+        text-align: left;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .dp-tabelle td {
+        border: 1px solid #ccc;
+        padding: 2.5mm 2mm;
+        vertical-align: top;
+    }
+
+    .dp-tabelle tbody tr:nth-child(even) td {
+        background: #f5f5f5;
+    }
+
+    .dp-leer {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 5mm;
+    }
+
+    .dp-fusszeile {
+        font-size: 8pt;
+        color: #666;
+        text-align: right;
+        border-top: 1px solid #ccc;
+        padding-top: 3mm;
+    }
+
+    /* Törnabschluss-Druck */
+    #abschluss-druck-bereich { padding: 15mm 15mm; }
+
+    .adp-header {
+        margin-bottom: 8mm;
+        border-bottom: 2pt solid #000;
+        padding-bottom: 4mm;
+    }
+
+    .adp-header h1 {
+        font-size: 20pt;
+        font-weight: bold;
+        margin-bottom: 3mm;
+    }
+
+    .adp-meta-row {
+        font-size: 10pt;
+        color: #333;
+        margin-bottom: 2mm;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8mm;
+    }
+
+    .adp-zeiten {
+        font-size: 10pt;
+        margin-top: 3mm;
+        padding: 2mm 3mm;
+        background: #f0f0f0;
+        border-radius: 2mm;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6mm;
+    }
+
+    .adp-tabelle {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 8.5pt;
+        margin-bottom: 8mm;
+    }
+
+    .adp-tabelle th {
+        background: #e0e0e0;
+        border: 1px solid #888;
+        padding: 2.5mm 2mm;
+        text-align: left;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .adp-tabelle td {
+        border: 1px solid #bbb;
+        padding: 2mm;
+        vertical-align: top;
+    }
+
+    .adp-tabelle tbody tr:nth-child(even) td { background: #f5f5f5; }
+
+    .adp-fusszeile {
+        font-size: 8pt;
+        color: #666;
+        text-align: right;
+        border-top: 1px solid #ccc;
+        padding-top: 3mm;
+    }
+}
