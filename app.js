@@ -110,7 +110,7 @@ function formularFuellen(toern) {
     fldNotes.value      = toern.notes || "";
     crewListeRendern(toern.crew || []);
     ereignisListeRendern(toern.events || []);
-    rudergaengerSelectAktualisieren(toern.crew || []);
+    rudergaengerSelectFuellen();
     ereignisZeitVorbefuellen();
     toernStatistikRendern(toernStatistikBerechnen(toern));
     toernAbschlussRendern(toernAbschlussBerechnen(toern));
@@ -193,19 +193,24 @@ function ereignisZeitVorbefuellen() {
     eventTime.value = pad(now.getHours()) + ":" + pad(now.getMinutes());
 }
 
-function rudergaengerSelectAktualisieren(crew) {
+function rudergaengerSelectFuellen() {
+    /* Globale Crew + aktuelle Törn-Crew kombinieren */
+    const global     = ladeCrew();
+    const toernNamen = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name) : [];
+    const alle       = [...new Set([...global, ...toernNamen])].filter(Boolean);
+
     eventRuder.innerHTML = '<option value="">— Rudergänger —</option>';
-    if (!crew || crew.length === 0) {
+    if (alle.length === 0) {
         eventRuder.disabled = true;
-        eventRuder.title = "Bitte zuerst Crew hinzufügen";
+        eventRuder.title    = "Bitte zuerst Crew hinzufügen";
         return;
     }
     eventRuder.disabled = false;
-    eventRuder.title = "";
-    crew.forEach(person => {
+    eventRuder.title    = "";
+    alle.forEach(name => {
         const opt = document.createElement("option");
-        opt.value = person.id;
-        opt.textContent = person.name + (person.role ? " · " + person.role : "");
+        opt.value       = name;
+        opt.textContent = name;
         eventRuder.appendChild(opt);
     });
 }
@@ -274,10 +279,7 @@ function ereignisHinzufuegen() {
         eventTime.focus();
         return;
     }
-    const ruderId = eventRuder.value;
-    const ruder = ruderId
-        ? (aktuellerToern.crew || []).find(c => c.id === ruderId)
-        : null;
+    const ruderName = eventRuder.value;
     const wetterOffen = !eventWetterFelder.hidden;
     const windForceVal = eventWindForce.value.trim();
     const ev = {
@@ -286,7 +288,7 @@ function ereignisHinzufuegen() {
         date:         eventDate.value,
         time:         eventTime.value,
         ort:          eventOrt.value.trim(),
-        rudergaenger: ruder ? { crewId: ruder.id, name: ruder.name } : null,
+        rudergaenger: ruderName ? { name: ruderName } : null,
         note:         eventNote.value.trim(),
         weather:      wetterOffen ? {
             windForce:     windForceVal !== "" ? Number(windForceVal) : null,
@@ -783,12 +785,13 @@ btnSpeichern.onclick     = toernSpeichernAktion;
 btnToernLoeschen.onclick = toernLoeschenAktion;
 btnCrewAdd.onclick       = crewHinzufuegen;
 btnEventAdd.onclick      = ereignisHinzufuegen;
-document.getElementById("btn-csv-export").onclick = csvExportieren;
+document.getElementById("btn-csv-export").onclick  = csvExportieren;
+document.getElementById("btn-json-export").onclick = exportJSON;
 document.getElementById("btn-drucken").onclick        = druckenVorbereiten;
 document.getElementById("btn-abschluss-druck").onclick = abschlussdrucken;
 
 eventRuder.addEventListener("mousedown", () => {
-    if (aktuellerToern) rudergaengerSelectAktualisieren(aktuellerToern.crew || []);
+    rudergaengerSelectFuellen();
 });
 
 btnWetterToggle.onclick = () => {

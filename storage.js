@@ -1,39 +1,50 @@
 /* ======================
    STORAGE.JS
-   localStorage-Verwaltung für Törns
+   localStorage-Verwaltung – zentrale Datenhaltung
 ====================== */
 
-const STORAGE_KEY = "segel_logbuch_trips";
+const KEY_TOERNS = "segel_logbuch_toerns";
+const KEY_CREW   = "segel_logbuch_crew";
+
+
+/* --- Hilfsfunktion ---------------------------------------------- */
 
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
-function alleToernsLaden() {
+
+/* --- Törns ------------------------------------------------------ */
+
+function ladeToerns() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(KEY_TOERNS);
         if (!raw) return [];
         const parsed = JSON.parse(raw);
         return Array.isArray(parsed) ? parsed : [];
-    } catch {
-        return [];
-    }
+    } catch { return []; }
 }
 
+function speichereToerns(toerns) {
+    localStorage.setItem(KEY_TOERNS, JSON.stringify(toerns));
+}
+
+/* Wrapper – bestehende Aufrufe in app.js bleiben kompatibel */
+function alleToernsLaden() { return ladeToerns(); }
+
 function toernSpeichern(toern) {
-    const alle = alleToernsLaden();
+    const alle = ladeToerns();
     const idx = alle.findIndex(t => t.tripId === toern.tripId);
-    if (idx >= 0) {
-        alle[idx] = toern;
-    } else {
-        alle.push(toern);
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(alle));
+    idx >= 0 ? alle[idx] = toern : alle.push(toern);
+    speichereToerns(alle);
+    /* Crew-Namen dieses Törns in globale Liste übernehmen */
+    const namen = new Set(ladeCrew());
+    (toern.crew || []).forEach(p => { if (p.name) namen.add(p.name); });
+    speichereCrew([...namen]);
 }
 
 function toernLoeschen(tripId) {
-    const alle = alleToernsLaden().filter(t => t.tripId !== tripId);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(alle));
+    speichereToerns(ladeToerns().filter(t => t.tripId !== tripId));
 }
 
 function neuerToern() {
@@ -71,3 +82,72 @@ function neuerToern() {
         }
     };
 }
+
+
+/* --- Crew (global) ---------------------------------------------- */
+
+function ladeCrew() {
+    try {
+        const raw = localStorage.getItem(KEY_CREW);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
+}
+
+function speichereCrew(namen) {
+    const bereinigt = [...new Set(namen.filter(n => typeof n === "string" && n.trim()))];
+    localStorage.setItem(KEY_CREW, JSON.stringify(bereinigt));
+}
+
+
+/* --- Export / Import -------------------------------------------- */
+
+function exportJSON() {
+    const data = {
+        toerns: ladeToerns(),
+        crew:   ladeCrew()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = "segellogbuch_backup_" + new Date().toISOString().slice(0, 10) + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importJSON(data) {
+    if (data && Array.isArray(data.toerns)) {
+        speichereToerns(data.toerns);
+        if (Array.isArray(data.crew)) speichereCrew(data.crew);
+        return data.toerns.length;
+    }
+    /* Legacy: einfaches Törn-Array (aus altem Format) */
+    if (Array.isArray(data)) {
+        speichereToerns(data);
+        return data.length;
+    }
+    throw new Error("Ungültiges Format");
+}
+
+
+/* --- Migration (einmalig beim Start) ---------------------------- */
+
+(function migrieren() {
+    const altKey = "segel_logbuch_trips";
+    const alt = localStorage.getItem(altKey);
+    if (alt && !localStorage.getItem(KEY_TOERNS)) {
+        localStorage.setItem(KEY_TOERNS, alt);
+        localStorage.removeItem(altKey);
+        /* Crew-Namen aus alten Törns in globale Liste übernehmen */
+        try {
+            const toerns = JSON.parse(alt);
+            if (Array.isArray(toerns)) {
+                const namen = new Set();
+                toerns.forEach(t => (t.crew || []).forEach(p => { if (p.name) namen.add(p.name); }));
+                if (namen.size) speichereCrew([...namen]);
+            }
+        } catch {}
+    }
+})();
