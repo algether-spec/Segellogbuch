@@ -197,9 +197,11 @@ function rudergaengerSelectAktualisieren(crew) {
     eventRuder.innerHTML = '<option value="">— Rudergänger —</option>';
     if (!crew || crew.length === 0) {
         eventRuder.disabled = true;
+        eventRuder.title = "Bitte zuerst Crew hinzufügen";
         return;
     }
     eventRuder.disabled = false;
+    eventRuder.title = "";
     crew.forEach(person => {
         const opt = document.createElement("option");
         opt.value = person.id;
@@ -784,7 +786,7 @@ document.getElementById("btn-csv-export").onclick = csvExportieren;
 document.getElementById("btn-drucken").onclick        = druckenVorbereiten;
 document.getElementById("btn-abschluss-druck").onclick = abschlussdrucken;
 
-eventRuder.addEventListener("focus", () => {
+eventRuder.addEventListener("mousedown", () => {
     if (aktuellerToern) rudergaengerSelectAktualisieren(aktuellerToern.crew || []);
 });
 
