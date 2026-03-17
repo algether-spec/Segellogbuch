@@ -24,6 +24,7 @@
             <option value="">— Törn auswählen —</option>
         </select>
         <button type="button" id="btn-neuer-toern" class="btn-primary">+ Neuer Törn</button>
+        <button type="button" id="btn-neuer-log" class="btn-primary" hidden>📘 Log</button>
     </div>
 
     <!-- Törnübersicht -->
@@ -53,16 +54,6 @@
                     <div class="field">
                         <label for="fld-start-time">Startzeit</label>
                         <input type="time" id="fld-start-time">
-                    </div>
-                </div>
-                <div class="field-row">
-                    <div class="field">
-                        <label for="fld-end-date">Enddatum</label>
-                        <input type="date" id="fld-end-date">
-                    </div>
-                    <div class="field">
-                        <label for="fld-end-time">Endzeit</label>
-                        <input type="time" id="fld-end-time">
                     </div>
                 </div>
                 <div class="field">
@@ -124,15 +115,18 @@
             </div>
         </div>
 
-        <!-- Logbuch-Ereignisse -->
-        <div class="card">
-            <h2>📖 Logbuch-Ereignisse</h2>
+        <!-- Logbucheintrag -->
+        <div class="card" id="log-card">
+            <h2>📘 Logbucheintrag</h2>
 
             <div class="event-add-row">
                 <div class="field">
-                    <label for="event-type">Typ</label>
-                    <select id="event-type">
-                        <option value="">— Typ wählen —</option>
+                    <label for="log_zeit">Zeit *</label>
+                    <input type="datetime-local" id="log_zeit">
+                </div>
+                <div class="field">
+                    <label for="log_typ">Typ</label>
+                    <select id="log_typ">
                         <option>Abfahrt</option>
                         <option>Ankunft</option>
                         <option>Ankersetzen</option>
@@ -147,57 +141,37 @@
                         <option>Sonstiges</option>
                     </select>
                 </div>
-                <div class="field">
-                    <label for="event-date">Datum *</label>
-                    <input type="date" id="event-date">
-                </div>
-                <div class="field">
-                    <label for="event-time">Zeit *</label>
-                    <input type="time" id="event-time">
-                </div>
             </div>
 
             <div class="event-add-row">
                 <div class="field">
-                    <label for="event-ort">Ort</label>
-                    <input type="text" id="event-ort" placeholder="z. B. Hafen Kiel">
+                    <label for="log_wind">Wind (Bft)</label>
+                    <select id="log_wind">
+                        <option value="">—</option>
+                        <option>0</option><option>1</option><option>2</option>
+                        <option>3</option><option>4</option><option>5</option>
+                        <option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                    </select>
                 </div>
                 <div class="field">
-                    <label for="event-ruder">Rudergänger</label>
-                    <select id="event-ruder">
+                    <label for="rudergaenger">Rudergänger</label>
+                    <select id="rudergaenger">
                         <option value="">— Rudergänger —</option>
                     </select>
                 </div>
             </div>
 
             <div class="field" style="margin-bottom: 10px;">
-                <label for="event-note">Notiz</label>
-                <textarea id="event-note" placeholder="Was ist passiert?" rows="2"></textarea>
+                <label for="log_text">Bemerkung</label>
+                <input type="text" id="log_text" placeholder="Was ist passiert?">
             </div>
 
-            <button type="button" id="btn-wetter-toggle" class="btn-wetter-toggle">🌬 Wetter +</button>
-
-            <div id="event-wetter-felder" hidden>
-                <div class="event-add-row" style="margin-top: 10px;">
-                    <div class="field">
-                        <label for="event-wind-force">Wind (Bft)</label>
-                        <input type="number" id="event-wind-force" min="0" max="12" placeholder="0–12">
-                    </div>
-                    <div class="field">
-                        <label for="event-wind-dir">Windrichtung</label>
-                        <input type="text" id="event-wind-dir" placeholder="z. B. NW">
-                    </div>
-                    <div class="field">
-                        <label for="event-wetter-desc">Beschreibung</label>
-                        <input type="text" id="event-wetter-desc" placeholder="z. B. bedeckt">
-                    </div>
-                </div>
-            </div>
-
-            <button type="button" id="btn-event-add" class="btn-secondary">+ Ereignis hinzufügen</button>
-
-            <ul id="event-list" style="margin-top: 14px;"></ul>
+            <button type="button" id="btn-log-speichern" class="btn-secondary">+ Eintrag speichern</button>
         </div>
+
+        <!-- Log-Liste -->
+        <div id="log-liste"></div>
 
         <!-- Statistik -->
         <div id="toern-statistik"></div>

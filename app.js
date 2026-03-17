@@ -15,8 +15,6 @@ const btnSpeichern      = document.getElementById("btn-speichern");
 const fldTripName   = document.getElementById("fld-tripname");
 const fldStartDate  = document.getElementById("fld-start-date");
 const fldStartTime  = document.getElementById("fld-start-time");
-const fldEndDate    = document.getElementById("fld-end-date");
-const fldEndTime    = document.getElementById("fld-end-time");
 const fldSkipper    = document.getElementById("fld-skipper");
 
 const fldShipName   = document.getElementById("fld-ship-name");
@@ -38,19 +36,14 @@ const toernStatistik       = document.getElementById("toern-statistik");
 const toernAbschlussDiv    = document.getElementById("toern-abschluss");
 const abschlussDruckBereich = document.getElementById("abschluss-druck-bereich");
 
-const eventType     = document.getElementById("event-type");
-const eventDate     = document.getElementById("event-date");
-const eventTime     = document.getElementById("event-time");
-const eventOrt          = document.getElementById("event-ort");
-const eventRuder        = document.getElementById("event-ruder");
-const eventNote         = document.getElementById("event-note");
-const btnEventAdd       = document.getElementById("btn-event-add");
-const eventList         = document.getElementById("event-list");
-const btnWetterToggle   = document.getElementById("btn-wetter-toggle");
-const eventWetterFelder = document.getElementById("event-wetter-felder");
-const eventWindForce    = document.getElementById("event-wind-force");
-const eventWindDir      = document.getElementById("event-wind-dir");
-const eventWetterDesc   = document.getElementById("event-wetter-desc");
+const logZeit         = document.getElementById("log_zeit");
+const logTyp          = document.getElementById("log_typ");
+const logWind         = document.getElementById("log_wind");
+const logRudergaenger = document.getElementById("rudergaenger");
+const logText         = document.getElementById("log_text");
+const logListe        = document.getElementById("log-liste");
+const btnNeuerLog     = document.getElementById("btn-neuer-log");
+const btnLogSpeichern = document.getElementById("btn-log-speichern");
 
 
 /* --- Hilfsfunktionen -------------------------------------------- */
@@ -100,8 +93,6 @@ function formularFuellen(toern) {
     fldTripName.value   = toern.tripName   || "";
     fldStartDate.value  = toern.startDate  || "";
     fldStartTime.value  = toern.startTime  || "";
-    fldEndDate.value    = toern.endDate    || "";
-    fldEndTime.value    = toern.endTime    || "";
     fldSkipper.value    = toern.skipper    || "";
     fldShipName.value   = toern.shipData?.name         || "";
     fldShipType.value   = toern.shipData?.type         || "";
@@ -109,19 +100,17 @@ function formularFuellen(toern) {
     fldShipEngine.value = toern.shipData?.engine       || "";
     fldNotes.value      = toern.notes || "";
     crewListeRendern(toern.crew || []);
-    ereignisListeRendern(toern.events || []);
     rudergaengerSelectFuellen();
-    ereignisZeitVorbefuellen();
+    zeigeLogs();
     toernStatistikRendern(toernStatistikBerechnen(toern));
     toernAbschlussRendern(toernAbschlussBerechnen(toern));
+    btnNeuerLog.hidden = false;
 }
 
 function formularLesen() {
     aktuellerToern.tripName  = fldTripName.value.trim();
     aktuellerToern.startDate = fldStartDate.value;
     aktuellerToern.startTime = fldStartTime.value;
-    aktuellerToern.endDate   = fldEndDate.value;
-    aktuellerToern.endTime   = fldEndTime.value;
     aktuellerToern.skipper   = fldSkipper.value.trim();
     aktuellerToern.shipData  = {
         name:         fldShipName.value.trim(),
@@ -186,11 +175,11 @@ function crewHinzufuegen() {
 
 /* --- Ereignisse ------------------------------------------------- */
 
-function ereignisZeitVorbefuellen() {
+function logZeitVorbefuellen() {
     const now = new Date();
     const pad = n => String(n).padStart(2, "0");
-    eventDate.value = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
-    eventTime.value = pad(now.getHours()) + ":" + pad(now.getMinutes());
+    logZeit.value = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate())
+        + "T" + pad(now.getHours()) + ":" + pad(now.getMinutes());
 }
 
 function rudergaengerSelectFuellen() {
@@ -199,117 +188,86 @@ function rudergaengerSelectFuellen() {
     const toernNamen = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name) : [];
     const alle       = [...new Set([...global, ...toernNamen])].filter(Boolean);
 
-    eventRuder.innerHTML = '<option value="">— Rudergänger —</option>';
+    logRudergaenger.innerHTML = '<option value="">— Rudergänger —</option>';
     if (alle.length === 0) {
-        eventRuder.disabled = true;
-        eventRuder.title    = "Bitte zuerst Crew hinzufügen";
+        logRudergaenger.disabled = true;
+        logRudergaenger.title    = "Bitte zuerst Crew hinzufügen";
         return;
     }
-    eventRuder.disabled = false;
-    eventRuder.title    = "";
+    logRudergaenger.disabled = false;
+    logRudergaenger.title    = "";
     alle.forEach(name => {
         const opt = document.createElement("option");
         opt.value       = name;
         opt.textContent = name;
-        eventRuder.appendChild(opt);
+        logRudergaenger.appendChild(opt);
     });
 }
 
-function ereignisListeRendern(events) {
-    eventList.innerHTML = "";
-    if (!events || events.length === 0) {
-        eventList.innerHTML = '<li class="event-empty">Noch keine Ereignisse eingetragen.</li>';
-        return;
-    }
-    const sortiert = [...events].sort((a, b) => {
+function zeigeLogs() {
+    if (!aktuellerToern) { logListe.innerHTML = ""; return; }
+    const events = (aktuellerToern.events || []).slice().sort((a, b) => {
         const da = (a.date || "") + "T" + (a.time || "00:00");
         const db = (b.date || "") + "T" + (b.time || "00:00");
         return da < db ? -1 : da > db ? 1 : 0;
     });
-    sortiert.forEach(ev => {
-        const li = document.createElement("li");
-        li.className = "event-item";
-
-        const info = document.createElement("span");
-        info.className = "event-info";
-        const zeitstempel = [ev.date, ev.time].filter(Boolean).join(" ");
-        const meta = [zeitstempel, ev.ort, ev.rudergaenger ? "Rudergänger: " + ev.rudergaenger.name : ""].filter(Boolean).join("  ·  ");
-        const w = ev.weather;
-        const wetterText = w
-            ? [w.windForce !== null && w.windForce !== undefined ? "Wind: " + w.windForce + " Bft" : "", w.windDirection, w.description].filter(Boolean).join(", ")
-            : "";
-        info.innerHTML = '<span class="event-type">' + ev.type + '</span>'
-            + (meta ? '<span class="event-time-label">' + meta + '</span>' : '')
-            + (ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : '')
-            + (wetterText ? '<span class="event-wetter-text">🌬 ' + wetterText + '</span>' : '');
-
-        const del = document.createElement("button");
-        del.type = "button";
-        del.className = "btn-crew-del";
-        del.textContent = "✕";
-        del.onclick = () => {
-            aktuellerToern.events = aktuellerToern.events.filter(e => e.id !== ev.id);
-            ereignisListeRendern(aktuellerToern.events);
-        };
-
-        li.appendChild(info);
-        li.appendChild(del);
-        eventList.appendChild(li);
-    });
-    if (aktuellerToern) {
-        toernStatistikRendern(toernStatistikBerechnen(aktuellerToern));
-        toernAbschlussRendern(toernAbschlussBerechnen(aktuellerToern));
+    if (events.length === 0) {
+        logListe.innerHTML = '<div class="card"><p class="event-empty">Noch keine Einträge.</p></div>';
+    } else {
+        const zeilen = events.map(ev => {
+            const w   = ev.weather;
+            const wind = w && w.windForce !== null && w.windForce !== undefined ? w.windForce + " Bft" : "";
+            const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
+            const zeit  = [ev.date, ev.time].filter(Boolean).join(" ");
+            return `<li class="event-item">
+                <span class="event-info">
+                    <span class="event-type">${ev.type}</span>
+                    <span class="event-time-label">${[zeit, wind, ruder].filter(Boolean).join("  ·  ")}</span>
+                    ${ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : ''}
+                </span>
+                <button type="button" class="btn-crew-del" data-id="${ev.id}">✕</button>
+            </li>`;
+        }).join("");
+        logListe.innerHTML = `<ul class="log-liste-ul" style="list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:14px">${zeilen}</ul>`;
+        logListe.querySelectorAll("[data-id]").forEach(btn => {
+            btn.onclick = () => {
+                aktuellerToern.events = aktuellerToern.events.filter(e => e.id !== btn.dataset.id);
+                zeigeLogs();
+            };
+        });
     }
+    toernStatistikRendern(toernStatistikBerechnen(aktuellerToern));
+    toernAbschlussRendern(toernAbschlussBerechnen(aktuellerToern));
 }
 
-function ereignisHinzufuegen() {
-    if (!aktuellerToern) return;
-    if (!eventType.value) {
-        statusSetzen("Bitte einen Ereignistyp auswählen.", "error");
-        eventType.focus();
+function logEintragSpeichern() {
+    if (!aktuellerToern) {
+        statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
         return;
     }
-    if (!eventDate.value) {
-        statusSetzen("Datum ist ein Pflichtfeld.", "error");
-        eventDate.focus();
+    if (!logZeit.value) {
+        statusSetzen("Zeit ist ein Pflichtfeld.", "error");
+        logZeit.focus();
         return;
     }
-    if (!eventTime.value) {
-        statusSetzen("Uhrzeit ist ein Pflichtfeld.", "error");
-        eventTime.focus();
-        return;
-    }
-    const ruderName = eventRuder.value;
-    const wetterOffen = !eventWetterFelder.hidden;
-    const windForceVal = eventWindForce.value.trim();
+    const windVal = logWind.value;
     const ev = {
         id:           generateId(),
-        type:         eventType.value,
-        date:         eventDate.value,
-        time:         eventTime.value,
-        ort:          eventOrt.value.trim(),
-        rudergaenger: ruderName ? { name: ruderName } : null,
-        note:         eventNote.value.trim(),
-        weather:      wetterOffen ? {
-            windForce:     windForceVal !== "" ? Number(windForceVal) : null,
-            windDirection: eventWindDir.value.trim(),
-            description:   eventWetterDesc.value.trim()
-        } : null
+        type:         logTyp.value,
+        date:         logZeit.value.slice(0, 10),
+        time:         logZeit.value.slice(11, 16),
+        ort:          "",
+        rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
+        note:         logText.value.trim(),
+        weather:      windVal ? { windForce: Number(windVal), windDirection: "", description: "" } : null
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
-    ereignisListeRendern(aktuellerToern.events);
-    eventType.value      = "";
-    eventOrt.value       = "";
-    eventRuder.value     = "";
-    eventNote.value      = "";
-    eventWindForce.value = "";
-    eventWindDir.value   = "";
-    eventWetterDesc.value = "";
-    eventWetterFelder.hidden = true;
-    btnWetterToggle.textContent = "🌬 Wetter +";
-    ereignisZeitVorbefuellen();
-    eventType.focus();
+    zeigeLogs();
+    logText.value         = "";
+    logRudergaenger.value = "";
+    logWind.value         = "";
+    statusSetzen("Eintrag gespeichert.", "ok");
 }
 
 
@@ -599,6 +557,7 @@ function toernUebersichtRendern() {
                 aktuellerToern = null;
                 formSection.hidden = true;
                 btnToernLoeschen.hidden = true;
+                btnNeuerLog.hidden = true;
                 toernSelect.value = "";
             }
             toernSelectAktualisieren();
@@ -659,6 +618,7 @@ function toernLoeschenAktion() {
     aktuellerToern = null;
     formSection.hidden = true;
     btnToernLoeschen.hidden = true;
+    btnNeuerLog.hidden = true;
     toernSelect.value = "";
     toernSelectAktualisieren();
     statusSetzen("Törn gelöscht.", "ok");
@@ -783,22 +743,22 @@ function csvExportieren() {
 btnNeuerToern.onclick    = neuerToernAnlegen;
 btnSpeichern.onclick     = toernSpeichernAktion;
 btnToernLoeschen.onclick = toernLoeschenAktion;
-btnCrewAdd.onclick       = crewHinzufuegen;
-btnEventAdd.onclick      = ereignisHinzufuegen;
-document.getElementById("btn-csv-export").onclick  = csvExportieren;
-document.getElementById("btn-json-export").onclick = exportJSON;
-document.getElementById("btn-drucken").onclick        = druckenVorbereiten;
+btnCrewAdd.onclick        = crewHinzufuegen;
+btnLogSpeichern.onclick   = logEintragSpeichern;
+document.getElementById("btn-csv-export").onclick      = csvExportieren;
+document.getElementById("btn-json-export").onclick     = exportJSON;
+document.getElementById("btn-drucken").onclick         = druckenVorbereiten;
 document.getElementById("btn-abschluss-druck").onclick = abschlussdrucken;
 
-eventRuder.addEventListener("mousedown", () => {
+btnNeuerLog.onclick = () => {
+    logZeitVorbefuellen();
+    rudergaengerSelectFuellen();
+    logZeit.focus();
+};
+
+logRudergaenger.addEventListener("mousedown", () => {
     rudergaengerSelectFuellen();
 });
-
-btnWetterToggle.onclick = () => {
-    const offen = eventWetterFelder.hidden;
-    eventWetterFelder.hidden = !offen;
-    btnWetterToggle.textContent = offen ? "🌬 Wetter −" : "🌬 Wetter +";
-};
 
 crewInput.addEventListener("keydown", e => {
     if (e.key === "Enter") { e.preventDefault(); crewHinzufuegen(); }
@@ -807,7 +767,7 @@ crewInput.addEventListener("keydown", e => {
 toernSelect.onchange = () => {
     const val = toernSelect.value;
     if (val) toernLaden(val);
-    else { formSection.hidden = true; aktuellerToern = null; }
+    else { formSection.hidden = true; btnNeuerLog.hidden = true; aktuellerToern = null; }
 };
 
 
