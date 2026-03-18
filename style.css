@@ -247,6 +247,59 @@ button:active { opacity: 0.75; }
     cursor: pointer;
 }
 
+/* --- PWA-Migrations-Modal --------------------------------------- */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px 24px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.modal-box h2 {
+    font-size: 19px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.modal-box p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.modal-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 15px;
+    border-radius: 12px;
+}
+
+.migration-ok  { color: #059669; font-weight: 700; margin-top: 14px; font-size: 14px; }
+.migration-err { color: #dc2626; font-weight: 700; margin-top: 14px; font-size: 14px; }
+
 /* --- Versionszeile ---------------------------------------------- */
 
 .version-bar {

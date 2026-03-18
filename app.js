@@ -902,6 +902,71 @@ function autoBackupStarten() {
 }
 
 
+/* --- PWA-Migrations-Modal --------------------------------------- */
+
+function pwaMigrationModalZeigen() {
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+        <div class="modal-box">
+            <h2>📦 Keine Daten gefunden</h2>
+            <p>Hast du die App vorher im Browser verwendet?<br>
+               Dann importiere deine Daten mit dem Backup.</p>
+            <input type="file" id="pwa-file" accept=".json,application/json" style="display:none">
+            <div class="modal-btns">
+                <button type="button" class="btn-primary modal-btn" id="pwa-btn-import">📂 Backup importieren</button>
+                <button type="button" class="btn-secondary modal-btn" id="pwa-btn-skip">Neu starten</button>
+            </div>
+            <div id="pwa-result"></div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    document.getElementById("pwa-btn-import").onclick = () =>
+        document.getElementById("pwa-file").click();
+
+    document.getElementById("pwa-file").addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const data   = JSON.parse(e.target.result);
+                const anzahl = importJSON(data);
+                localStorage.setItem("pwa_migration_done", "1");
+                document.getElementById("pwa-result").innerHTML =
+                    '<p class="migration-ok">✅ ' + anzahl + " Törn" +
+                    (anzahl !== 1 ? "s" : "") + " importiert.</p>";
+                setTimeout(() => {
+                    overlay.remove();
+                    toernSelectAktualisieren();
+                    statusSetzen("Daten importiert.", "ok");
+                }, 1500);
+            } catch {
+                document.getElementById("pwa-result").innerHTML =
+                    '<p class="migration-err">❌ Ungültige Datei.</p>';
+            }
+        };
+        reader.readAsText(file, "UTF-8");
+    });
+
+    document.getElementById("pwa-btn-skip").onclick = () => {
+        localStorage.setItem("pwa_migration_done", "1");
+        overlay.remove();
+    };
+}
+
+function pwaMigrationPruefen() {
+    const istPWA = window.matchMedia("(display-mode: standalone)").matches;
+    if (!istPWA) return;
+    if (localStorage.getItem("pwa_migration_done")) return;
+    if (ladeToerns().length > 0) {
+        localStorage.setItem("pwa_migration_done", "1");
+        return;
+    }
+    pwaMigrationModalZeigen();
+}
+
+
 /* --- Start ------------------------------------------------------ */
 
 toernSelectAktualisieren();
@@ -910,4 +975,5 @@ btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
 tabInhaltToggeln();
 backupBannerPruefen();
+pwaMigrationPruefen();
 autoBackupStarten();
