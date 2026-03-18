@@ -1104,8 +1104,8 @@ function gpsAbfragen(ev) {
         pos => {
             const speedMs = pos.coords.speed;
             ev.pos = {
-                lat: parseFloat(pos.coords.latitude.toFixed(4)),
-                lon: parseFloat(pos.coords.longitude.toFixed(4)),
+                lat: parseFloat(pos.coords.latitude.toFixed(5)),
+                lon: parseFloat(pos.coords.longitude.toFixed(5)),
                 sog: speedMs != null ? parseFloat((speedMs * 1.94384).toFixed(1)) : null
             };
             toernSpeichern(aktuellerToern);
