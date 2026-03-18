@@ -15,6 +15,8 @@ const btnSpeichern      = document.getElementById("btn-speichern");
 const fldTripName   = document.getElementById("fld-tripname");
 const fldStartDate  = document.getElementById("fld-start-date");
 const fldStartTime  = document.getElementById("fld-start-time");
+const fldEndDate    = document.getElementById("fld-end-date");
+const fldEndTime    = document.getElementById("fld-end-time");
 const fldSkipper    = document.getElementById("fld-skipper");
 
 const fldShipName   = document.getElementById("fld-ship-name");
@@ -131,25 +133,60 @@ function logbuchStatusAktualisieren() {
     document.getElementById("ls-modus").textContent = modusText;
     document.getElementById("ls-seit").textContent  = "seit " + (seitIso.slice(11, 16) || "—");
 
+    /* Letztes Manöver (letztes Nicht-Zustandsereignis) */
+    const ZUSTAND_TYPEN = new Set([...MOTOR_TYPEN, ...SEGEL_TYPEN]);
+    const letztesManoever = [...events].reverse().find(e => !ZUSTAND_TYPEN.has(e.type));
+    const manoeverWrap = document.getElementById("ls-manoever-wrap");
+    if (manoeverWrap) {
+        if (letztesManoever) {
+            document.getElementById("ls-manoever").textContent = letztesManoever.type;
+            manoeverWrap.hidden = false;
+        } else {
+            manoeverWrap.hidden = true;
+        }
+    }
+
     /* Rudergänger aus letztem Eintrag mit Rudergänger */
     const mitRuder = [...events].reverse().find(e => e.rudergaenger?.name);
-    const select   = document.getElementById("ls-ruder-select");
+    const ruderSelect = document.getElementById("ls-ruder-select");
     const aktRuder = mitRuder ? mitRuder.rudergaenger.name : "";
     const crew     = (aktuellerToern.crew || []).map(p => p.name);
     if (aktRuder && !crew.includes(aktRuder)) crew.unshift(aktRuder);
-    select.innerHTML = "";
+    ruderSelect.innerHTML = "";
     if (!aktRuder) {
         const ph = document.createElement("option");
         ph.value = ""; ph.textContent = "👤 —";
-        select.appendChild(ph);
+        ruderSelect.appendChild(ph);
     }
     crew.forEach(name => {
         const opt = document.createElement("option");
         opt.value = name;
         opt.textContent = "👤 " + name;
         if (name === aktRuder) opt.selected = true;
-        select.appendChild(opt);
+        ruderSelect.appendChild(opt);
     });
+
+    /* Wind aus letztem Eintrag mit Winddaten */
+    const mitWind   = [...events].reverse().find(e =>
+        e.weather?.windForce !== undefined && e.weather?.windForce !== null && e.weather?.windForce !== ""
+    );
+    const windWert  = mitWind ? String(mitWind.weather.windForce) : "";
+    const windSelect = document.getElementById("ls-wind-select");
+    const windWrap  = document.getElementById("ls-wind-wrap");
+    if (windSelect) {
+        windSelect.innerHTML = "";
+        const emptyOpt = document.createElement("option");
+        emptyOpt.value = ""; emptyOpt.textContent = "💨 —";
+        windSelect.appendChild(emptyOpt);
+        for (let i = 0; i <= 12; i++) {
+            const opt = document.createElement("option");
+            opt.value = String(i);
+            opt.textContent = "💨 " + i + " Bft";
+            if (String(i) === windWert) opt.selected = true;
+            windSelect.appendChild(opt);
+        }
+        if (windWrap) windWrap.hidden = false;
+    }
 
     el.hidden = false;
     zustandAktualisieren();
@@ -200,6 +237,8 @@ function formularFuellen(toern) {
     fldTripName.value   = toern.tripName   || "";
     fldStartDate.value  = toern.startDate  || "";
     fldStartTime.value  = toern.startTime  || "";
+    fldEndDate.value    = toern.endDate    || "";
+    fldEndTime.value    = toern.endTime    || "";
     fldSkipper.value    = toern.skipper    || "";
     fldShipName.value   = toern.shipData?.name         || "";
     fldShipType.value   = toern.shipData?.type         || "";
@@ -218,6 +257,8 @@ function formularLesen() {
     aktuellerToern.tripName  = fldTripName.value.trim();
     aktuellerToern.startDate = fldStartDate.value;
     aktuellerToern.startTime = fldStartTime.value;
+    aktuellerToern.endDate   = fldEndDate.value;
+    aktuellerToern.endTime   = fldEndTime.value;
     aktuellerToern.skipper   = fldSkipper.value.trim();
     aktuellerToern.shipData  = {
         name:         fldShipName.value.trim(),
@@ -379,6 +420,7 @@ function logEintragSpeichern() {
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+    gpsAbfragen(ev);
     speichereLetzteWerte(logWind.value, logRudergaenger.value);
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
@@ -899,12 +941,13 @@ function schnellEintragSpeichern(typ) {
         type:         typ,
         zeit:         zeitIso,
         ort:          "",
-        rudergaenger: ruder ? { name: ruder } : null,
+        rudergaenger: null,
         note:         "",
         weather:      wind !== "" ? { windForce: Number(wind), windDirection: "", description: "" } : null
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+    gpsAbfragen(ev);
     speichereLetzteWerte(wind, ruder);
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
@@ -962,6 +1005,7 @@ btnSpeichern.onclick     = toernSpeichernAktion;
 btnToernLoeschen.onclick = toernLoeschenAktion;
 btnCrewAdd.onclick        = crewHinzufuegen;
 btnLogSpeichern.onclick   = logEintragSpeichern;
+document.getElementById("btn-abschliessen").onclick = toernAbschliessenAktion;
 document.getElementById("btn-csv-export").onclick      = csvExportieren;
 document.getElementById("btn-json-export").onclick     = exportJSON;
 document.getElementById("btn-drucken").onclick         = druckenVorbereiten;
@@ -1007,6 +1051,7 @@ document.getElementById("ls-ruder-select").addEventListener("change", function (
                         : null
     };
     aktuellerToern.events.push(ev);
+    gpsAbfragen(ev);
     speichereLetzteWerte(letzte.wind || "", name);
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
@@ -1014,6 +1059,67 @@ document.getElementById("ls-ruder-select").addEventListener("change", function (
     zeigeLogs();
     statusSetzen("👤 " + name + " am Ruder.", "ok", 2000);
 });
+
+document.getElementById("ls-wind-select").addEventListener("change", function () {
+    const wind = this.value;
+    if (!aktuellerToern) return;
+    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
+    const letzte  = ladeLetzteWerte() || {};
+    const ev = {
+        id:           generateId(),
+        type:         "Wetterwechsel",
+        zeit:         zeitIso,
+        ort:          "",
+        rudergaenger: null,
+        note:         "",
+        weather:      wind !== "" ? { windForce: Number(wind), windDirection: "", description: "" } : null
+    };
+    aktuellerToern.events.push(ev);
+    gpsAbfragen(ev);
+    speichereLetzteWerte(wind, letzte.rudergaenger || "");
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
+    zeigeLogs();
+    if (wind !== "") statusSetzen("💨 Wind: " + wind + " Bft.", "ok", 2000);
+});
+
+
+/* --- GPS -------------------------------------------------------- */
+
+function gpsAbfragen(ev) {
+    if (!navigator.geolocation || !aktuellerToern) return;
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            ev.pos = {
+                lat: parseFloat(pos.coords.latitude.toFixed(5)),
+                lon: parseFloat(pos.coords.longitude.toFixed(5))
+            };
+            toernSpeichern(aktuellerToern);
+        },
+        () => { /* kein GPS verfügbar oder verweigert – ignorieren */ },
+        { maximumAge: 30000, timeout: 8000, enableHighAccuracy: false }
+    );
+}
+
+
+/* --- Törn abschließen ------------------------------------------- */
+
+function toernAbschliessenAktion() {
+    if (!aktuellerToern) return;
+    if (!confirm(`Törn "${aktuellerToern.tripName || "(ohne Name)"}" jetzt abschließen?\nEnddatum und Endzeit werden auf jetzt gesetzt.`)) return;
+    const now = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    aktuellerToern.endDate = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+    aktuellerToern.endTime = pad(now.getHours()) + ":" + pad(now.getMinutes());
+    fldEndDate.value = aktuellerToern.endDate;
+    fldEndTime.value = aktuellerToern.endTime;
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
+    toernSelectAktualisieren();
+    statusSetzen("🏁 Törn abgeschlossen: " + aktuellerToern.endDate + " " + aktuellerToern.endTime, "ok", 5000);
+}
 
 
 /* --- Auto-Backup ------------------------------------------------ */

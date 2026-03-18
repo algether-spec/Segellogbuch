@@ -68,6 +68,16 @@
                             <input type="time" id="fld-start-time">
                         </div>
                     </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="fld-end-date">Enddatum</label>
+                            <input type="date" id="fld-end-date">
+                        </div>
+                        <div class="field">
+                            <label for="fld-end-time">Endzeit</label>
+                            <input type="time" id="fld-end-time">
+                        </div>
+                    </div>
                     <div class="field">
                         <label for="fld-skipper">Schiffsführer *</label>
                         <input type="text" id="fld-skipper" placeholder="Vor- und Nachname">
@@ -109,6 +119,7 @@
             </div>
 
             <button type="button" id="btn-speichern" class="btn-save">💾 Törn speichern</button>
+            <button type="button" id="btn-abschliessen" class="btn-abschliessen">🏁 Törn abschließen</button>
 
         </div><!-- /form-section -->
 
@@ -156,8 +167,10 @@
                 <!-- Statusleiste -->
                 <div id="logbuch-status" class="logbuch-status" hidden>
                     <span id="ls-modus"></span>
+                    <span id="ls-manoever-wrap" hidden><span class="ls-sep">·</span><span id="ls-manoever"></span></span>
                     <span class="ls-sep">·</span>
                     <select id="ls-ruder-select" class="ls-ruder-select" title="Rudergänger wechseln"></select>
+                    <span id="ls-wind-wrap" hidden><span class="ls-sep">·</span><select id="ls-wind-select" class="ls-ruder-select" title="Wind ändern"></select></span>
                     <span class="ls-sep">·</span>
                     <span id="ls-seit"></span>
                 </div>
@@ -318,7 +331,7 @@
 
     <!-- Versionszeile -->
     <div class="version-bar">
-        <span id="version-label">v1.3.3 · von Al.Gether</span>
+        <span id="version-label">v1.3.4 · von Al.Gether</span>
         <span id="backup-status" class="backup-status"></span>
         <button type="button" id="btn-update" class="btn-update" hidden onclick="updateErzwingen()"></button>
     </div>

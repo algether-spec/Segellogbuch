@@ -3,7 +3,7 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "1.3.3";
+const APP_VERSION = "1.3.4";
 
 async function autoUpdatePruefen() {
     try {
