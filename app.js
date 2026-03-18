@@ -48,11 +48,11 @@ const btnLogSpeichern = document.getElementById("btn-log-speichern");
 
 /* --- Hilfsfunktionen -------------------------------------------- */
 
-function statusSetzen(text, typ = "ok") {
+function statusSetzen(text, typ = "ok", ms = 3000) {
     statusMsg.textContent = text;
     statusMsg.className = "status-msg status-" + typ;
     statusMsg.hidden = !text;
-    if (text) setTimeout(() => { statusMsg.hidden = true; }, 3000);
+    if (text) setTimeout(() => { statusMsg.hidden = true; }, ms);
 }
 
 function validieren() {
@@ -204,6 +204,8 @@ function rudergaengerSelectFuellen() {
         opt.textContent = name;
         logRudergaenger.appendChild(opt);
     });
+    /* Punkt 3: Bei genau 1 Crew-Mitglied automatisch vorauswählen */
+    if (alle.length === 1) logRudergaenger.value = alle[0];
 }
 
 function zeigeLogs() {
@@ -748,23 +750,29 @@ function schnellEintragSpeichern(typ) {
         statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
         return;
     }
-    const now = new Date();
-    const pad = n => String(n).padStart(2, "0");
-    const letzte = ladeLetzteWerte();
+    /* Punkt 4: Lokale Zeit (nicht UTC) */
+    const lokalStr = new Date().toLocaleString("sv").slice(0, 16); // "2026-03-18 14:35"
+    /* Punkt 2: Fallback bei leerem last_values */
+    const letzte = ladeLetzteWerte() || {};
+    const wind   = letzte.wind        || "";
+    const ruder  = letzte.rudergaenger || "";
     const ev = {
         id:           generateId(),
         type:         typ,
-        date:         now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()),
-        time:         pad(now.getHours()) + ":" + pad(now.getMinutes()),
+        date:         lokalStr.slice(0, 10),
+        time:         lokalStr.slice(11, 16),
         ort:          "",
-        rudergaenger: letzte.rudergaenger ? { name: letzte.rudergaenger } : null,
+        rudergaenger: ruder ? { name: ruder } : null,
         note:         "",
-        weather:      letzte.wind !== "" ? { windForce: Number(letzte.wind), windDirection: "", description: "" } : null
+        weather:      wind !== "" ? { windForce: Number(wind), windDirection: "", description: "" } : null
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+    /* Punkt 1: last_values nach jedem Schnellbutton sichern */
+    speichereLetzteWerte(wind, ruder);
     zeigeLogs();
-    statusSetzen(typ + " gespeichert.", "ok");
+    /* Punkt 5: Visuelles Feedback für 2 Sekunden */
+    statusSetzen("✅ " + typ + " gespeichert.", "ok", 2000);
 }
 
 
@@ -783,9 +791,9 @@ document.getElementById("btn-abschluss-druck").onclick = abschlussdrucken;
 btnNeuerLog.onclick = () => {
     logZeitVorbefuellen();
     rudergaengerSelectFuellen();
-    const letzte = ladeLetzteWerte();
-    if (letzte.wind)        logWind.value         = letzte.wind;
-    if (letzte.rudergaenger) logRudergaenger.value = letzte.rudergaenger;
+    const letzte = ladeLetzteWerte() || {};
+    if (letzte.wind)         logWind.value         = letzte.wind || "";
+    if (letzte.rudergaenger) logRudergaenger.value  = letzte.rudergaenger || "";
     logZeit.focus();
 };
 
