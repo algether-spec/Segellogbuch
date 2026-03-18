@@ -5,6 +5,7 @@
 
 const KEY_TOERNS = "segel_logbuch_toerns";
 const KEY_CREW   = "segel_logbuch_crew";
+const KEY_BACKUP = "segel_logbuch_backup"; /* wird NIE beim Update gelöscht */
 
 
 /* --- Hilfsfunktion ---------------------------------------------- */
@@ -129,6 +130,34 @@ function importJSON(data) {
         return data.length;
     }
     throw new Error("Ungültiges Format");
+}
+
+
+/* --- Auto-Backup ------------------------------------------------ */
+
+function autoBackupSpeichern() {
+    const toerns = ladeToerns();
+    if (toerns.length === 0) return;
+    const backup = {
+        timestamp: new Date().toISOString(),
+        toerns,
+        crew: ladeCrew()
+    };
+    try {
+        localStorage.setItem(KEY_BACKUP, JSON.stringify(backup));
+    } catch { /* Storage voll – ignorieren */ }
+}
+
+function backupLaden() {
+    try {
+        const raw = localStorage.getItem(KEY_BACKUP);
+        return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+}
+
+function backupWiederherstellen(backup) {
+    speichereToerns(backup.toerns);
+    if (Array.isArray(backup.crew)) speichereCrew(backup.crew);
 }
 
 

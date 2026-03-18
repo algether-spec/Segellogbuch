@@ -779,9 +779,50 @@ toernSelect.onchange = () => {
 };
 
 
+/* --- Auto-Backup ------------------------------------------------ */
+
+function backupBannerPruefen() {
+    const backup = backupLaden();
+    /* Nur anzeigen wenn Backup existiert aber aktuelle Daten fehlen */
+    if (!backup || !backup.toerns || backup.toerns.length === 0) return;
+    if (ladeToerns().length > 0) return;
+
+    const datum = new Date(backup.timestamp).toLocaleString("de-DE", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
+
+    const banner = document.createElement("div");
+    banner.className = "backup-banner";
+    banner.innerHTML =
+        '<span>💾 Backup vom ' + datum + ' gefunden (' + backup.toerns.length
+        + ' Törn' + (backup.toerns.length !== 1 ? 's' : '') + ')</span>'
+        + '<div class="backup-banner-btns">'
+        + '<button type="button" id="btn-backup-ja" class="btn-backup-restore">Wiederherstellen</button>'
+        + '<button type="button" id="btn-backup-nein" class="btn-backup-ignore">✕</button>'
+        + '</div>';
+
+    document.querySelector(".app").insertBefore(banner, statusMsg);
+
+    document.getElementById("btn-backup-ja").onclick = () => {
+        backupWiederherstellen(backup);
+        banner.remove();
+        toernSelectAktualisieren();
+        statusSetzen("Backup wiederhergestellt.", "ok");
+    };
+    document.getElementById("btn-backup-nein").onclick = () => banner.remove();
+}
+
+function autoBackupStarten() {
+    setInterval(autoBackupSpeichern, 5 * 60 * 1000);
+}
+
+
 /* --- Start ------------------------------------------------------ */
 
 toernSelectAktualisieren();
 formSection.hidden = true;
 btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
+backupBannerPruefen();
+autoBackupStarten();
