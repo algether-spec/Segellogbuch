@@ -331,9 +331,9 @@
 
     <!-- Versionszeile -->
     <div class="version-bar">
-        <span id="version-label">v1.3.4 · von Al.Gether</span>
+        <span id="version-label">v1.3.5 · von Al.Gether</span>
         <span id="backup-status" class="backup-status"></span>
-        <button type="button" id="btn-update" class="btn-update" hidden onclick="updateErzwingen()"></button>
+        <button type="button" id="btn-update" class="btn-update" onclick="updateErzwingen()"></button>
     </div>
 
 </div><!-- /app -->
@@ -354,8 +354,14 @@
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
+    /* Wenn neuer SW übernimmt → Seite neu laden damit neue HTML/JS geladen wird */
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+        window.location.reload();
+    });
 }
+updateButtonInit();
 autoUpdatePruefen();
+setInterval(autoUpdatePruefen, 30000);
 </script>
 
 </body>

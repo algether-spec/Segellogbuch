@@ -1005,7 +1005,8 @@ btnSpeichern.onclick     = toernSpeichernAktion;
 btnToernLoeschen.onclick = toernLoeschenAktion;
 btnCrewAdd.onclick        = crewHinzufuegen;
 btnLogSpeichern.onclick   = logEintragSpeichern;
-document.getElementById("btn-abschliessen").onclick = toernAbschliessenAktion;
+const _btnAbs = document.getElementById("btn-abschliessen");
+if (_btnAbs) _btnAbs.onclick = toernAbschliessenAktion;
 document.getElementById("btn-csv-export").onclick      = csvExportieren;
 document.getElementById("btn-json-export").onclick     = exportJSON;
 document.getElementById("btn-drucken").onclick         = druckenVorbereiten;
@@ -1034,7 +1035,8 @@ toernSelect.onchange = () => {
     else { formSection.hidden = true; aktuellerToern = null; tabInhaltToggeln(); }
 };
 
-document.getElementById("ls-ruder-select").addEventListener("change", function () {
+const _ruderSelectEl = document.getElementById("ls-ruder-select");
+if (_ruderSelectEl) _ruderSelectEl.addEventListener("change", function () {
     const name = this.value;
     if (!name || !aktuellerToern) return;
     const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
@@ -1058,9 +1060,10 @@ document.getElementById("ls-ruder-select").addEventListener("change", function (
     backupStatusAktualisieren();
     zeigeLogs();
     statusSetzen("👤 " + name + " am Ruder.", "ok", 2000);
-});
+}); // end ls-ruder-select listener
 
-document.getElementById("ls-wind-select").addEventListener("change", function () {
+const _windSelectEl = document.getElementById("ls-wind-select");
+if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
     const wind = this.value;
     if (!aktuellerToern) return;
     const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
@@ -1082,7 +1085,7 @@ document.getElementById("ls-wind-select").addEventListener("change", function ()
     backupStatusAktualisieren();
     zeigeLogs();
     if (wind !== "") statusSetzen("💨 Wind: " + wind + " Bft.", "ok", 2000);
-});
+}); // end ls-wind-select listener
 
 
 /* --- GPS -------------------------------------------------------- */

@@ -3,21 +3,27 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "1.3.4";
+const APP_VERSION = "1.3.5";
+
+function updateButtonInit() {
+    const btn = document.getElementById("btn-update");
+    if (btn) btn.textContent = "v" + APP_VERSION;
+}
 
 async function autoUpdatePruefen() {
     try {
-        /* no-store: immer frisch vom Server, nie aus Browser- oder SW-Cache */
-        const res = await fetch("version.json", { cache: "no-store" });
+        /* Cache-Busting via Query-String + no-store */
+        const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
+        const btn = document.getElementById("btn-update");
+        if (!btn) return;
         if (data.version && data.version !== APP_VERSION) {
-            const btn = document.getElementById("btn-update");
-            if (btn) {
-                btn.hidden = false;
-                btn.textContent = "🔄 Update " + data.version + " verfügbar";
-                btn.classList.add("btn-update-available");
-            }
+            btn.textContent = "🔄 Update " + data.version;
+            btn.classList.add("btn-update-available");
+        } else {
+            btn.textContent = "v" + APP_VERSION;
+            btn.classList.remove("btn-update-available");
         }
     } catch { /* kein Netz – kein Problem */ }
 }
@@ -28,11 +34,11 @@ async function updateErzwingen() {
         const keys = await caches.keys();
         await Promise.all(keys.map(k => caches.delete(k)));
     }
-    /* 2. Service Worker deregistrieren (damit alter SW nicht mehr abfängt) */
+    /* 2. Service Worker deregistrieren */
     if ("serviceWorker" in navigator) {
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(r => r.unregister()));
     }
-    /* 3. Erst jetzt neu laden – alle Dateien kommen frisch vom Server */
+    /* 3. Neu laden – alle Dateien kommen frisch vom Server */
     location.reload(true);
 }
