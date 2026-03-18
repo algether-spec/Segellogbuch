@@ -69,40 +69,78 @@ function evZeitIso(ev) {
 }
 
 const MODUS_MAP = {
-    "Abfahrt":  "⛵ Unter Segel",
-    "Ablegen":  "⛵ Unter Segel",
     "Ankern":   "⚓ Vor Anker",
     "Anlegen":  "🏁 Im Hafen",
     "Ankunft":  "🏁 Im Hafen",
     "MOB":      "🆘 MOB aktiv"
 };
 
+/* Ereignistypen die den Fahrt-Zustand definieren */
+const MOTOR_TYPEN = new Set(["Motor an"]);
+const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt", "Ablegen"]);
+
+function zustandErmitteln() {
+    if (!aktuellerToern || !(aktuellerToern.events || []).length) return null;
+    const sorted = aktuellerToern.events.slice().sort((a, b) =>
+        evZeitIso(a) < evZeitIso(b) ? -1 : 1
+    );
+    for (let i = sorted.length - 1; i >= 0; i--) {
+        const typ = sorted[i].type;
+        if (MOTOR_TYPEN.has(typ)) return { zustand: "motor", event: sorted[i] };
+        if (SEGEL_TYPEN.has(typ)) return { zustand: "segeln", event: sorted[i] };
+    }
+    return null;
+}
+
+function zustandAktualisieren() {
+    const result = zustandErmitteln();
+    const btnS = document.getElementById("btn-zustand-segeln");
+    const btnM = document.getElementById("btn-zustand-motor");
+    if (!btnS || !btnM) return;
+    btnS.classList.toggle("btn-zustand-aktiv", result?.zustand === "segeln");
+    btnM.classList.toggle("btn-zustand-aktiv", result?.zustand === "motor");
+}
+
+function zustandSetzen(zustand) {
+    schnellEintragSpeichern(zustand === "motor" ? "Motor an" : "Segeln");
+}
+
 function logbuchStatusAktualisieren() {
     const el = document.getElementById("logbuch-status");
     if (!el) return;
     if (!aktuellerToern || !(aktuellerToern.events || []).length) {
         el.hidden = true;
+        zustandAktualisieren();
         return;
     }
     const events = aktuellerToern.events.slice().sort((a, b) =>
         evZeitIso(a) < evZeitIso(b) ? -1 : 1
     );
-    const letztes = events[events.length - 1];
 
-    document.getElementById("ls-modus").textContent =
-        MODUS_MAP[letztes.type] || letztes.type;
+    /* Modus + "seit" aus letztem Zustandsereignis */
+    const zustandResult = zustandErmitteln();
+    let modusText, seitIso;
+    if (zustandResult) {
+        modusText = zustandResult.zustand === "motor" ? "🔧 Motor" : "⛵ Segeln";
+        seitIso   = evZeitIso(zustandResult.event);
+    } else {
+        const letztes = events[events.length - 1];
+        modusText = MODUS_MAP[letztes.type] || letztes.type;
+        seitIso   = evZeitIso(letztes);
+    }
+    document.getElementById("ls-modus").textContent = modusText;
+    document.getElementById("ls-seit").textContent  = "seit " + (seitIso.slice(11, 16) || "—");
 
-    /* Rudergänger-Select befüllen */
-    const select = document.getElementById("ls-ruder-select");
-    const aktRuder = letztes.rudergaenger ? letztes.rudergaenger.name : "";
-    const crew = (aktuellerToern.crew || []).map(p => p.name);
-    /* Rudergänger immer in der Liste haben, auch wenn nicht in Crew */
+    /* Rudergänger aus letztem Eintrag mit Rudergänger */
+    const mitRuder = [...events].reverse().find(e => e.rudergaenger?.name);
+    const select   = document.getElementById("ls-ruder-select");
+    const aktRuder = mitRuder ? mitRuder.rudergaenger.name : "";
+    const crew     = (aktuellerToern.crew || []).map(p => p.name);
     if (aktRuder && !crew.includes(aktRuder)) crew.unshift(aktRuder);
     select.innerHTML = "";
     if (!aktRuder) {
         const ph = document.createElement("option");
-        ph.value = "";
-        ph.textContent = "👤 —";
+        ph.value = ""; ph.textContent = "👤 —";
         select.appendChild(ph);
     }
     crew.forEach(name => {
@@ -113,10 +151,8 @@ function logbuchStatusAktualisieren() {
         select.appendChild(opt);
     });
 
-    document.getElementById("ls-seit").textContent =
-        "seit " + (evZeitIso(letztes).slice(11, 16) || "—");
-
     el.hidden = false;
+    zustandAktualisieren();
 }
 
 function statusSetzen(text, typ = "ok", ms = 3000) {
@@ -363,6 +399,22 @@ function evTimestamp(ev) {
     return new Date(iso).getTime();
 }
 
+function motorUndSegelMinuten(events) {
+    const zustandEvents = events
+        .filter(e => MOTOR_TYPEN.has(e.type) || SEGEL_TYPEN.has(e.type))
+        .filter(e => evTimestamp(e) !== null)
+        .sort((a, b) => evTimestamp(a) - evTimestamp(b));
+    let motorMin = 0, segelMin = 0;
+    for (let i = 0; i < zustandEvents.length - 1; i++) {
+        const cur  = zustandEvents[i];
+        const next = zustandEvents[i + 1];
+        const dt   = (evTimestamp(next) - evTimestamp(cur)) / 60000;
+        if (MOTOR_TYPEN.has(cur.type)) motorMin += dt;
+        else if (SEGEL_TYPEN.has(cur.type)) segelMin += dt;
+    }
+    return { motorMin: Math.round(motorMin), segelMin: Math.round(segelMin) };
+}
+
 function minutenAusPaaren(events, startTyp, endTyp) {
     const relevant = events
         .filter(e => e.type === startTyp || e.type === endTyp)
@@ -389,11 +441,13 @@ function toernStatistikBerechnen(toern) {
         proTyp[ev.type] = (proTyp[ev.type] || 0) + 1;
     }
 
+    const { motorMin, segelMin } = motorUndSegelMinuten(events);
+
     return {
         gesamt:     events.length,
         proTyp,
-        unterSegel: minutenAusPaaren(events, "Abfahrt",    "Ankunft"),
-        mitMotor:   minutenAusPaaren(events, "Motorbetrieb", "Motorbetrieb"),
+        unterSegel: segelMin,
+        mitMotor:   motorMin,
         anker:      minutenAusPaaren(events, "Ankersetzen", "Anker auf"),
         hafen:      minutenAusPaaren(events, "Ankunft",    "Abfahrt")
     };

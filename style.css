@@ -217,6 +217,45 @@ button:active { opacity: 0.75; }
     text-underline-offset: 3px;
 }
 
+/* --- Zustandsbuttons -------------------------------------------- */
+
+.zustand-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.btn-zustand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 11px 10px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-zustand-aktiv {
+    border-color: #0ea5e9;
+    color: #0369a1;
+    background: #e0f2fe;
+}
+
+.btn-zustand[id="btn-zustand-motor"].btn-zustand-aktiv {
+    border-color: #f97316;
+    color: #c2410c;
+    background: #fff7ed;
+}
+
+.btn-zustand:active { opacity: 0.8; }
+
 .schnell-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1108,6 +1147,10 @@ button:active { opacity: 0.75; }
 
     .tu-main    { background: #1e293b; color: #e2e8f0; }
     .tu-item    { border-color: #334155; }
+
+    .btn-zustand { background: #1e293b; color: #94a3b8; }
+    .btn-zustand-aktiv { background: #0c2a3f; color: #38bdf8; border-color: #1e4976; }
+    .btn-zustand[id="btn-zustand-motor"].btn-zustand-aktiv { background: #2d1a0a; color: #fb923c; border-color: #7c2d12; }
 
     .logbuch-status { background: #0c2a3f; border-color: #1e4976; color: #7dd3fc; }
     .ls-sep         { color: #1e4976; }

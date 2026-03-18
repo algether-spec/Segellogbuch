@@ -162,6 +162,18 @@
                     <span id="ls-seit"></span>
                 </div>
 
+                <!-- Zustandsbuttons -->
+                <div class="zustand-bar">
+                    <button type="button" id="btn-zustand-segeln" class="btn-zustand" onclick="zustandSetzen('segeln')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 20h16L12 2z"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+                        Segeln
+                    </button>
+                    <button type="button" id="btn-zustand-motor" class="btn-zustand" onclick="zustandSetzen('motor')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/></svg>
+                        Motor
+                    </button>
+                </div>
+
                 <!-- Schnellbuttons Grid -->
                 <div class="schnell-grid">
 
@@ -221,6 +233,8 @@
                         <select id="log_typ">
                             <option>Abfahrt</option>
                             <option>Ablegen</option>
+                            <option>Segeln</option>
+                            <option>Motor an</option>
                             <option>Ankunft</option>
                             <option>Anlegen</option>
                             <option>Ankern</option>
@@ -304,7 +318,7 @@
 
     <!-- Versionszeile -->
     <div class="version-bar">
-        <span id="version-label">v1.3.2 · von Al.Gether</span>
+        <span id="version-label">v1.3.3 · von Al.Gether</span>
         <span id="backup-status" class="backup-status"></span>
         <button type="button" id="btn-update" class="btn-update" hidden onclick="updateErzwingen()"></button>
     </div>
