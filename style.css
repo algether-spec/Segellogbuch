@@ -108,6 +108,74 @@ button:active { opacity: 0.75; }
     margin-top: 6px;
 }
 
+/* --- Aktiver Törnname ------------------------------------------- */
+
+.aktiver-toern-bar {
+    background: #0f4c81;
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 14px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* --- Tab-Navigation --------------------------------------------- */
+
+.tab-nav {
+    display: flex;
+    gap: 4px;
+    background: #e2e8f0;
+    border-radius: 13px;
+    padding: 4px;
+    margin-bottom: 16px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 4px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.tab-btn.tab-aktiv {
+    background: #fff;
+    color: #0f4c81;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.tab-panel  { display: block; }
+.tab-hidden { display: none !important; }
+
+/* --- Tab-Leer-Meldung ------------------------------------------- */
+
+.tab-leer {
+    padding: 40px 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* --- Log-Button-Zeile ------------------------------------------- */
+
+.log-btn-row {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-log-save {
+    flex: 1;
+    background: #0f4c81;
+    color: #fff;
+}
+
 /* --- Schnellbuttons --------------------------------------------- */
 
 .schnell-row {

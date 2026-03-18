@@ -124,7 +124,7 @@ function formularFuellen(toern) {
     zeigeLogs();
     toernStatistikRendern(toernStatistikBerechnen(toern));
     toernAbschlussRendern(toernAbschlussBerechnen(toern));
-    btnNeuerLog.hidden = false;
+    tabInhaltToggeln();
 }
 
 function formularLesen() {
@@ -581,8 +581,8 @@ function toernUebersichtRendern() {
                 aktuellerToern = null;
                 formSection.hidden = true;
                 btnToernLoeschen.hidden = true;
-                btnNeuerLog.hidden = true;
                 toernSelect.value = "";
+                tabInhaltToggeln();
             }
             toernSelectAktualisieren();
             statusSetzen("Törn gelöscht.", "ok");
@@ -642,8 +642,8 @@ function toernLoeschenAktion() {
     aktuellerToern = null;
     formSection.hidden = true;
     btnToernLoeschen.hidden = true;
-    btnNeuerLog.hidden = true;
     toernSelect.value = "";
+    tabInhaltToggeln();
     toernSelectAktualisieren();
     statusSetzen("Törn gelöscht.", "ok");
 }
@@ -791,6 +791,42 @@ function schnellEintragSpeichern(typ) {
 }
 
 
+/* --- Tab-Navigation --------------------------------------------- */
+
+function tabWechseln(tabId) {
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("tab-hidden"));
+    document.getElementById(tabId).classList.remove("tab-hidden");
+    document.querySelectorAll(".tab-btn").forEach(b =>
+        b.classList.toggle("tab-aktiv", b.dataset.tab === tabId)
+    );
+    /* Beim Wechsel zum Logbuch: Zeit und letzte Werte vorausfüllen */
+    if (tabId === "tab-logbuch" && aktuellerToern) {
+        logZeitVorbefuellen();
+        rudergaengerSelectFuellen();
+        const letzte = ladeLetzteWerte() || {};
+        if (letzte.wind)         logWind.value         = letzte.wind || "";
+        if (letzte.rudergaenger) logRudergaenger.value  = letzte.rudergaenger || "";
+    }
+}
+
+function tabInhaltToggeln() {
+    const aktiv = !!aktuellerToern;
+    ["crew", "logbuch", "statistik"].forEach(t => {
+        const leer   = document.getElementById("tab-" + t + "-leer");
+        const inhalt = document.getElementById("tab-" + t + "-inhalt");
+        if (leer)   leer.hidden   = aktiv;
+        if (inhalt) inhalt.hidden = !aktiv;
+    });
+    const bar = document.getElementById("aktiver-toern-bar");
+    bar.hidden = !aktiv;
+    if (aktiv) {
+        document.getElementById("aktiver-toern-label").textContent =
+            (aktuellerToern.tripName || "(ohne Name)") + "  ·  " +
+            (aktuellerToern.startDate || "kein Datum");
+    }
+}
+
+
 /* --- Event Listener --------------------------------------------- */
 
 btnNeuerToern.onclick    = neuerToernAnlegen;
@@ -823,7 +859,7 @@ crewInput.addEventListener("keydown", e => {
 toernSelect.onchange = () => {
     const val = toernSelect.value;
     if (val) toernLaden(val);
-    else { formSection.hidden = true; btnNeuerLog.hidden = true; aktuellerToern = null; }
+    else { formSection.hidden = true; aktuellerToern = null; tabInhaltToggeln(); }
 };
 
 
@@ -872,5 +908,6 @@ toernSelectAktualisieren();
 formSection.hidden = true;
 btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
+tabInhaltToggeln();
 backupBannerPruefen();
 autoBackupStarten();
