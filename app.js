@@ -222,7 +222,8 @@ function zeigeLogs() {
             const w   = ev.weather;
             const wind = w && w.windForce !== null && w.windForce !== undefined ? w.windForce + " Bft" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
-            const zeit  = [ev.date, ev.time].filter(Boolean).join(" ");
+            const datumKurz = ev.date ? ev.date.slice(8) + "." + ev.date.slice(5, 7) + "." : "";
+            const zeit = ev.time ? (datumKurz ? datumKurz + " " + ev.time : ev.time) : datumKurz || "—";
             return `<li class="event-item">
                 <span class="event-info">
                     <span class="event-type">${ev.type}</span>
