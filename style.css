@@ -726,6 +726,16 @@ button:active { opacity: 0.75; }
     margin-top: 2px;
 }
 
+.event-pos {
+    display: block;
+    font-size: 11px;
+    color: #0369a1;
+    margin-top: 2px;
+    text-decoration: none;
+}
+
+.event-pos:hover { text-decoration: underline; }
+
 .event-empty {
     font-size: 13px;
     color: #94a3b8;
@@ -1160,6 +1170,7 @@ button:active { opacity: 0.75; }
     .event-item        { background: #1e293b; }
     .event-time-label  { color: #94a3b8; }
     .event-note-text   { color: #64748b; }
+    .event-pos         { color: #38bdf8; }
 
     .tu-main    { background: #1e293b; color: #e2e8f0; }
     .tu-item    { border-color: #334155; }

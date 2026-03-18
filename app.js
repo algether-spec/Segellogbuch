@@ -375,12 +375,20 @@ function zeigeLogs() {
             const wind  = w && w.windForce !== null && w.windForce !== undefined ? w.windForce + " Bft" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
-            /* Format: "18.03. 14:35 · Wende · 4 Bft · Hans" */
             const info  = [zeit, ev.type, wind, ruder].filter(Boolean).join("  ·  ");
+
+            let posHtml = "";
+            if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
+                const mapsUrl = "https://maps.google.com/?q=" + ev.pos.lat + "," + ev.pos.lon;
+                const sog     = ev.pos.sog != null && ev.pos.sog > 0 ? "  ·  " + ev.pos.sog + " kn" : "";
+                posHtml = `<a class="event-pos" href="${mapsUrl}" target="_blank" rel="noopener">📍 ${ev.pos.lat}, ${ev.pos.lon}${sog}</a>`;
+            }
+
             return `<li class="event-item">
                 <span class="event-info">
                     <span class="event-time-label">${info}</span>
                     ${ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : ''}
+                    ${posHtml}
                 </span>
                 <button type="button" class="btn-crew-del" data-id="${ev.id}">✕</button>
             </li>`;
@@ -1094,9 +1102,11 @@ function gpsAbfragen(ev) {
     if (!navigator.geolocation || !aktuellerToern) return;
     navigator.geolocation.getCurrentPosition(
         pos => {
+            const speedMs = pos.coords.speed;
             ev.pos = {
                 lat: parseFloat(pos.coords.latitude.toFixed(5)),
-                lon: parseFloat(pos.coords.longitude.toFixed(5))
+                lon: parseFloat(pos.coords.longitude.toFixed(5)),
+                sog: speedMs != null ? parseFloat((speedMs * 1.94384).toFixed(1)) : null
             };
             toernSpeichern(aktuellerToern);
         },
