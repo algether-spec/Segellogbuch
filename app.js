@@ -379,9 +379,11 @@ function zeigeLogs() {
 
             let posHtml = "";
             if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
-                const mapsUrl = "https://maps.google.com/?q=" + ev.pos.lat + "," + ev.pos.lon;
-                const sog     = ev.pos.sog != null && ev.pos.sog > 0 ? "  ·  " + ev.pos.sog + " kn" : "";
-                posHtml = `<a class="event-pos" href="${mapsUrl}" target="_blank" rel="noopener">📍 ${ev.pos.lat}, ${ev.pos.lon}${sog}</a>`;
+                const mapsUrl  = "https://maps.google.com/?q=" + ev.pos.lat + "," + ev.pos.lon;
+                const latDisp  = ev.pos.lat.toFixed(4);
+                const lonDisp  = ev.pos.lon.toFixed(4);
+                const sog      = ev.pos.sog != null && ev.pos.sog > 0 ? "  ·  " + ev.pos.sog + " kn" : "";
+                posHtml = `<a class="event-pos" href="${mapsUrl}" target="_blank" rel="noopener">📍 ${latDisp}, ${lonDisp}${sog}</a>`;
             }
 
             return `<li class="event-item">
@@ -949,7 +951,7 @@ function schnellEintragSpeichern(typ) {
         type:         typ,
         zeit:         zeitIso,
         ort:          "",
-        rudergaenger: null,
+        rudergaenger: ruder ? { name: ruder } : null,
         note:         "",
         weather:      wind !== "" ? { windForce: Number(wind), windDirection: "", description: "" } : null
     };
