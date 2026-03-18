@@ -4,8 +4,6 @@
 ====================== */
 
 let aktuellerToern = null;
-let letzterLogWind  = "";
-let letzterLogRuder = "";
 
 /* --- DOM-Elemente ----------------------------------------------- */
 
@@ -267,8 +265,7 @@ function logEintragSpeichern() {
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
-    letzterLogWind  = logWind.value;
-    letzterLogRuder = logRudergaenger.value;
+    speichereLetzteWerte(logWind.value, logRudergaenger.value);
     zeigeLogs();
     logText.value         = "";
     logRudergaenger.value = "";
@@ -744,6 +741,33 @@ function csvExportieren() {
 }
 
 
+/* --- Schnellbuttons --------------------------------------------- */
+
+function schnellEintragSpeichern(typ) {
+    if (!aktuellerToern) {
+        statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
+        return;
+    }
+    const now = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    const letzte = ladeLetzteWerte();
+    const ev = {
+        id:           generateId(),
+        type:         typ,
+        date:         now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()),
+        time:         pad(now.getHours()) + ":" + pad(now.getMinutes()),
+        ort:          "",
+        rudergaenger: letzte.rudergaenger ? { name: letzte.rudergaenger } : null,
+        note:         "",
+        weather:      letzte.wind !== "" ? { windForce: Number(letzte.wind), windDirection: "", description: "" } : null
+    };
+    if (!aktuellerToern.events) aktuellerToern.events = [];
+    aktuellerToern.events.push(ev);
+    zeigeLogs();
+    statusSetzen(typ + " gespeichert.", "ok");
+}
+
+
 /* --- Event Listener --------------------------------------------- */
 
 btnNeuerToern.onclick    = neuerToernAnlegen;
@@ -759,8 +783,9 @@ document.getElementById("btn-abschluss-druck").onclick = abschlussdrucken;
 btnNeuerLog.onclick = () => {
     logZeitVorbefuellen();
     rudergaengerSelectFuellen();
-    if (letzterLogWind)  logWind.value         = letzterLogWind;
-    if (letzterLogRuder) logRudergaenger.value  = letzterLogRuder;
+    const letzte = ladeLetzteWerte();
+    if (letzte.wind)        logWind.value         = letzte.wind;
+    if (letzte.rudergaenger) logRudergaenger.value = letzte.rudergaenger;
     logZeit.focus();
 };
 

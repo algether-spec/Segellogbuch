@@ -5,7 +5,8 @@
 
 const KEY_TOERNS = "segel_logbuch_toerns";
 const KEY_CREW   = "segel_logbuch_crew";
-const KEY_BACKUP = "segel_logbuch_backup"; /* wird NIE beim Update gelöscht */
+const KEY_BACKUP       = "segel_logbuch_backup"; /* wird NIE beim Update gelöscht */
+const KEY_LETZTE_WERTE = "last_values";
 
 
 /* --- Hilfsfunktion ---------------------------------------------- */
@@ -130,6 +131,20 @@ function importJSON(data) {
         return data.length;
     }
     throw new Error("Ungültiges Format");
+}
+
+
+/* --- Letzte Werte ----------------------------------------------- */
+
+function ladeLetzteWerte() {
+    try {
+        const raw = localStorage.getItem(KEY_LETZTE_WERTE);
+        return raw ? JSON.parse(raw) : { wind: "", rudergaenger: "" };
+    } catch { return { wind: "", rudergaenger: "" }; }
+}
+
+function speichereLetzteWerte(wind, rudergaenger) {
+    localStorage.setItem(KEY_LETZTE_WERTE, JSON.stringify({ wind, rudergaenger }));
 }
 
 

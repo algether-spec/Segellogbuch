@@ -108,6 +108,33 @@ button:active { opacity: 0.75; }
     margin-top: 6px;
 }
 
+/* --- Schnellbuttons --------------------------------------------- */
+
+.schnell-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.btn-schnell {
+    flex: 1;
+    min-width: 90px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-schnell:active {
+    background: #bae6fd;
+}
+
 /* --- Auto-Backup-Banner ----------------------------------------- */
 
 .backup-banner {

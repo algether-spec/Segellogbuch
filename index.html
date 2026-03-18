@@ -121,6 +121,13 @@
         <div class="card" id="log-card">
             <h2>📘 Logbucheintrag</h2>
 
+            <!-- Schnellbuttons -->
+            <div class="schnell-row">
+                <button type="button" class="btn-schnell" onclick="schnellEintragSpeichern('Abfahrt')">⛵ Abfahrt</button>
+                <button type="button" class="btn-schnell" onclick="schnellEintragSpeichern('Ankunft')">⚓ Ankunft</button>
+                <button type="button" class="btn-schnell" onclick="schnellEintragSpeichern('Wende')">🔄 Wende</button>
+            </div>
+
             <div class="event-add-row">
                 <div class="field">
                     <label for="log_zeit">Zeit *</label>
@@ -133,6 +140,7 @@
                         <option>Ankunft</option>
                         <option>Ankersetzen</option>
                         <option>Anker auf</option>
+                        <option>Wende</option>
                         <option>Manöver</option>
                         <option>Segelwechsel</option>
                         <option>Reffen</option>
@@ -147,6 +155,12 @@
 
             <div class="event-add-row">
                 <div class="field">
+                    <label for="rudergaenger">Rudergänger</label>
+                    <select id="rudergaenger">
+                        <option value="">— Rudergänger —</option>
+                    </select>
+                </div>
+                <div class="field">
                     <label for="log_wind">Wind (Bft)</label>
                     <select id="log_wind">
                         <option value="">—</option>
@@ -154,12 +168,6 @@
                         <option>3</option><option>4</option><option>5</option>
                         <option>6</option><option>7</option><option>8</option>
                         <option>9</option><option>10</option><option>11</option><option>12</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="rudergaenger">Rudergänger</label>
-                    <select id="rudergaenger">
-                        <option value="">— Rudergänger —</option>
                     </select>
                 </div>
             </div>
@@ -192,7 +200,7 @@
 
     <!-- Versionszeile -->
     <div class="version-bar">
-        <span id="version-label">v1.2.2 · von Al.Gether</span>
+        <span id="version-label">v1.2.3 · von Al.Gether</span>
         <button type="button" id="btn-update" class="btn-update" hidden onclick="updateErzwingen()"></button>
     </div>
 
