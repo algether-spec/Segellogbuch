@@ -48,6 +48,26 @@ const btnLogSpeichern = document.getElementById("btn-log-speichern");
 
 /* --- Hilfsfunktionen -------------------------------------------- */
 
+/**
+ * ISO-String "2026-03-18T14:35" → "18.03. 14:35" (lokale Formatierung)
+ * Leerer String bei fehlendem Wert.
+ */
+function formatDatumZeit(iso) {
+    if (!iso) return "";
+    const d = iso.slice(0, 10);
+    const t = iso.slice(11, 16);
+    const datum = d && d !== "0000-00-00" ? d.slice(8) + "." + d.slice(5, 7) + "." : "";
+    return t ? (datum ? datum + " " + t : t) : datum;
+}
+
+/**
+ * Liefert den ISO-Zeitstring eines Events.
+ * Neue Events haben ev.zeit, alte ev.date + ev.time.
+ */
+function evZeitIso(ev) {
+    return ev.zeit || ((ev.date || "") + "T" + (ev.time || "00:00"));
+}
+
 function statusSetzen(text, typ = "ok", ms = 3000) {
     statusMsg.textContent = text;
     statusMsg.className = "status-msg status-" + typ;
@@ -210,24 +230,22 @@ function rudergaengerSelectFuellen() {
 
 function zeigeLogs() {
     if (!aktuellerToern) { logListe.innerHTML = ""; return; }
-    const events = (aktuellerToern.events || []).slice().sort((a, b) => {
-        const da = (a.date || "") + "T" + (a.time || "00:00");
-        const db = (b.date || "") + "T" + (b.time || "00:00");
-        return da < db ? -1 : da > db ? 1 : 0;
-    });
+    const events = (aktuellerToern.events || []).slice().sort((a, b) =>
+        evZeitIso(a) < evZeitIso(b) ? -1 : evZeitIso(a) > evZeitIso(b) ? 1 : 0
+    );
     if (events.length === 0) {
         logListe.innerHTML = '<div class="card"><p class="event-empty">Noch keine Einträge.</p></div>';
     } else {
         const zeilen = events.map(ev => {
-            const w   = ev.weather;
-            const wind = w && w.windForce !== null && w.windForce !== undefined ? w.windForce + " Bft" : "";
+            const w     = ev.weather;
+            const wind  = w && w.windForce !== null && w.windForce !== undefined ? w.windForce + " Bft" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
-            const datumKurz = ev.date ? ev.date.slice(8) + "." + ev.date.slice(5, 7) + "." : "";
-            const zeit = ev.time ? (datumKurz ? datumKurz + " " + ev.time : ev.time) : datumKurz || "—";
+            const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
+            /* Format: "18.03. 14:35 · Wende · 4 Bft · Hans" */
+            const info  = [zeit, ev.type, wind, ruder].filter(Boolean).join("  ·  ");
             return `<li class="event-item">
                 <span class="event-info">
-                    <span class="event-type">${ev.type}</span>
-                    <span class="event-time-label">${[zeit, wind, ruder].filter(Boolean).join("  ·  ")}</span>
+                    <span class="event-time-label">${info}</span>
                     ${ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : ''}
                 </span>
                 <button type="button" class="btn-crew-del" data-id="${ev.id}">✕</button>
@@ -259,8 +277,7 @@ function logEintragSpeichern() {
     const ev = {
         id:           generateId(),
         type:         logTyp.value,
-        date:         logZeit.value.slice(0, 10),
-        time:         logZeit.value.slice(11, 16),
+        zeit:         logZeit.value,   /* "2026-03-18T14:35" aus datetime-local */
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
         note:         logText.value.trim(),
@@ -280,8 +297,9 @@ function logEintragSpeichern() {
 /* --- Törnstatistik ---------------------------------------------- */
 
 function evTimestamp(ev) {
-    if (!ev.date || !ev.time) return null;
-    return new Date(ev.date + "T" + ev.time).getTime();
+    const iso = ev.zeit || (ev.date ? ev.date + "T" + (ev.time || "00:00") : null);
+    if (!iso) return null;
+    return new Date(iso).getTime();
 }
 
 function minutenAusPaaren(events, startTyp, endTyp) {
@@ -380,11 +398,9 @@ function toernAbschlussBerechnen(toern) {
         skipper:   toern.skipper   || "—",
         shipData:  toern.shipData  || {},
         crew:      toern.crew      || [],
-        events:    (toern.events   || []).slice().sort((a, b) => {
-            const da = (a.date || "") + "T" + (a.time || "00:00");
-            const db = (b.date || "") + "T" + (b.time || "00:00");
-            return da < db ? -1 : da > db ? 1 : 0;
-        }),
+        events:    (toern.events || []).slice().sort((a, b) =>
+            evZeitIso(a) < evZeitIso(b) ? -1 : evZeitIso(a) > evZeitIso(b) ? 1 : 0
+        ),
         stat
     };
 }
@@ -406,16 +422,17 @@ function toernAbschlussRendern(ab) {
 
     const eventZeilen = ab.events.length
         ? ab.events.map(ev => {
-            const w = ev.weather;
+            const w   = ev.weather;
+            const iso = evZeitIso(ev);
             return `<tr>
                 <td>${ev.type || ""}</td>
-                <td>${ev.date || ""}</td>
-                <td>${ev.time || ""}</td>
+                <td>${iso.slice(0, 10)}</td>
+                <td>${iso.slice(11, 16)}</td>
                 <td>${ev.ort  || ""}</td>
                 <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
-                <td>${w && ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : ""}</td>
-                <td>${w ? ev.weather.windDirection || "" : ""}</td>
-                <td>${w ? ev.weather.description  || "" : ""}</td>
+                <td>${w && w.windForce !== null && w.windForce !== undefined ? w.windForce : ""}</td>
+                <td>${w ? w.windDirection || "" : ""}</td>
+                <td>${w ? w.description  || "" : ""}</td>
                 <td>${ev.note || ""}</td>
             </tr>`;
         }).join("")
@@ -485,16 +502,17 @@ function abschlussdrucken() {
      .join("&nbsp;&nbsp;·&nbsp;&nbsp;");
 
     const eventZeilen = ab.events.map(ev => {
-        const w = ev.weather;
+        const w   = ev.weather;
+        const iso = evZeitIso(ev);
         return `<tr>
             <td>${ev.type || ""}</td>
-            <td>${ev.date || ""}</td>
-            <td>${ev.time || ""}</td>
+            <td>${iso.slice(0, 10)}</td>
+            <td>${iso.slice(11, 16)}</td>
             <td>${ev.ort  || ""}</td>
             <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
-            <td>${w && ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : ""}</td>
-            <td>${w ? ev.weather.windDirection || "" : ""}</td>
-            <td>${w ? ev.weather.description  || "" : ""}</td>
+            <td>${w && w.windForce !== null && w.windForce !== undefined ? w.windForce : ""}</td>
+            <td>${w ? w.windDirection || "" : ""}</td>
+            <td>${w ? w.description  || "" : ""}</td>
             <td>${ev.note || ""}</td>
         </tr>`;
     }).join("") || `<tr><td colspan="9" style="text-align:center;color:#666;font-style:italic;padding:6mm">Keine Ereignisse</td></tr>`;
@@ -639,25 +657,22 @@ function druckenVorbereiten() {
 
     const zeitraum = [t.startDate, t.endDate].filter(Boolean).join(" – ") || "—";
 
-    const events = (t.events || [])
-        .slice()
-        .sort((a, b) => {
-            const da = (a.date || "") + "T" + (a.time || "00:00");
-            const db = (b.date || "") + "T" + (b.time || "00:00");
-            return da < db ? -1 : da > db ? 1 : 0;
-        });
+    const events = (t.events || []).slice().sort((a, b) =>
+        evZeitIso(a) < evZeitIso(b) ? -1 : evZeitIso(a) > evZeitIso(b) ? 1 : 0
+    );
 
     const zeilen = events.map(ev => {
-        const w = ev.weather;
+        const w   = ev.weather;
+        const iso = evZeitIso(ev);
         return `<tr>
             <td>${ev.type || ""}</td>
-            <td>${ev.date || ""}</td>
-            <td>${ev.time || ""}</td>
+            <td>${iso.slice(0, 10)}</td>
+            <td>${iso.slice(11, 16)}</td>
             <td>${ev.ort || ""}</td>
             <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
-            <td>${w && ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : ""}</td>
-            <td>${w ? ev.weather.windDirection || "" : ""}</td>
-            <td>${w ? ev.weather.description || "" : ""}</td>
+            <td>${w && w.windForce !== null && w.windForce !== undefined ? w.windForce : ""}</td>
+            <td>${w ? w.windDirection || "" : ""}</td>
+            <td>${w ? w.description || "" : ""}</td>
             <td>${ev.note || ""}</td>
         </tr>`;
     }).join("");
@@ -713,23 +728,24 @@ function csvExportieren() {
     const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind Bft;Wind Richtung;Wetter;Notiz";
     const zeilen = (t.events || [])
         .slice()
-        .sort((a, b) => {
-            const da = (a.date || "") + "T" + (a.time || "00:00");
-            const db = (b.date || "") + "T" + (b.time || "00:00");
-            return da < db ? -1 : da > db ? 1 : 0;
-        })
-        .map(ev => [
-            t.tripName,
-            ev.date,
-            ev.time,
-            ev.type,
-            ev.ort,
-            ev.rudergaenger ? ev.rudergaenger.name : "",
-            ev.weather ? (ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : "") : "",
-            ev.weather ? ev.weather.windDirection : "",
-            ev.weather ? ev.weather.description : "",
-            ev.note
-        ].map(csvFeldEscapen).join(";"));
+        .sort((a, b) =>
+            evZeitIso(a) < evZeitIso(b) ? -1 : evZeitIso(a) > evZeitIso(b) ? 1 : 0
+        )
+        .map(ev => {
+            const iso = evZeitIso(ev);
+            return [
+                t.tripName,
+                iso.slice(0, 10),
+                iso.slice(11, 16),
+                ev.type,
+                ev.ort,
+                ev.rudergaenger ? ev.rudergaenger.name : "",
+                ev.weather ? (ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : "") : "",
+                ev.weather ? ev.weather.windDirection : "",
+                ev.weather ? ev.weather.description : "",
+                ev.note
+            ].map(csvFeldEscapen).join(";");
+        });
 
     const inhalt = "\uFEFF" + [kopfzeile, ...zeilen].join("\r\n");
     const blob = new Blob([inhalt], { type: "text/csv;charset=utf-8;" });
@@ -751,17 +767,15 @@ function schnellEintragSpeichern(typ) {
         statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
         return;
     }
-    /* Punkt 4: Lokale Zeit (nicht UTC) */
-    const lokalStr = new Date().toLocaleString("sv").slice(0, 16); // "2026-03-18 14:35"
-    /* Punkt 2: Fallback bei leerem last_values */
     const letzte = ladeLetzteWerte() || {};
-    const wind   = letzte.wind        || "";
+    const wind   = letzte.wind         || "";
     const ruder  = letzte.rudergaenger || "";
+    /* Lokale Zeit als ISO-String "2026-03-18T14:35" */
+    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
     const ev = {
         id:           generateId(),
         type:         typ,
-        date:         lokalStr.slice(0, 10),
-        time:         lokalStr.slice(11, 16),
+        zeit:         zeitIso,
         ort:          "",
         rudergaenger: ruder ? { name: ruder } : null,
         note:         "",
