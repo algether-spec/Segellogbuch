@@ -68,6 +68,57 @@ function evZeitIso(ev) {
     return ev.zeit || ((ev.date || "") + "T" + (ev.time || "00:00"));
 }
 
+const MODUS_MAP = {
+    "Abfahrt":  "⛵ Unter Segel",
+    "Ablegen":  "⛵ Unter Segel",
+    "Ankern":   "⚓ Vor Anker",
+    "Anlegen":  "🏁 Im Hafen",
+    "Ankunft":  "🏁 Im Hafen",
+    "MOB":      "🆘 MOB aktiv"
+};
+
+function logbuchStatusAktualisieren() {
+    const el = document.getElementById("logbuch-status");
+    if (!el) return;
+    if (!aktuellerToern || !(aktuellerToern.events || []).length) {
+        el.hidden = true;
+        return;
+    }
+    const events = aktuellerToern.events.slice().sort((a, b) =>
+        evZeitIso(a) < evZeitIso(b) ? -1 : 1
+    );
+    const letztes = events[events.length - 1];
+
+    document.getElementById("ls-modus").textContent =
+        MODUS_MAP[letztes.type] || letztes.type;
+
+    /* Rudergänger-Select befüllen */
+    const select = document.getElementById("ls-ruder-select");
+    const aktRuder = letztes.rudergaenger ? letztes.rudergaenger.name : "";
+    const crew = (aktuellerToern.crew || []).map(p => p.name);
+    /* Rudergänger immer in der Liste haben, auch wenn nicht in Crew */
+    if (aktRuder && !crew.includes(aktRuder)) crew.unshift(aktRuder);
+    select.innerHTML = "";
+    if (!aktRuder) {
+        const ph = document.createElement("option");
+        ph.value = "";
+        ph.textContent = "👤 —";
+        select.appendChild(ph);
+    }
+    crew.forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = "👤 " + name;
+        if (name === aktRuder) opt.selected = true;
+        select.appendChild(opt);
+    });
+
+    document.getElementById("ls-seit").textContent =
+        "seit " + (evZeitIso(letztes).slice(11, 16) || "—");
+
+    el.hidden = false;
+}
+
 function statusSetzen(text, typ = "ok", ms = 3000) {
     statusMsg.textContent = text;
     statusMsg.className = "status-msg status-" + typ;
@@ -164,6 +215,9 @@ function crewListeRendern(crew) {
         del.textContent = "✕";
         del.onclick = () => {
             aktuellerToern.crew = aktuellerToern.crew.filter(c => c.id !== person.id);
+            toernSpeichern(aktuellerToern);
+            autoBackupSpeichern();
+            backupStatusAktualisieren();
             crewListeRendern(aktuellerToern.crew);
             rudergaengerSelectFuellen();
         };
@@ -187,6 +241,9 @@ function crewHinzufuegen() {
         role: crewRole.value.trim() || "Crew"
     };
     aktuellerToern.crew.push(person);
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
     crewListeRendern(aktuellerToern.crew);
     rudergaengerSelectFuellen();
     crewInput.value = "";
@@ -261,6 +318,7 @@ function zeigeLogs() {
     }
     toernStatistikRendern(toernStatistikBerechnen(aktuellerToern));
     toernAbschlussRendern(toernAbschlussBerechnen(aktuellerToern));
+    logbuchStatusAktualisieren();
 }
 
 function logEintragSpeichern() {
@@ -286,6 +344,9 @@ function logEintragSpeichern() {
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
     speichereLetzteWerte(logWind.value, logRudergaenger.value);
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
     zeigeLogs();
     logText.value         = "";
     logRudergaenger.value = "";
@@ -630,6 +691,8 @@ function toernSpeichernAktion() {
     if (!validieren()) return;
     formularLesen();
     toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
     toernSelectAktualisieren();
     btnToernLoeschen.hidden = false;
     statusSetzen("Törn gespeichert.", "ok");
@@ -789,6 +852,9 @@ function schnellEintragSpeichern(typ) {
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
     speichereLetzteWerte(wind, ruder);
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
     zeigeLogs();
     if (typ === "MOB") {
         statusSetzen("🆘 MOB – Mann über Bord! Zeit: " + ev.zeit.slice(11, 16), "error", 10000);
@@ -813,6 +879,7 @@ function tabWechseln(tabId) {
         const letzte = ladeLetzteWerte() || {};
         if (letzte.wind)         logWind.value         = letzte.wind || "";
         if (letzte.rudergaenger) logRudergaenger.value  = letzte.rudergaenger || "";
+        logbuchStatusAktualisieren();
     }
 }
 
@@ -869,8 +936,44 @@ toernSelect.onchange = () => {
     else { formSection.hidden = true; aktuellerToern = null; tabInhaltToggeln(); }
 };
 
+document.getElementById("ls-ruder-select").addEventListener("change", function () {
+    const name = this.value;
+    if (!name || !aktuellerToern) return;
+    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
+    const letzte  = ladeLetzteWerte() || {};
+    const ev = {
+        id:           generateId(),
+        type:         "Ruderwechsel",
+        zeit:         zeitIso,
+        ort:          "",
+        rudergaenger: { name },
+        note:         "",
+        weather:      letzte.wind !== "" && letzte.wind !== undefined
+                        ? { windForce: Number(letzte.wind), windDirection: "", description: "" }
+                        : null
+    };
+    aktuellerToern.events.push(ev);
+    speichereLetzteWerte(letzte.wind || "", name);
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
+    zeigeLogs();
+    statusSetzen("👤 " + name + " am Ruder.", "ok", 2000);
+});
+
 
 /* --- Auto-Backup ------------------------------------------------ */
+
+function backupStatusAktualisieren() {
+    const el = document.getElementById("backup-status");
+    if (!el) return;
+    const backup = backupLaden();
+    if (!backup || !backup.timestamp) { el.textContent = ""; return; }
+    const d = new Date(backup.timestamp);
+    const pad = n => String(n).padStart(2, "0");
+    const zeit = pad(d.getHours()) + ":" + pad(d.getMinutes());
+    el.textContent = "💾 Zuletzt gesichert: " + zeit;
+}
 
 function backupBannerPruefen() {
     const backup = backupLaden();
@@ -878,16 +981,15 @@ function backupBannerPruefen() {
     if (!backup || !backup.toerns || backup.toerns.length === 0) return;
     if (ladeToerns().length > 0) return;
 
-    const datum = new Date(backup.timestamp).toLocaleString("de-DE", {
-        day: "2-digit", month: "2-digit", year: "numeric",
-        hour: "2-digit", minute: "2-digit"
-    });
+    const d = new Date(backup.timestamp);
+    const pad = n => String(n).padStart(2, "0");
+    const datum = pad(d.getDate()) + "." + pad(d.getMonth() + 1) + ". "
+        + pad(d.getHours()) + ":" + pad(d.getMinutes());
 
     const banner = document.createElement("div");
     banner.className = "backup-banner";
     banner.innerHTML =
-        '<span>💾 Backup vom ' + datum + ' gefunden (' + backup.toerns.length
-        + ' Törn' + (backup.toerns.length !== 1 ? 's' : '') + ')</span>'
+        '<span>Backup vom ' + datum + ' wiederherstellen?</span>'
         + '<div class="backup-banner-btns">'
         + '<button type="button" id="btn-backup-ja" class="btn-backup-restore">Wiederherstellen</button>'
         + '<button type="button" id="btn-backup-nein" class="btn-backup-ignore">✕</button>'
@@ -902,10 +1004,6 @@ function backupBannerPruefen() {
         statusSetzen("Backup wiederhergestellt.", "ok");
     };
     document.getElementById("btn-backup-nein").onclick = () => banner.remove();
-}
-
-function autoBackupStarten() {
-    setInterval(autoBackupSpeichern, 5 * 60 * 1000);
 }
 
 
@@ -982,5 +1080,5 @@ btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
 tabInhaltToggeln();
 backupBannerPruefen();
+backupStatusAktualisieren();
 pwaMigrationPruefen();
-autoBackupStarten();

@@ -153,6 +153,15 @@
             <div class="card" id="log-card">
                 <h2>📘 Logbucheintrag</h2>
 
+                <!-- Statusleiste -->
+                <div id="logbuch-status" class="logbuch-status" hidden>
+                    <span id="ls-modus"></span>
+                    <span class="ls-sep">·</span>
+                    <select id="ls-ruder-select" class="ls-ruder-select" title="Rudergänger wechseln"></select>
+                    <span class="ls-sep">·</span>
+                    <span id="ls-seit"></span>
+                </div>
+
                 <!-- Schnellbuttons Grid -->
                 <div class="schnell-grid">
 
@@ -226,6 +235,7 @@
                             <option>Drehen Motor</option>
                             <option>Box-Manöver</option>
                             <option>Mooring</option>
+                            <option>Ruderwechsel</option>
                             <option>Segelwechsel</option>
                             <option>Reffen</option>
                             <option>Motorbetrieb</option>
@@ -294,7 +304,8 @@
 
     <!-- Versionszeile -->
     <div class="version-bar">
-        <span id="version-label">v1.3.0 · von Al.Gether</span>
+        <span id="version-label">v1.3.2 · von Al.Gether</span>
+        <span id="backup-status" class="backup-status"></span>
         <button type="button" id="btn-update" class="btn-update" hidden onclick="updateErzwingen()"></button>
     </div>
 
