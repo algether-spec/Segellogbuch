@@ -176,32 +176,103 @@ button:active { opacity: 0.75; }
     color: #fff;
 }
 
-/* --- Schnellbuttons --------------------------------------------- */
+/* --- Schnellbuttons Grid ---------------------------------------- */
 
-.schnell-row {
-    display: flex;
+.schnell-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
+    margin-bottom: 10px;
 }
 
-.btn-schnell {
-    flex: 1;
-    min-width: 90px;
+.btn-schnell-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 72px;
+    padding: 10px 6px 8px;
+    border-radius: 12px;
     background: #e0f2fe;
     color: #0369a1;
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
-    padding: 10px 8px;
-    border-radius: 10px;
-    border: none;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s;
+    line-height: 1.2;
+}
+
+.btn-schnell-card:active { background: #bae6fd; }
+
+.btn-weitere-card {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-weitere-card:active { background: #e2e8f0; }
+
+/* --- Weitere-Panel ---------------------------------------------- */
+
+.schnell-weitere {
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.schnell-weitere-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.btn-schnell-sm {
+    padding: 11px 6px;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
     cursor: pointer;
     transition: background 0.15s;
 }
 
-.btn-schnell:active {
-    background: #bae6fd;
+.btn-schnell-sm:active { background: #e2e8f0; }
+
+/* --- MOB Floating Button ---------------------------------------- */
+
+.btn-mob-float {
+    position: fixed;
+    bottom: 24px;
+    right: 16px;
+    z-index: 200;
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 56px;
+    min-width: 68px;
+    height: 68px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.55);
+    cursor: pointer;
+    letter-spacing: 0.5px;
 }
+
+.btn-mob-float span { font-size: 12px; font-weight: 900; letter-spacing: 1px; }
+.btn-mob-float:active { opacity: 0.85; }
+
+/* Abstand damit Content nicht unter MOB-Button endet */
+.app { padding-bottom: 96px; }
 
 /* --- Auto-Backup-Banner ----------------------------------------- */
 
@@ -947,4 +1018,56 @@ button:active { opacity: 0.75; }
         border-top: 1px solid #ccc;
         padding-top: 3mm;
     }
+}
+
+
+/* === Dark Mode ================================================== */
+
+@media (prefers-color-scheme: dark) {
+    body { background: #0f172a; color: #e2e8f0; }
+
+    header { background: #1e3a5f; }
+
+    .card { background: #1e293b; }
+
+    .tab-nav { background: #1e293b; }
+    .tab-btn { color: #94a3b8; }
+    .tab-btn.tab-aktiv { background: #334155; color: #7dd3fc; box-shadow: none; }
+
+    .aktiver-toern-bar { background: #1e3a5f; }
+
+    input, select, textarea {
+        background: #1e293b;
+        color: #e2e8f0;
+        border-color: #334155;
+    }
+
+    .toern-bar select { background: #1e293b; color: #e2e8f0; border-color: #334155; }
+
+    .btn-secondary  { background: #334155; color: #e2e8f0; }
+    .btn-export     { background: #334155; color: #e2e8f0; }
+
+    .btn-schnell-card  { background: #1e3a5f; color: #7dd3fc; border-color: #1e4976; }
+    .btn-schnell-card:active { background: #1e4976; }
+    .btn-weitere-card  { background: #1e293b; color: #94a3b8; }
+    .btn-weitere-card:active { background: #334155; }
+
+    .schnell-weitere   { background: #1e293b; }
+    .btn-schnell-sm    { background: #334155; color: #cbd5e1; border-color: #475569; }
+    .btn-schnell-sm:active { background: #475569; }
+
+    .event-item        { background: #1e293b; }
+    .event-time-label  { color: #94a3b8; }
+    .event-note-text   { color: #64748b; }
+
+    .tu-main    { background: #1e293b; color: #e2e8f0; }
+    .tu-item    { border-color: #334155; }
+
+    .backup-banner { background: #2d2a14; border-color: #ca8a04; color: #fde047; }
+
+    .delete-row .btn-danger { background: #7f1d1d; }
+
+    .modal-box { background: #1e293b; }
+    .modal-box h2 { color: #e2e8f0; }
+    .modal-box p  { color: #94a3b8; }
 }

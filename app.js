@@ -762,6 +762,11 @@ function csvExportieren() {
 
 /* --- Schnellbuttons --------------------------------------------- */
 
+function schnellWeitereToggeln() {
+    const panel = document.getElementById("schnell-weitere");
+    if (panel) panel.hidden = !panel.hidden;
+}
+
 function schnellEintragSpeichern(typ) {
     if (!aktuellerToern) {
         statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
@@ -783,11 +788,13 @@ function schnellEintragSpeichern(typ) {
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
-    /* Punkt 1: last_values nach jedem Schnellbutton sichern */
     speichereLetzteWerte(wind, ruder);
     zeigeLogs();
-    /* Punkt 5: Visuelles Feedback für 2 Sekunden */
-    statusSetzen("✅ " + typ + " gespeichert.", "ok", 2000);
+    if (typ === "MOB") {
+        statusSetzen("🆘 MOB – Mann über Bord! Zeit: " + ev.zeit.slice(11, 16), "error", 10000);
+    } else {
+        statusSetzen("✅ " + typ + " gespeichert.", "ok", 2000);
+    }
 }
 
 
