@@ -3,7 +3,7 @@
    Offline-Cache für Segellogbuch
 ====================== */
 
-const CACHE = "segellogbuch-v1.2.0";
+const CACHE = "segellogbuch-v1.2.1";
 
 const ASSETS = [
     "./",
@@ -34,6 +34,11 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
+    /* version.json immer frisch vom Netz – nie aus Cache */
+    if (e.request.url.includes("version.json")) {
+        e.respondWith(fetch(e.request, { cache: "no-store" }).catch(() => caches.match(e.request)));
+        return;
+    }
     e.respondWith(
         caches.match(e.request).then(cached => cached || fetch(e.request))
     );
