@@ -165,7 +165,7 @@ const MODUS_MAP = {
 };
 
 /* Ereignistypen die den Fahrt-Zustand definieren */
-const MOTOR_TYPEN = new Set(["Motor an", "Ablegen", "Anker lichten", "Von Boje"]);
+const MOTOR_TYPEN = new Set(["Motor an", "Ablegen"]);
 const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt"]);
 
 function zustandErmitteln() {
@@ -195,6 +195,11 @@ function zustandAktualisieren() {
     const btnHalse = document.getElementById("btn-halse");
     if (btnWende) btnWende.disabled = !istSegeln;
     if (btnHalse) btnHalse.disabled = !istSegeln;
+
+    /* Anlegen nur bei Motor-Zustand aktiv */
+    const istMotor = result?.zustand === "motor";
+    const btnAnlegen = document.getElementById("btn-anlegen");
+    if (btnAnlegen) btnAnlegen.disabled = !istMotor;
 }
 
 function zustandSetzen(zustand) {
