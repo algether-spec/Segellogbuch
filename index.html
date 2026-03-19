@@ -176,14 +176,18 @@
                     <span id="ls-seit"></span>
                 </div>
 
-                <!-- Ablegen / Anlegen (prominent) -->
-                <div class="hafenmanover-bar">
-                    <button type="button" class="btn-hafenmanover btn-ablegen" onclick="schnellEintragSpeichern('Ablegen')">
-                        🚢 Ablegen
-                    </button>
-                    <button type="button" class="btn-hafenmanover btn-anlegen" onclick="schnellEintragSpeichern('Anlegen')">
-                        🏁 Anlegen
-                    </button>
+                <!-- Fahrt-Start Buttons (wenn gestoppt) -->
+                <div id="fahrt-start-bar" class="hafenmanover-bar" hidden>
+                    <button type="button" class="btn-hafenmanover btn-ablegen" onclick="schnellEintragSpeichern('Ablegen')">🚢 Ablegen</button>
+                    <button type="button" class="btn-hafenmanover btn-anker-lichten" onclick="schnellEintragSpeichern('Anker lichten')">⚓ Anker lichten</button>
+                    <button type="button" class="btn-hafenmanover btn-von-boje" onclick="schnellEintragSpeichern('Von Boje')">🔵 Von Boje</button>
+                </div>
+
+                <!-- Fahrt-Stopp Buttons (wenn unterwegs) -->
+                <div id="fahrt-stopp-bar" class="hafenmanover-bar">
+                    <button type="button" class="btn-hafenmanover btn-anlegen" onclick="schnellEintragSpeichern('Anlegen')">🏁 Anlegen</button>
+                    <button type="button" class="btn-hafenmanover btn-ankern" onclick="schnellEintragSpeichern('Ankern')">⚓ Ankern</button>
+                    <button type="button" class="btn-hafenmanover btn-an-boje" onclick="schnellEintragSpeichern('An Boje')">🔵 An Boje</button>
                 </div>
 
                 <!-- Zustandsbuttons -->
@@ -244,7 +248,6 @@
                     <div class="weitere-gruppe">
                         <span class="weitere-label">— Allgemein</span>
                         <div class="schnell-weitere-grid">
-                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Ankern')">Ankern</button>
                             <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Ruderwechsel')">Ruderwechsel</button>
                             <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Sichtung')">Sichtung</button>
                             <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Wetterwechsel')">Wetterwechsel</button>
@@ -358,10 +361,10 @@
 
 </div><!-- /app -->
 
-<!-- Status-Button (floating, oben rechts) -->
-<button type="button" id="btn-fahrt-status" class="btn-fahrt-status btn-fahrt-stopp" onclick="schnellEintragSpeichern(imHafenLaden() ? 'Ablegen' : 'Anlegen')">
+<!-- Status-Badge (floating, oben rechts) -->
+<div id="btn-fahrt-status" class="btn-fahrt-status btn-fahrt-stopp">
     <span id="btn-fahrt-status-text">STOPP</span>
-</button>
+</div>
 
 <!-- MOB-Button (floating, immer sichtbar) -->
 <button type="button" id="btn-mob" class="btn-mob-float" onclick="schnellEintragSpeichern('MOB')">

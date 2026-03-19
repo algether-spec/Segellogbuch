@@ -232,36 +232,37 @@ button:active { opacity: 0.75; }
     text-underline-offset: 3px;
 }
 
-/* --- Hafen-Manöver (Ablegen / Anlegen) -------------------------- */
+/* --- Hafen-Manöver (Start / Stopp Bars) ------------------------- */
 
 .hafenmanover-bar {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     margin-bottom: 10px;
 }
 
 .btn-hafenmanover {
-    padding: 14px 10px;
+    padding: 12px 6px;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 700;
     border: none;
     cursor: pointer;
+    color: #fff;
     transition: opacity 0.15s, transform 0.1s;
 }
 
 .btn-hafenmanover:active { opacity: 0.8; transform: scale(0.97); }
 
-.btn-ablegen {
-    background: #0ea5e9;
-    color: #fff;
-}
+/* Start-Buttons */
+.btn-ablegen      { background: #0ea5e9; } /* blau   */
+.btn-anker-lichten{ background: #f59e0b; } /* amber  */
+.btn-von-boje     { background: #6366f1; } /* indigo */
 
-.btn-anlegen {
-    background: #10b981;
-    color: #fff;
-}
+/* Stopp-Buttons */
+.btn-anlegen      { background: #10b981; } /* grün   */
+.btn-ankern       { background: #64748b; } /* slate  */
+.btn-an-boje      { background: #6366f1; } /* indigo */
 
 /* --- Zustandsbuttons -------------------------------------------- */
 
@@ -1266,8 +1267,12 @@ button:active { opacity: 0.75; }
     .tu-main    { background: #1e293b; color: #e2e8f0; }
     .tu-item    { border-color: #334155; }
 
-    .btn-ablegen { background: #0369a1; }
-    .btn-anlegen { background: #059669; }
+    .btn-ablegen       { background: #0369a1; }
+    .btn-anker-lichten { background: #b45309; }
+    .btn-von-boje      { background: #4338ca; }
+    .btn-anlegen       { background: #059669; }
+    .btn-ankern        { background: #334155; }
+    .btn-an-boje       { background: #4338ca; }
     .btn-schnell-card:disabled { background: #1e293b; color: #475569; }
 
     .btn-zustand { background: #1e293b; color: #94a3b8; }

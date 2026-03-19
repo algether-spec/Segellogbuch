@@ -165,7 +165,7 @@ const MODUS_MAP = {
 };
 
 /* Ereignistypen die den Fahrt-Zustand definieren */
-const MOTOR_TYPEN = new Set(["Motor an", "Ablegen", "Anlegen"]);
+const MOTOR_TYPEN = new Set(["Motor an", "Ablegen", "Anker lichten", "Von Boje"]);
 const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt"]);
 
 function zustandErmitteln() {
@@ -201,31 +201,50 @@ function zustandSetzen(zustand) {
     schnellEintragSpeichern(zustand === "motor" ? "Motor an" : "Segeln");
 }
 
-/* --- Im-Hafen-Zustand ------------------------------------------- */
+/* --- Stopp-Zustand (hafen / anker / boje / fahrt) --------------- */
 
-function imHafenLaden() {
-    return localStorage.getItem("segel_logbuch_im_hafen") === "true";
+const STOPP_TEXTE = { hafen: "🏁 Im Hafen", anker: "⚓ Vor Anker", boje: "🔵 An Boje" };
+const STOPP_EREIGNISSE = { "Anlegen": "hafen", "Ankern": "anker", "An Boje": "boje" };
+const START_EREIGNISSE = new Set(["Ablegen", "Anker lichten", "Von Boje"]);
+
+function stoppZustandLaden() {
+    /* Rückwärtskompatibel: altes im_hafen-Flag migrieren */
+    if (localStorage.getItem("segel_logbuch_im_hafen") === "true") {
+        localStorage.setItem("segel_logbuch_stopp", "hafen");
+        localStorage.removeItem("segel_logbuch_im_hafen");
+    }
+    return localStorage.getItem("segel_logbuch_stopp") || "fahrt";
 }
 
-function imHafenSpeichern(val) {
-    localStorage.setItem("segel_logbuch_im_hafen", val ? "true" : "false");
+function stoppZustandSpeichern(val) {
+    localStorage.setItem("segel_logbuch_stopp", val);
 }
 
-function hafenSperrungAktualisieren(imHafen) {
+function hafenSperrungAktualisieren(stopp) {
+    const istStopp = stopp !== "fahrt";
+
+    /* Start-Bar / Stopp-Bar umschalten */
+    const startBar = document.getElementById("fahrt-start-bar");
+    const stoppBar = document.getElementById("fahrt-stopp-bar");
+    if (startBar) startBar.hidden = !istStopp;
+    if (stoppBar) stoppBar.hidden = istStopp;
+
     /* Alle Manöver- und Zustandsbuttons sperren/freigeben */
     document.querySelectorAll(".btn-schnell-card, .btn-schnell-sm, .btn-zustand").forEach(btn => {
-        btn.disabled = imHafen;
+        btn.disabled = istStopp;
     });
+
     /* Statusleiste: Modus-Text überschreiben */
     const modus = document.getElementById("ls-modus");
-    if (imHafen && modus) modus.textContent = "🏁 Im Hafen";
-    /* Status-Button oben rechts aktualisieren */
-    const statusBtn  = document.getElementById("btn-fahrt-status");
-    const statusText = document.getElementById("btn-fahrt-status-text");
-    if (statusBtn && statusText) {
-        statusText.textContent = imHafen ? "🔴 STOPP" : "🟢 FAHRT";
-        statusBtn.classList.toggle("btn-fahrt-stopp", imHafen);
-        statusBtn.classList.toggle("btn-fahrt-fahrt", !imHafen);
+    if (istStopp && modus) modus.textContent = STOPP_TEXTE[stopp] || "—";
+
+    /* Status-Badge oben rechts */
+    const badge     = document.getElementById("btn-fahrt-status");
+    const badgeText = document.getElementById("btn-fahrt-status-text");
+    if (badge && badgeText) {
+        badgeText.textContent = istStopp ? "🔴 STOPP" : "🟢 FAHRT";
+        badge.classList.toggle("btn-fahrt-stopp", istStopp);
+        badge.classList.toggle("btn-fahrt-fahrt", !istStopp);
     }
 }
 
@@ -235,7 +254,7 @@ function logbuchStatusAktualisieren() {
     if (!aktuellerToern || !(aktuellerToern.events || []).length) {
         el.hidden = true;
         zustandAktualisieren();
-        hafenSperrungAktualisieren(imHafenLaden());
+        hafenSperrungAktualisieren(stoppZustandLaden());
         return;
     }
     const events = aktuellerToern.events.slice().sort((a, b) =>
@@ -336,7 +355,7 @@ function logbuchStatusAktualisieren() {
 
     el.hidden = false;
     zustandAktualisieren();
-    hafenSperrungAktualisieren(imHafenLaden());
+    hafenSperrungAktualisieren(stoppZustandLaden());
 }
 
 function statusSetzen(text, typ = "ok", ms = 3000) {
@@ -1159,11 +1178,11 @@ function schnellEintragSpeichern(typ) {
     autoBackupSpeichern();
     backupStatusAktualisieren();
     zeigeLogs();
-    /* Im-Hafen-Zustand setzen/löschen */
-    if (typ === "Anlegen") {
-        imHafenSpeichern(true);
-    } else if (typ === "Ablegen") {
-        imHafenSpeichern(false);
+    /* Stopp-Zustand setzen/löschen */
+    if (STOPP_EREIGNISSE[typ]) {
+        stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
+    } else if (START_EREIGNISSE.has(typ)) {
+        stoppZustandSpeichern("fahrt");
     }
 
     if (typ === "MOB") {
@@ -1469,7 +1488,7 @@ formSection.hidden = true;
 btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
 tabInhaltToggeln();
-hafenSperrungAktualisieren(imHafenLaden());
+hafenSperrungAktualisieren(stoppZustandLaden());
 backupBannerPruefen();
 backupStatusAktualisieren();
 pwaMigrationPruefen();
