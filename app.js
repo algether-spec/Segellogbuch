@@ -223,18 +223,29 @@ function stoppZustandSpeichern(val) {
 function hafenSperrungAktualisieren(stopp) {
     const istStopp = stopp !== "fahrt";
 
-    /* Start-Bar / Stopp-Bar umschalten */
-    const startBar = document.getElementById("fahrt-start-bar");
-    const stoppBar = document.getElementById("fahrt-stopp-bar");
+    /* Start-Bar (Ablegen/Anker lichten/Von Boje) ↔ Stopp-Bar */
+    const startBar  = document.getElementById("fahrt-start-bar");
+    const stoppBar  = document.getElementById("fahrt-stopp-bar");
     if (startBar) startBar.hidden = !istStopp;
     if (stoppBar) stoppBar.hidden = istStopp;
 
-    /* Alle Manöver- und Zustandsbuttons sperren/freigeben */
-    document.querySelectorAll(".btn-schnell-card, .btn-schnell-sm, .btn-zustand").forEach(btn => {
+    /* Zustand- und Manöver-Bereiche: nur bei FAHRT sichtbar */
+    const zustandBar  = document.getElementById("zustand-bar");
+    const manoeverGrid = document.getElementById("manoever-grid");
+    const weiterePanel = document.getElementById("schnell-weitere");
+    if (zustandBar)   zustandBar.hidden   = istStopp;
+    if (manoeverGrid) manoeverGrid.hidden = istStopp;
+    if (weiterePanel && istStopp) weiterePanel.hidden = true;
+
+    /* btn-schnell-sm in Weitere-Panel: disable im Stopp (Sicherheit) */
+    document.querySelectorAll(".btn-schnell-sm").forEach(btn => {
         btn.disabled = istStopp;
     });
 
-    /* Statusleiste: Modus-Text überschreiben */
+    /* Bei FAHRT: Wende/Halse korrekt per Segeln/Motor-Zustand setzen */
+    if (!istStopp) zustandAktualisieren();
+
+    /* Statusleiste: Modus-Text überschreiben wenn gestoppt */
     const modus = document.getElementById("ls-modus");
     if (istStopp && modus) modus.textContent = STOPP_TEXTE[stopp] || "—";
 
