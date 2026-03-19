@@ -1193,18 +1193,18 @@ function schnellEintragSpeichern(typ) {
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+    /* Stopp-Zustand VOR zeigeLogs speichern – sonst liest UI alten Zustand */
+    if (STOPP_EREIGNISSE[typ]) {
+        stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
+    } else if (START_EREIGNISSE.has(typ)) {
+        stoppZustandSpeichern("fahrt");
+    }
     gpsAbfragen(ev);
     speichereLetzteWerte(wind, ruder);
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
     zeigeLogs();
-    /* Stopp-Zustand setzen/löschen */
-    if (STOPP_EREIGNISSE[typ]) {
-        stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
-    } else if (START_EREIGNISSE.has(typ)) {
-        stoppZustandSpeichern("fahrt");
-    }
 
     if (typ === "MOB") {
         statusSetzen("🆘 MOB – Mann über Bord! Zeit: " + ev.zeit.slice(11, 16), "error", 10000);
