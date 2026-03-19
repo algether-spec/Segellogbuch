@@ -311,18 +311,13 @@ function logbuchStatusAktualisieren() {
     document.getElementById("ls-modus").textContent = modusText;
     document.getElementById("ls-seit").textContent  = "seit " + (seitIso.slice(11, 16) || "—");
 
-    /* Letztes Manöver – nur wenn es zur aktuellen Antriebskategorie passt */
-    const ZUSTAND_TYPEN   = new Set([...MOTOR_TYPEN, ...SEGEL_TYPEN]);
-    const SEGEL_MANOEVER  = new Set(["Wende", "Halse", "Reffen"]);
-    const MOTOR_MANOEVER  = new Set(["Ablegen", "Anlegen", "Box-Manöver", "Mooring"]);
-    const ALLG_MANOEVER   = new Set(["Ankern", "An Boje", "Ruderwechsel"]);
-    const aktAntrieb      = zustandResult?.zustand || "";
-    const letztesManoever = [...events].reverse().find(e => {
-        if (ZUSTAND_TYPEN.has(e.type)) return false;
-        if (aktAntrieb === "segeln") return SEGEL_MANOEVER.has(e.type) || ALLG_MANOEVER.has(e.type);
-        if (aktAntrieb === "motor")  return MOTOR_MANOEVER.has(e.type) || ALLG_MANOEVER.has(e.type);
-        return ALLG_MANOEVER.has(e.type);
-    });
+    /* Letztes Manöver – Zustandswechsel ausschließen, nur echte Manöver */
+    const KEIN_MANOEVER = new Set([
+        "Motor an", "Segeln", "Abfahrt",
+        "Ablegen", "Anlegen", "Ankern", "Anker lichten",
+        "An Boje", "Von Boje"
+    ]);
+    const letztesManoever = [...events].reverse().find(e => !KEIN_MANOEVER.has(e.type));
     const manoeverWrap = document.getElementById("ls-manoever-wrap");
     if (manoeverWrap) {
         if (letztesManoever) {
