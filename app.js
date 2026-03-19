@@ -246,7 +246,7 @@ function hafenSperrungAktualisieren(stopp) {
     document.querySelectorAll(".btn-schnell-sm").forEach(btn => {
         btn.disabled = istStopp;
     });
-    if (btnLogSpeichern) btnLogSpeichern.disabled = istStopp;
+    /* btnLogSpeichern bleibt immer aktiv – Modal ermöglicht Nachträge auch bei STOPP */
 
     /* Bei FAHRT: Wende/Halse korrekt per Segeln/Motor-Zustand setzen */
     if (!istStopp) zustandAktualisieren();
@@ -628,6 +628,21 @@ function zeigeLogs() {
     logbuchStatusAktualisieren();
 }
 
+function logModalOeffnen() {
+    logZeitVorbefuellen();
+    rudergaengerSelectFuellen();
+    const letzte = ladeLetzteWerte() || {};
+    if (letzte.rudergaenger) logRudergaenger.value = letzte.rudergaenger;
+    if (stoppZustandLaden() === "fahrt") formWetterVorbelegen();
+    const overlay = document.getElementById("log-modal-overlay");
+    if (overlay) overlay.hidden = false;
+}
+
+function logModalSchliessen() {
+    const overlay = document.getElementById("log-modal-overlay");
+    if (overlay) overlay.hidden = true;
+}
+
 function logEintragSpeichern() {
     if (!aktuellerToern) {
         statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
@@ -661,6 +676,7 @@ function logEintragSpeichern() {
     logRudergaenger.value = "";
     logWind.value         = "";
     if (logWindDir) logWindDir.value = "";
+    logModalSchliessen();
     statusSetzen("Eintrag gespeichert.", "ok");
 }
 

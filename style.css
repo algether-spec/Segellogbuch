@@ -178,18 +178,63 @@ button:active { opacity: 0.75; }
     font-size: 14px;
 }
 
-/* --- Log-Button-Zeile ------------------------------------------- */
+/* --- Detaillierter Eintrag Button ------------------------------- */
 
-.log-btn-row {
+.btn-detail-eintrag {
+    display: block;
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1.5px dashed #cbd5e1;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 4px;
+}
+
+.btn-detail-eintrag:active { background: #e2e8f0; }
+
+/* --- Log Modal -------------------------------------------------- */
+
+.log-modal-box {
+    text-align: left;
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.log-modal-box h2 { text-align: left; margin-bottom: 14px; }
+
+.log-modal-felder {
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.log-modal-btns {
+    display: flex;
+    flex-direction: column;
     gap: 8px;
 }
 
-.btn-log-save {
-    flex: 1;
+.btn-primary {
+    padding: 12px;
+    border-radius: 10px;
     background: #0f4c81;
     color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    width: 100%;
 }
+
+.btn-primary:active { opacity: 0.85; }
 
 /* --- Schnellbuttons Grid ---------------------------------------- */
 
@@ -1247,6 +1292,10 @@ button:active { opacity: 0.75; }
     .toern-bar select { background: #1e293b; color: #e2e8f0; border-color: #334155; }
 
     .btn-secondary  { background: #334155; color: #e2e8f0; }
+    .btn-primary    { background: #1e4976; }
+    .btn-detail-eintrag { background: #1e293b; color: #64748b; border-color: #334155; }
+    .log-modal-box  { background: #1e293b; }
+    .log-modal-box h2 { color: #e2e8f0; }
     .btn-abschliessen { background: #92400e; }
     .btn-export     { background: #334155; color: #e2e8f0; }
 

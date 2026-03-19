@@ -257,75 +257,8 @@
 
                 </div>
 
-                <div class="event-add-row">
-                    <div class="field">
-                        <label for="log_zeit">Zeit *</label>
-                        <input type="datetime-local" id="log_zeit">
-                    </div>
-                    <div class="field">
-                        <label for="log_typ">Typ</label>
-                        <select id="log_typ">
-                            <option>Abfahrt</option>
-                            <option>Ablegen</option>
-                            <option>Segeln</option>
-                            <option>Motor an</option>
-                            <option>Ankunft</option>
-                            <option>Anlegen</option>
-                            <option>Ankern</option>
-                            <option>Anker auf</option>
-                            <option>Wende</option>
-                            <option>Halse</option>
-                            <option>Q-Wende</option>
-                            <option>Aufschießer</option>
-                            <option>Beidrehen</option>
-                            <option>Segel setzen</option>
-                            <option>Segel bergen</option>
-                            <option>Drehen Motor</option>
-                            <option>Box-Manöver</option>
-                            <option>Mooring</option>
-                            <option>Ruderwechsel</option>
-                            <option>Segelwechsel</option>
-                            <option>Reffen</option>
-                            <option>Motorbetrieb</option>
-                            <option>Wetterwechsel</option>
-                            <option>Sichtung</option>
-                            <option>MOB</option>
-                            <option>Notfall</option>
-                            <option>Sonstiges</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="event-add-row">
-                    <div class="field">
-                        <label for="rudergaenger">Rudergänger</label>
-                        <select id="rudergaenger">
-                            <option value="">— Rudergänger —</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="log_wind">Wind (kn) <span id="wind-loading" hidden>⏳</span></label>
-                        <input type="number" id="log_wind" step="0.1" min="0" max="99" placeholder="0.0">
-                    </div>
-                    <div class="field">
-                        <label for="log_wind_dir">Windrichtung</label>
-                        <select id="log_wind_dir">
-                            <option value="">—</option>
-                            <option>N</option><option>NE</option><option>E</option><option>SE</option>
-                            <option>S</option><option>SW</option><option>W</option><option>NW</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="field" style="margin-bottom: 10px;">
-                    <label for="log_text">Bemerkung</label>
-                    <input type="text" id="log_text" placeholder="Was ist passiert?">
-                </div>
-
-                <div class="log-btn-row">
-                    <button type="button" id="btn-neuer-log" class="btn-secondary">🕐 Zeit aktualisieren</button>
-                    <button type="button" id="btn-log-speichern" class="btn-secondary btn-log-save">+ Eintrag speichern</button>
-                </div>
+                <!-- Detaillierter Eintrag Button (immer sichtbar) -->
+                <button type="button" class="btn-detail-eintrag" onclick="logModalOeffnen()">✏️ Detaillierter Eintrag</button>
             </div>
 
             <div id="log-liste"></div>
@@ -375,6 +308,60 @@
 <!-- Druckbereich (nur beim Drucken sichtbar) -->
 <div id="druck-bereich"></div>
 <div id="abschluss-druck-bereich"></div>
+
+<!-- Detaillierter Eintrag Modal -->
+<div id="log-modal-overlay" class="modal-overlay" hidden>
+    <div class="modal-box log-modal-box">
+        <h2>✏️ Eintrag</h2>
+        <div class="log-modal-felder">
+            <div class="field">
+                <label for="log_zeit">Zeit *</label>
+                <input type="datetime-local" id="log_zeit">
+            </div>
+            <div class="field">
+                <label for="log_typ">Typ</label>
+                <select id="log_typ">
+                    <option>Abfahrt</option><option>Ablegen</option><option>Segeln</option>
+                    <option>Motor an</option><option>Ankunft</option><option>Anlegen</option>
+                    <option>Ankern</option><option>Anker auf</option><option>An Boje</option>
+                    <option>Von Boje</option><option>Anker lichten</option>
+                    <option>Wende</option><option>Halse</option><option>Q-Wende</option>
+                    <option>Aufschießer</option><option>Beidrehen</option>
+                    <option>Segel setzen</option><option>Segel bergen</option><option>Reffen</option>
+                    <option>Drehen Motor</option><option>Box-Manöver</option><option>Mooring</option>
+                    <option>Ruderwechsel</option><option>Segelwechsel</option>
+                    <option>Wetterwechsel</option><option>Sichtung</option>
+                    <option>MOB</option><option>Notfall</option><option>Sonstiges</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="rudergaenger">Rudergänger</label>
+                <select id="rudergaenger"><option value="">— Rudergänger —</option></select>
+            </div>
+            <div class="field">
+                <label for="log_wind">Wind (kn) <span id="wind-loading" hidden>⏳</span></label>
+                <input type="number" id="log_wind" step="0.1" min="0" max="99" placeholder="0.0">
+            </div>
+            <div class="field">
+                <label for="log_wind_dir">Windrichtung</label>
+                <select id="log_wind_dir">
+                    <option value="">—</option>
+                    <option>N</option><option>NE</option><option>E</option><option>SE</option>
+                    <option>S</option><option>SW</option><option>W</option><option>NW</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="log_text">Bemerkung</label>
+                <input type="text" id="log_text" placeholder="Was ist passiert?">
+            </div>
+        </div>
+        <div class="log-modal-btns">
+            <button type="button" id="btn-neuer-log" class="btn-secondary">🕐 Zeit aktualisieren</button>
+            <button type="button" id="btn-log-speichern" class="btn-primary">+ Eintrag speichern</button>
+            <button type="button" class="btn-secondary" onclick="logModalSchliessen()">Abbrechen</button>
+        </div>
+    </div>
+</div>
 
 <script src="storage.js"></script>
 <script src="config.js"></script>
