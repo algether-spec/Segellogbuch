@@ -168,6 +168,23 @@ const MODUS_MAP = {
 const MOTOR_TYPEN = new Set(["Motor an", "Ablegen"]);
 const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt"]);
 
+/* Kategorie-Mapping */
+const KATEGORIE_MAP = {
+    "Wende": "Segeln", "Halse": "Segeln", "Reffen": "Segeln",
+    "Segel setzen": "Segeln", "Segel bergen": "Segeln",
+    "Aufschießer": "Segeln", "Beidrehen": "Segeln", "Segeln": "Segeln",
+    "Ablegen": "Motor", "Anlegen": "Motor", "Motor an": "Motor",
+    "Drehen Motor": "Motor", "Box-Manöver": "Motor", "Mooring": "Motor",
+    "Ankern": "Anker", "Anker lichten": "Anker",
+    "An Boje": "Boje", "Von Boje": "Boje",
+    "Ruderwechsel": "Allgemein", "Sichtung": "Allgemein",
+    "MOB": "Allgemein", "Notfall": "Allgemein"
+};
+
+function kategorieFuerTyp(typ) {
+    return KATEGORIE_MAP[typ] || "Allgemein";
+}
+
 function zustandErmitteln() {
     if (!aktuellerToern || !(aktuellerToern.events || []).length) return null;
     const sorted = aktuellerToern.events.slice().sort((a, b) =>
@@ -593,7 +610,8 @@ function zeigeLogs() {
             const sog   = ev.pos != null ? (ev.pos.sog ?? 0) + " kn SOG" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
-            const info  = [zeit, ev.type, wind, sog, ruder].filter(Boolean).join("  ·  ");
+            const kat   = ev.kategorie || kategorieFuerTyp(ev.type);
+            const info  = [zeit, ev.type, kat, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
             if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
@@ -659,6 +677,7 @@ function logEintragSpeichern() {
     const ev = {
         id:           generateId(),
         type:         logTyp.value,
+        kategorie:    kategorieFuerTyp(logTyp.value),
         zeit:         logZeit.value,   /* "2026-03-18T14:35" aus datetime-local */
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
@@ -1149,7 +1168,7 @@ function csvFeldEscapen(wert) {
 function csvExportieren() {
     if (!aktuellerToern) return;
     const t = aktuellerToern;
-    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind kn;Wind Bft;Wind Richtung;Wetter;Notiz;GPS;SOG kn";
+    const kopfzeile = "Toernname;Datum;Zeit;Typ;Kategorie;Ort;Rudergänger;Wind kn;Wind Bft;Wind Richtung;Wetter;Notiz;GPS;SOG kn";
     const zeilen = (t.events || [])
         .slice()
         .sort((a, b) =>
@@ -1162,6 +1181,7 @@ function csvExportieren() {
                 isoZuDatum(iso.slice(0, 10)),
                 iso.slice(11, 16),
                 ev.type,
+                ev.kategorie || kategorieFuerTyp(ev.type),
                 ev.ort,
                 ev.rudergaenger ? ev.rudergaenger.name : "",
                 ev.weather ? (ev.weather.windKnots != null ? ev.weather.windKnots : "") : "",
@@ -1205,6 +1225,7 @@ function schnellEintragSpeichern(typ) {
     const ev = {
         id:           generateId(),
         type:         typ,
+        kategorie:    kategorieFuerTyp(typ),
         zeit:         zeitIso,
         ort:          "",
         rudergaenger: ruder ? { name: ruder } : null,
