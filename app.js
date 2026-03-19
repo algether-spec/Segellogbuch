@@ -242,10 +242,11 @@ function hafenSperrungAktualisieren(stopp) {
     if (manoeverGrid) manoeverGrid.hidden = istStopp;
     if (weiterePanel && istStopp) weiterePanel.hidden = true;
 
-    /* btn-schnell-sm in Weitere-Panel: disable im Stopp (Sicherheit) */
+    /* btn-schnell-sm in Weitere-Panel + Formular-Speichern-Button */
     document.querySelectorAll(".btn-schnell-sm").forEach(btn => {
         btn.disabled = istStopp;
     });
+    if (btnLogSpeichern) btnLogSpeichern.disabled = istStopp;
 
     /* Bei FAHRT: Wende/Halse korrekt per Segeln/Motor-Zustand setzen */
     if (!istStopp) zustandAktualisieren();
@@ -515,6 +516,7 @@ function crewHinzufuegen() {
 
 function formWetterVorbelegen() {
     if (!navigator.geolocation || !aktuellerToern) return;
+    if (stoppZustandLaden() !== "fahrt") return;
     const ladeEl = document.getElementById("wind-loading");
     /* ⏳ Loading-State */
     if (ladeEl) ladeEl.hidden = false;
@@ -1343,6 +1345,7 @@ if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
 
 function gpsAbfragen(ev) {
     if (!navigator.geolocation || !aktuellerToern) return;
+    if (stoppZustandLaden() !== "fahrt") return;
     navigator.geolocation.getCurrentPosition(
         async pos => {
             const speedMs = pos.coords.speed;
