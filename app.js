@@ -189,12 +189,14 @@ function zustandAktualisieren() {
     btnS.classList.toggle("btn-zustand-aktiv", result?.zustand === "segeln");
     btnM.classList.toggle("btn-zustand-aktiv", result?.zustand === "motor");
 
-    /* Wende/Halse nur bei Segel-Zustand aktiv */
+    /* Wende/Halse/Reffen nur bei Segel-Zustand aktiv */
     const istSegeln = result?.zustand === "segeln";
-    const btnWende = document.getElementById("btn-wende");
-    const btnHalse = document.getElementById("btn-halse");
-    if (btnWende) btnWende.disabled = !istSegeln;
-    if (btnHalse) btnHalse.disabled = !istSegeln;
+    const btnWende  = document.getElementById("btn-wende");
+    const btnHalse  = document.getElementById("btn-halse");
+    const btnReffen = document.getElementById("btn-reffen");
+    if (btnWende)  btnWende.disabled  = !istSegeln;
+    if (btnHalse)  btnHalse.disabled  = !istSegeln;
+    if (btnReffen) btnReffen.disabled = !istSegeln;
 
     /* Anlegen nur bei Motor-Zustand aktiv */
     const istMotor = result?.zustand === "motor";
