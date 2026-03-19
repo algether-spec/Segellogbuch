@@ -238,10 +238,8 @@ function hafenSperrungAktualisieren(stopp) {
     /* Zustand- und Manöver-Bereiche: nur bei FAHRT sichtbar */
     const zustandBar  = document.getElementById("zustand-bar");
     const manoeverGrid = document.getElementById("manoever-grid");
-    const weiterePanel = document.getElementById("schnell-weitere");
     if (zustandBar)   zustandBar.hidden   = istStopp;
     if (manoeverGrid) manoeverGrid.hidden = istStopp;
-    if (weiterePanel && istStopp) weiterePanel.hidden = true;
 
     /* btn-schnell-sm in Weitere-Panel + Formular-Speichern-Button */
     document.querySelectorAll(".btn-schnell-sm").forEach(btn => {
@@ -1186,10 +1184,6 @@ function csvExportieren() {
 
 /* --- Schnellbuttons --------------------------------------------- */
 
-function schnellWeitereToggeln() {
-    const panel = document.getElementById("schnell-weitere");
-    if (panel) panel.hidden = !panel.hidden;
-}
 
 function schnellEintragSpeichern(typ) {
     if (!aktuellerToern) {
