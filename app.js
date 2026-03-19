@@ -186,6 +186,11 @@ function logbuchStatusAktualisieren() {
             windSelect.appendChild(opt);
         }
         if (windWrap) windWrap.hidden = false;
+        /* last_values mit aktuellem Wind synchronisieren */
+        if (windWert !== "") {
+            const lv = ladeLetzteWerte() || {};
+            speichereLetzteWerte(windWert, lv.rudergaenger || "");
+        }
     }
 
     el.hidden = false;
@@ -941,9 +946,11 @@ function schnellEintragSpeichern(typ) {
         statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
         return;
     }
-    const letzte = ladeLetzteWerte() || {};
-    const wind   = letzte.wind         || "";
-    const ruder  = letzte.rudergaenger || "";
+    const letzte    = ladeLetzteWerte() || {};
+    const windSel   = document.getElementById("ls-wind-select");
+    const wind      = (windSel && windSel.value !== "") ? windSel.value : (letzte.wind || "");
+    const ruderSel  = document.getElementById("ls-ruder-select");
+    const ruder     = (ruderSel && ruderSel.value) ? ruderSel.value : (letzte.rudergaenger || "");
     /* Lokale Zeit als ISO-String "2026-03-18T14:35" */
     const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
     const ev = {

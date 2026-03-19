@@ -3,11 +3,13 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "1.3.7";
+const APP_VERSION = "1.4.0";
 
 function updateButtonInit() {
     const btn = document.getElementById("btn-update");
     if (btn) btn.textContent = "v" + APP_VERSION;
+    const lbl = document.getElementById("version-label");
+    if (lbl) lbl.textContent = "v" + APP_VERSION + " · von Al.Gether";
 }
 
 async function autoUpdatePruefen() {
