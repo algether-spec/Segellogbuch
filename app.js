@@ -219,6 +219,14 @@ function hafenSperrungAktualisieren(imHafen) {
     /* Statusleiste: Modus-Text überschreiben */
     const modus = document.getElementById("ls-modus");
     if (imHafen && modus) modus.textContent = "🏁 Im Hafen";
+    /* Status-Button oben rechts aktualisieren */
+    const statusBtn  = document.getElementById("btn-fahrt-status");
+    const statusText = document.getElementById("btn-fahrt-status-text");
+    if (statusBtn && statusText) {
+        statusText.textContent = imHafen ? "🔴 STOPP" : "🟢 FAHRT";
+        statusBtn.classList.toggle("btn-fahrt-stopp", imHafen);
+        statusBtn.classList.toggle("btn-fahrt-fahrt", !imHafen);
+    }
 }
 
 function logbuchStatusAktualisieren() {

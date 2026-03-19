@@ -373,6 +373,41 @@ button:active { opacity: 0.75; }
 
 .btn-schnell-sm:active { background: #e2e8f0; }
 
+/* --- Status Floating Button (oben rechts) ----------------------- */
+
+.btn-fahrt-status {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 200;
+    border: none;
+    border-radius: 56px;
+    min-width: 68px;
+    height: 52px;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.btn-fahrt-stopp {
+    background: #dc2626;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.5);
+}
+
+.btn-fahrt-fahrt {
+    background: #16a34a;
+    box-shadow: 0 4px 16px rgba(22, 163, 74, 0.5);
+}
+
+.btn-fahrt-status:active { opacity: 0.85; }
+
 /* --- MOB Floating Button ---------------------------------------- */
 
 .btn-mob-float {
