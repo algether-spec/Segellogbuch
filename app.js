@@ -611,8 +611,9 @@ function zeigeLogs() {
             const sog   = ev.pos != null ? (ev.pos.sog ?? 0) + " kn SOG" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
-            const kat   = ev.kategorie || kategorieFuerTyp(ev.type);
-            const info  = [zeit, kat, ev.type, wind, sog, ruder].filter(Boolean).join("  ·  ");
+            const kat     = ev.kategorie || kategorieFuerTyp(ev.type);
+            const antrieb = ev.antrieb === "motor" ? "Motor" : ev.antrieb === "segeln" ? "Segeln" : "";
+            const info    = [zeit, kat, ev.type, antrieb, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
             if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
@@ -679,6 +680,7 @@ function logEintragSpeichern() {
         id:           generateId(),
         type:         logTyp.value,
         kategorie:    kategorieFuerTyp(logTyp.value),
+        antrieb:      zustandErmitteln()?.zustand || "",
         zeit:         logZeit.value,   /* "2026-03-18T14:35" aus datetime-local */
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
@@ -1044,9 +1046,16 @@ function toernLaden(tripId) {
     const toern = alle.find(t => t.tripId === tripId);
     if (!toern) return;
     aktuellerToern = toern;
-    /* Bestehende Einträge ohne Kategorie nachrüsten */
-    (aktuellerToern.events || []).forEach(ev => {
+    /* Bestehende Einträge ohne Kategorie/Antrieb nachrüsten */
+    const sorted = (aktuellerToern.events || []).slice().sort((a, b) =>
+        evZeitIso(a) < evZeitIso(b) ? -1 : 1
+    );
+    let letzterAntrieb = "";
+    sorted.forEach(ev => {
         if (!ev.kategorie) ev.kategorie = kategorieFuerTyp(ev.type);
+        if (MOTOR_TYPEN.has(ev.type)) letzterAntrieb = "motor";
+        else if (SEGEL_TYPEN.has(ev.type)) letzterAntrieb = "segeln";
+        if (!ev.antrieb) ev.antrieb = letzterAntrieb;
     });
     formSection.hidden = false;
     btnToernLoeschen.hidden = false;
@@ -1176,7 +1185,7 @@ function csvFeldEscapen(wert) {
 function csvExportieren() {
     if (!aktuellerToern) return;
     const t = aktuellerToern;
-    const kopfzeile = "Toernname;Datum;Zeit;Typ;Kategorie;Ort;Rudergänger;Wind kn;Wind Bft;Wind Richtung;Wetter;Notiz;GPS;SOG kn";
+    const kopfzeile = "Toernname;Datum;Zeit;Typ;Kategorie;Antrieb;Ort;Rudergänger;Wind kn;Wind Bft;Wind Richtung;Wetter;Notiz;GPS;SOG kn";
     const zeilen = (t.events || [])
         .slice()
         .sort((a, b) =>
@@ -1190,6 +1199,7 @@ function csvExportieren() {
                 iso.slice(11, 16),
                 ev.type,
                 ev.kategorie || kategorieFuerTyp(ev.type),
+                ev.antrieb || "",
                 ev.ort,
                 ev.rudergaenger ? ev.rudergaenger.name : "",
                 ev.weather ? (ev.weather.windKnots != null ? ev.weather.windKnots : "") : "",
@@ -1234,6 +1244,7 @@ function schnellEintragSpeichern(typ) {
         id:           generateId(),
         type:         typ,
         kategorie:    kategorieFuerTyp(typ),
+        antrieb:      zustandErmitteln()?.zustand || "",
         zeit:         zeitIso,
         ort:          "",
         rudergaenger: ruder ? { name: ruder } : null,
