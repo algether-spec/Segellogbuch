@@ -1252,11 +1252,15 @@ function tabWechseln(tabId) {
         logbuchStatusAktualisieren();
         formWetterVorbelegen();
     }
+    /* Beim Wechsel zum Log-Tab: Liste aktualisieren */
+    if (tabId === "tab-log" && aktuellerToern) {
+        zeigeLogs();
+    }
 }
 
 function tabInhaltToggeln() {
     const aktiv = !!aktuellerToern;
-    ["crew", "logbuch", "statistik"].forEach(t => {
+    ["crew", "logbuch", "log", "statistik"].forEach(t => {
         const leer   = document.getElementById("tab-" + t + "-leer");
         const inhalt = document.getElementById("tab-" + t + "-inhalt");
         if (leer)   leer.hidden   = aktiv;

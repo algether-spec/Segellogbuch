@@ -30,6 +30,7 @@
         <button class="tab-btn tab-aktiv" data-tab="tab-toern"     onclick="tabWechseln('tab-toern')">📋 Törn</button>
         <button class="tab-btn"           data-tab="tab-crew"      onclick="tabWechseln('tab-crew')">👥 Crew</button>
         <button class="tab-btn"           data-tab="tab-logbuch"   onclick="tabWechseln('tab-logbuch')">📘 Logbuch</button>
+        <button class="tab-btn"           data-tab="tab-log"       onclick="tabWechseln('tab-log')">📋 Log</button>
         <button class="tab-btn"           data-tab="tab-statistik" onclick="tabWechseln('tab-statistik')">📊 Statistik</button>
     </nav>
 
@@ -261,13 +262,24 @@
                 <button type="button" class="btn-detail-eintrag" onclick="logModalOeffnen()">✏️ Detaillierter Eintrag</button>
             </div>
 
-            <div id="log-liste"></div>
-
         </div>
 
     </div><!-- /tab-logbuch -->
 
-    <!-- ═══ Tab 4: Statistik ═══════════════════════════════════════ -->
+    <!-- ═══ Tab 4: Log ═════════════════════════════════════════════ -->
+    <div id="tab-log" class="tab-panel tab-hidden">
+
+        <div class="tab-leer" id="tab-log-leer">
+            <p>⬆ Bitte zuerst einen Törn auswählen oder anlegen.</p>
+        </div>
+
+        <div id="tab-log-inhalt" hidden>
+            <div id="log-liste"></div>
+        </div>
+
+    </div><!-- /tab-log -->
+
+    <!-- ═══ Tab 5: Statistik ═══════════════════════════════════════ -->
     <div id="tab-statistik" class="tab-panel tab-hidden">
 
         <div class="tab-leer" id="tab-statistik-leer">
