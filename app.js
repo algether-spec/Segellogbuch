@@ -77,6 +77,14 @@ function isoZuDatum(iso) {
     return iso.slice(8, 10) + "." + iso.slice(5, 7) + "." + iso.slice(0, 4);
 }
 
+/* ev.weather → "3 Bft · 7.3 kn" oder "3 Bft" oder "" */
+function windText(w, trenner) {
+    if (!w || w.windForce === null || w.windForce === undefined) return "";
+    const bft = w.windForce + " Bft";
+    const kn  = w.windKnots != null ? w.windKnots + " kn" : "";
+    return kn ? bft + (trenner || " · ") + kn : bft;
+}
+
 /* ev.pos → "52.1234, 9.5678" oder "" */
 function posText(ev) {
     if (!ev.pos || ev.pos.lat == null || ev.pos.lon == null) return "";
@@ -132,8 +140,10 @@ async function wetterVonApi(lat, lon) {
         const data = await res.json();
         const c = data.current;
         if (!c) return null;
+        const ms = c.windspeed_10m ?? 0;
         return {
-            windForce:     msToBft(c.windspeed_10m ?? 0),
+            windForce:     msToBft(ms),
+            windKnots:     Math.round(ms * 1.94384 * 10) / 10,
             windDirection: gradZuRichtung(c.winddirection_10m ?? 0),
             description:   c.weathercode != null ? wettercodeZuText(c.weathercode) : ""
         };
@@ -461,7 +471,7 @@ function zeigeLogs() {
     } else {
         const zeilen = events.map(ev => {
             const w     = ev.weather;
-            const wind  = w && w.windForce !== null && w.windForce !== undefined ? w.windForce + " Bft" : "";
+            const wind  = windText(w);
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
             const info  = [zeit, ev.type, wind, ruder].filter(Boolean).join("  ·  ");
@@ -689,7 +699,7 @@ function toernAbschlussRendern(ab) {
                 <td>${iso.slice(11, 16)}</td>
                 <td>${ev.ort  || ""}</td>
                 <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
-                <td>${w && w.windForce !== null && w.windForce !== undefined ? w.windForce : ""}</td>
+                <td>${windText(w, " / ")}</td>
                 <td>${w ? w.windDirection || "" : ""}</td>
                 <td>${w ? w.description  || "" : ""}</td>
                 <td>${ev.note || ""}</td>
@@ -992,7 +1002,7 @@ function csvFeldEscapen(wert) {
 function csvExportieren() {
     if (!aktuellerToern) return;
     const t = aktuellerToern;
-    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind Bft;Wind Richtung;Wetter;Notiz;GPS";
+    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind Bft;Wind kn;Wind Richtung;Wetter;Notiz;GPS";
     const zeilen = (t.events || [])
         .slice()
         .sort((a, b) =>
@@ -1008,6 +1018,7 @@ function csvExportieren() {
                 ev.ort,
                 ev.rudergaenger ? ev.rudergaenger.name : "",
                 ev.weather ? (ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : "") : "",
+                ev.weather ? (ev.weather.windKnots != null ? ev.weather.windKnots : "") : "",
                 ev.weather ? ev.weather.windDirection : "",
                 ev.weather ? ev.weather.description : "",
                 ev.note,
