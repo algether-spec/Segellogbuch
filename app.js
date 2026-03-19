@@ -91,6 +91,13 @@ function posText(ev) {
     return ev.pos.lat.toFixed(4) + ", " + ev.pos.lon.toFixed(4);
 }
 
+/* Beaufort → Knoten (Untergrenze jeder Bft-Stufe in m/s × 1.94384) */
+const BFT_MS = [0, 0.3, 1.6, 3.4, 5.5, 8.0, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7];
+function bftZuKnoten(bft) {
+    const ms = BFT_MS[Math.max(0, Math.min(12, bft))] ?? 0;
+    return Math.round(ms * 1.94384 * 10) / 10;
+}
+
 /* m/s → Beaufort */
 function msToBft(ms) {
     if (ms <  0.3) return 0;
@@ -418,14 +425,32 @@ function crewHinzufuegen() {
 
 function formWetterVorbelegen() {
     if (!navigator.geolocation || !aktuellerToern) return;
+    const ladeEl = document.getElementById("wind-loading");
+    /* ⏳ Loading-State */
+    if (ladeEl) ladeEl.hidden = false;
+    logWind.value = "";
+    if (logWindDir) logWindDir.value = "";
+    logWind.disabled    = true;
+    if (logWindDir) logWindDir.disabled = true;
+
     navigator.geolocation.getCurrentPosition(
         async pos => {
+            /* GPS → API → Felder */
             const w = await wetterVonApi(pos.coords.latitude, pos.coords.longitude);
-            if (!w) return;
-            if (!logWind.value)              logWind.value    = String(w.windForce);
-            if (logWindDir && !logWindDir.value) logWindDir.value = w.windDirection;
+            if (w) {
+                logWind.value = String(w.windForce);
+                if (logWindDir) logWindDir.value = w.windDirection;
+            }
+            logWind.disabled    = false;
+            if (logWindDir) logWindDir.disabled = false;
+            if (ladeEl) ladeEl.hidden = true;
         },
-        () => {},
+        () => {
+            /* GPS verweigert – Felder freigeben */
+            logWind.disabled    = false;
+            if (logWindDir) logWindDir.disabled = false;
+            if (ladeEl) ladeEl.hidden = true;
+        },
         { maximumAge: 30000, timeout: 8000, enableHighAccuracy: false }
     );
 }
@@ -526,7 +551,7 @@ function logEintragSpeichern() {
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
         note:         logText.value.trim(),
-        weather:      windVal ? { windForce: Number(windVal), windDirection: windDirVal, description: "" } : null
+        weather:      windVal ? { windForce: Number(windVal), windKnots: bftZuKnoten(Number(windVal)), windDirection: windDirVal, description: "" } : null
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
@@ -1096,8 +1121,7 @@ function tabWechseln(tabId) {
         logZeitVorbefuellen();
         rudergaengerSelectFuellen();
         const letzte = ladeLetzteWerte() || {};
-        if (letzte.wind)         logWind.value         = letzte.wind || "";
-        if (letzte.rudergaenger) logRudergaenger.value  = letzte.rudergaenger || "";
+        if (letzte.rudergaenger) logRudergaenger.value = letzte.rudergaenger || "";
         logbuchStatusAktualisieren();
         formWetterVorbelegen();
     }
@@ -1139,10 +1163,7 @@ btnNeuerLog.onclick = () => {
     logZeitVorbefuellen();
     rudergaengerSelectFuellen();
     const letzte = ladeLetzteWerte() || {};
-    if (letzte.wind)         logWind.value         = letzte.wind || "";
-    if (letzte.rudergaenger) logRudergaenger.value  = letzte.rudergaenger || "";
-    logWind.value    = "";
-    if (logWindDir) logWindDir.value = "";
+    if (letzte.rudergaenger) logRudergaenger.value = letzte.rudergaenger || "";
     formWetterVorbelegen();
     logZeit.focus();
 };
