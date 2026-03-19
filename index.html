@@ -169,8 +169,6 @@
                 <div id="logbuch-status" class="logbuch-status" hidden>
                     <span id="ls-modus"></span>
                     <span id="ls-manoever-wrap" hidden><span class="ls-sep">·</span><span id="ls-manoever"></span></span>
-                    <span class="ls-sep">·</span>
-                    <select id="ls-ruder-select" class="ls-ruder-select" title="Rudergänger wechseln"></select>
                     <span id="ls-wind-wrap" hidden><span class="ls-sep">·</span><select id="ls-wind-select" class="ls-ruder-select" title="Wind ändern"></select></span>
                     <span id="ls-sog-wrap" hidden><span class="ls-sep">·</span><span id="ls-sog"></span></span>
                     <span class="ls-sep">·</span>
@@ -203,6 +201,12 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/></svg>
                         Motor
                     </button>
+                </div>
+
+                <!-- Rudergänger-Button (nur bei FAHRT) -->
+                <div id="ruder-bar" class="ruder-bar">
+                    <button type="button" id="btn-rudergaenger" class="btn-rudergaenger" onclick="ruderDropdownToggeln()">👤 —</button>
+                    <div id="ruder-dropdown" class="ruder-dropdown" hidden></div>
                 </div>
 
                 <!-- Manöver-Schnellbuttons (nur bei FAHRT) -->

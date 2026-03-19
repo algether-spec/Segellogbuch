@@ -255,10 +255,13 @@ function hafenSperrungAktualisieren(stopp) {
     if (stoppBar) stoppBar.hidden = istStopp;
 
     /* Zustand- und Manöver-Bereiche: nur bei FAHRT sichtbar */
-    const zustandBar  = document.getElementById("zustand-bar");
+    const zustandBar   = document.getElementById("zustand-bar");
+    const ruderBar     = document.getElementById("ruder-bar");
     const manoeverGrid = document.getElementById("manoever-grid");
     if (zustandBar)   zustandBar.hidden   = istStopp;
+    if (ruderBar)     ruderBar.hidden     = istStopp;
     if (manoeverGrid) manoeverGrid.hidden = istStopp;
+    if (istStopp) { const dd = document.getElementById("ruder-dropdown"); if (dd) dd.hidden = true; }
 
     /* btn-schnell-sm in Weitere-Panel + Formular-Speichern-Button */
     document.querySelectorAll(".btn-schnell-sm").forEach(btn => {
@@ -332,25 +335,11 @@ function logbuchStatusAktualisieren() {
         }
     }
 
-    /* Rudergänger aus letztem Eintrag mit Rudergänger */
-    const mitRuder = [...events].reverse().find(e => e.rudergaenger?.name);
-    const ruderSelect = document.getElementById("ls-ruder-select");
-    const aktRuder = mitRuder ? mitRuder.rudergaenger.name : "";
-    const crew     = (aktuellerToern.crew || []).map(p => p.name);
-    if (aktRuder && !crew.includes(aktRuder)) crew.unshift(aktRuder);
-    ruderSelect.innerHTML = "";
-    if (!aktRuder) {
-        const ph = document.createElement("option");
-        ph.value = ""; ph.textContent = "👤 —";
-        ruderSelect.appendChild(ph);
-    }
-    crew.forEach(name => {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = "👤 " + name;
-        if (name === aktRuder) opt.selected = true;
-        ruderSelect.appendChild(opt);
-    });
+    /* Rudergänger-Button aktualisieren */
+    const mitRuder  = [...events].reverse().find(e => e.rudergaenger?.name);
+    const aktRuder  = mitRuder ? mitRuder.rudergaenger.name : "";
+    const btnRuder  = document.getElementById("btn-rudergaenger");
+    if (btnRuder) btnRuder.textContent = aktRuder ? "👤 " + aktRuder : "👤 —";
 
     /* Wind aus letztem Eintrag mit Winddaten – Fallback auf last_values */
     const mitWind   = [...events].reverse().find(e =>
@@ -1244,8 +1233,7 @@ function schnellEintragSpeichern(typ) {
     const letzte    = ladeLetzteWerte() || {};
     const windSel   = document.getElementById("ls-wind-select");
     const wind      = (windSel && windSel.value !== "") ? windSel.value : (letzte.wind || "");
-    const ruderSel  = document.getElementById("ls-ruder-select");
-    const ruder     = (ruderSel && ruderSel.value) ? ruderSel.value : (letzte.rudergaenger || "");
+    const ruder     = letzte.rudergaenger || "";
     /* Lokale Zeit als ISO-String "2026-03-18T14:35" */
     const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
     const ev = {
@@ -1377,32 +1365,59 @@ toernSelect.onchange = () => {
     else { formSection.hidden = true; aktuellerToern = null; tabInhaltToggeln(); }
 };
 
-const _ruderSelectEl = document.getElementById("ls-ruder-select");
-if (_ruderSelectEl) _ruderSelectEl.addEventListener("change", function () {
-    const name = this.value;
+function ruderDropdownToggeln() {
+    const dd = document.getElementById("ruder-dropdown");
+    if (!dd) return;
+    if (!dd.hidden) { dd.hidden = true; return; }
+    const global = ladeCrew();
+    const toernN = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name) : [];
+    const alle   = [...new Set([...global, ...toernN])].filter(Boolean);
+    const mitRuder = [...(aktuellerToern?.events || [])].reverse().find(e => e.rudergaenger?.name);
+    const aktRuder = mitRuder?.rudergaenger.name || "";
+    dd.innerHTML = alle.length === 0
+        ? '<p class="ruder-dd-leer">Keine Crew eingetragen</p>'
+        : alle.map(name =>
+            `<button type="button" class="ruder-option${name === aktRuder ? " ruder-aktiv" : ""}"
+             onclick="rudergaengerWechseln('${name.replace(/'/g, "\\'")}')">👤 ${name}</button>`
+          ).join("");
+    dd.hidden = false;
+}
+
+function rudergaengerWechseln(name) {
+    const dd = document.getElementById("ruder-dropdown");
+    if (dd) dd.hidden = true;
     if (!name || !aktuellerToern) return;
-    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
     const letzte  = ladeLetzteWerte() || {};
+    speichereLetzteWerte(letzte.wind || "", name);
+    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
     const ev = {
         id:           generateId(),
         type:         "Ruderwechsel",
+        kategorie:    "Allgemein",
+        antrieb:      zustandErmitteln()?.zustand || "",
         zeit:         zeitIso,
         ort:          "",
         rudergaenger: { name },
         note:         "",
-        weather:      letzte.wind !== "" && letzte.wind !== undefined
+        weather:      letzte.wind
                         ? { windForce: msToBft(parseFloat(letzte.wind) / 1.94384), windKnots: parseFloat(letzte.wind), windDirection: "", description: "" }
                         : null
     };
     aktuellerToern.events.push(ev);
     gpsAbfragen(ev);
-    speichereLetzteWerte(letzte.wind || "", name);
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
     zeigeLogs();
     statusSetzen("👤 " + name + " am Ruder.", "ok", 2000);
-}); // end ls-ruder-select listener
+}
+
+/* Dropdown schließen bei Klick außerhalb */
+document.addEventListener("click", e => {
+    const bar = document.getElementById("ruder-bar");
+    const dd  = document.getElementById("ruder-dropdown");
+    if (dd && !dd.hidden && bar && !bar.contains(e.target)) dd.hidden = true;
+});
 
 const _windSelectEl = document.getElementById("ls-wind-select");
 if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
