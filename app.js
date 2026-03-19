@@ -614,6 +614,9 @@ function zeigeLogs() {
         logListe.querySelectorAll("[data-id]").forEach(btn => {
             btn.onclick = () => {
                 aktuellerToern.events = aktuellerToern.events.filter(e => e.id !== btn.dataset.id);
+                toernSpeichern(aktuellerToern);
+                autoBackupSpeichern();
+                backupStatusAktualisieren();
                 zeigeLogs();
             };
         });
