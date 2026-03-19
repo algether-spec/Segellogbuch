@@ -70,6 +70,18 @@ function evZeitIso(ev) {
     return ev.zeit || ((ev.date || "") + "T" + (ev.time || "00:00"));
 }
 
+/* ISO-Datum "2026-03-19" → "19.03.2026" */
+function isoZuDatum(iso) {
+    if (!iso || iso.length < 10) return iso || "";
+    return iso.slice(8, 10) + "." + iso.slice(5, 7) + "." + iso.slice(0, 4);
+}
+
+/* ev.pos → "52.1234, 9.5678" oder "" */
+function posText(ev) {
+    if (!ev.pos || ev.pos.lat == null || ev.pos.lon == null) return "";
+    return ev.pos.lat.toFixed(4) + ", " + ev.pos.lon.toFixed(4);
+}
+
 const MODUS_MAP = {
     "Ankern":   "⚓ Vor Anker",
     "Anlegen":  "🏁 Im Hafen",
@@ -596,9 +608,10 @@ function toernAbschlussRendern(ab) {
         ? ab.events.map(ev => {
             const w   = ev.weather;
             const iso = evZeitIso(ev);
+            const pos = posText(ev);
             return `<tr>
                 <td>${ev.type || ""}</td>
-                <td>${iso.slice(0, 10)}</td>
+                <td>${isoZuDatum(iso.slice(0, 10))}</td>
                 <td>${iso.slice(11, 16)}</td>
                 <td>${ev.ort  || ""}</td>
                 <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
@@ -606,9 +619,10 @@ function toernAbschlussRendern(ab) {
                 <td>${w ? w.windDirection || "" : ""}</td>
                 <td>${w ? w.description  || "" : ""}</td>
                 <td>${ev.note || ""}</td>
+                <td>${pos}</td>
             </tr>`;
         }).join("")
-        : `<tr><td colspan="9" class="ab-leer">Keine Ereignisse</td></tr>`;
+        : `<tr><td colspan="10" class="ab-leer">Keine Ereignisse</td></tr>`;
 
     const zeiten = [
         ["Unter Segel", ab.stat.unterSegel],
@@ -648,7 +662,7 @@ function toernAbschlussRendern(ab) {
                 <table class="ab-tabelle">
                     <thead><tr>
                         <th>Typ</th><th>Datum</th><th>Zeit</th><th>Ort</th>
-                        <th>Rudergänger</th><th>Bft</th><th>Richtung</th><th>Wetter</th><th>Notiz</th>
+                        <th>Rudergänger</th><th>Bft</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
                     </tr></thead>
                     <tbody>${eventZeilen}</tbody>
                 </table>
@@ -676,9 +690,10 @@ function abschlussdrucken() {
     const eventZeilen = ab.events.map(ev => {
         const w   = ev.weather;
         const iso = evZeitIso(ev);
+        const pos = posText(ev);
         return `<tr>
             <td>${ev.type || ""}</td>
-            <td>${iso.slice(0, 10)}</td>
+            <td>${isoZuDatum(iso.slice(0, 10))}</td>
             <td>${iso.slice(11, 16)}</td>
             <td>${ev.ort  || ""}</td>
             <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
@@ -686,8 +701,9 @@ function abschlussdrucken() {
             <td>${w ? w.windDirection || "" : ""}</td>
             <td>${w ? w.description  || "" : ""}</td>
             <td>${ev.note || ""}</td>
+            <td>${pos}</td>
         </tr>`;
-    }).join("") || `<tr><td colspan="9" style="text-align:center;color:#666;font-style:italic;padding:6mm">Keine Ereignisse</td></tr>`;
+    }).join("") || `<tr><td colspan="10" style="text-align:center;color:#666;font-style:italic;padding:6mm">Keine Ereignisse</td></tr>`;
 
     abschlussDruckBereich.innerHTML = `
         <div class="adp-header">
@@ -703,7 +719,7 @@ function abschlussdrucken() {
         <table class="adp-tabelle">
             <thead><tr>
                 <th>Typ</th><th>Datum</th><th>Zeit</th><th>Ort</th>
-                <th>Rudergänger</th><th>Bft</th><th>Richtung</th><th>Wetter</th><th>Notiz</th>
+                <th>Rudergänger</th><th>Bft</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
             </tr></thead>
             <tbody>${eventZeilen}</tbody>
         </table>
@@ -838,9 +854,10 @@ function druckenVorbereiten() {
     const zeilen = events.map(ev => {
         const w   = ev.weather;
         const iso = evZeitIso(ev);
+        const pos = posText(ev);
         return `<tr>
             <td>${ev.type || ""}</td>
-            <td>${iso.slice(0, 10)}</td>
+            <td>${isoZuDatum(iso.slice(0, 10))}</td>
             <td>${iso.slice(11, 16)}</td>
             <td>${ev.ort || ""}</td>
             <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
@@ -848,11 +865,12 @@ function druckenVorbereiten() {
             <td>${w ? w.windDirection || "" : ""}</td>
             <td>${w ? w.description || "" : ""}</td>
             <td>${ev.note || ""}</td>
+            <td>${pos}</td>
         </tr>`;
     }).join("");
 
     const leer = events.length === 0
-        ? '<tr><td colspan="9" class="dp-leer">Keine Ereignisse vorhanden.</td></tr>'
+        ? '<tr><td colspan="10" class="dp-leer">Keine Ereignisse vorhanden.</td></tr>'
         : zeilen;
 
     document.getElementById("druck-bereich").innerHTML = `
@@ -876,6 +894,7 @@ function druckenVorbereiten() {
                     <th>Windrichtung</th>
                     <th>Wetter</th>
                     <th>Notiz</th>
+                    <th>GPS</th>
                 </tr>
             </thead>
             <tbody>${leer}</tbody>
@@ -899,7 +918,7 @@ function csvFeldEscapen(wert) {
 function csvExportieren() {
     if (!aktuellerToern) return;
     const t = aktuellerToern;
-    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind Bft;Wind Richtung;Wetter;Notiz";
+    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind Bft;Wind Richtung;Wetter;Notiz;GPS";
     const zeilen = (t.events || [])
         .slice()
         .sort((a, b) =>
@@ -909,7 +928,7 @@ function csvExportieren() {
             const iso = evZeitIso(ev);
             return [
                 t.tripName,
-                iso.slice(0, 10),
+                isoZuDatum(iso.slice(0, 10)),
                 iso.slice(11, 16),
                 ev.type,
                 ev.ort,
@@ -917,7 +936,8 @@ function csvExportieren() {
                 ev.weather ? (ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : "") : "",
                 ev.weather ? ev.weather.windDirection : "",
                 ev.weather ? ev.weather.description : "",
-                ev.note
+                ev.note,
+                posText(ev)
             ].map(csvFeldEscapen).join(";");
         });
 
