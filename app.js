@@ -285,6 +285,19 @@ function logbuchStatusAktualisieren() {
         }
     }
 
+    /* SOG aus letztem Eintrag mit Position und Geschwindigkeit */
+    const mitSog   = [...events].reverse().find(e => e.pos?.sog != null && e.pos.sog > 0);
+    const sogWrap  = document.getElementById("ls-sog-wrap");
+    const sogEl    = document.getElementById("ls-sog");
+    if (sogWrap && sogEl) {
+        if (mitSog) {
+            sogEl.textContent = "🚀 " + mitSog.pos.sog + " kn SOG";
+            sogWrap.hidden = false;
+        } else {
+            sogWrap.hidden = true;
+        }
+    }
+
     el.hidden = false;
     zustandAktualisieren();
 }
@@ -502,9 +515,10 @@ function zeigeLogs() {
         const zeilen = events.map(ev => {
             const w     = ev.weather;
             const wind  = windText(w);
+            const sog   = ev.pos?.sog != null && ev.pos.sog > 0 ? ev.pos.sog + " kn SOG" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
-            const info  = [zeit, ev.type, wind, ruder].filter(Boolean).join("  ·  ");
+            const info  = [zeit, ev.type, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
             if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
@@ -734,9 +748,10 @@ function toernAbschlussRendern(ab) {
                 <td>${w ? w.description  || "" : ""}</td>
                 <td>${ev.note || ""}</td>
                 <td>${pos}</td>
+                <td>${ev.pos?.sog != null && ev.pos.sog > 0 ? ev.pos.sog : ""}</td>
             </tr>`;
         }).join("")
-        : `<tr><td colspan="10" class="ab-leer">Keine Ereignisse</td></tr>`;
+        : `<tr><td colspan="11" class="ab-leer">Keine Ereignisse</td></tr>`;
 
     const zeiten = [
         ["Unter Segel", ab.stat.unterSegel],
@@ -776,7 +791,7 @@ function toernAbschlussRendern(ab) {
                 <table class="ab-tabelle">
                     <thead><tr>
                         <th>Typ</th><th>Datum</th><th>Zeit</th><th>Ort</th>
-                        <th>Rudergänger</th><th>Wind kn</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
+                        <th>Rudergänger</th><th>Wind kn</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th><th>SOG kn</th>
                     </tr></thead>
                     <tbody>${eventZeilen}</tbody>
                 </table>
@@ -817,7 +832,7 @@ function abschlussdrucken() {
             <td>${ev.note || ""}</td>
             <td>${pos}</td>
         </tr>`;
-    }).join("") || `<tr><td colspan="10" style="text-align:center;color:#666;font-style:italic;padding:6mm">Keine Ereignisse</td></tr>`;
+    }).join("") || `<tr><td colspan="11" style="text-align:center;color:#666;font-style:italic;padding:6mm">Keine Ereignisse</td></tr>`;
 
     abschlussDruckBereich.innerHTML = `
         <div class="adp-header">
@@ -833,7 +848,7 @@ function abschlussdrucken() {
         <table class="adp-tabelle">
             <thead><tr>
                 <th>Typ</th><th>Datum</th><th>Zeit</th><th>Ort</th>
-                <th>Rudergänger</th><th>Wind kn</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
+                <th>Rudergänger</th><th>Wind kn</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th><th>SOG kn</th>
             </tr></thead>
             <tbody>${eventZeilen}</tbody>
         </table>
@@ -984,7 +999,7 @@ function druckenVorbereiten() {
     }).join("");
 
     const leer = events.length === 0
-        ? '<tr><td colspan="10" class="dp-leer">Keine Ereignisse vorhanden.</td></tr>'
+        ? '<tr><td colspan="11" class="dp-leer">Keine Ereignisse vorhanden.</td></tr>'
         : zeilen;
 
     document.getElementById("druck-bereich").innerHTML = `
@@ -1009,6 +1024,7 @@ function druckenVorbereiten() {
                     <th>Wetter</th>
                     <th>Notiz</th>
                     <th>GPS</th>
+                    <th>SOG kn</th>
                 </tr>
             </thead>
             <tbody>${leer}</tbody>
@@ -1032,7 +1048,7 @@ function csvFeldEscapen(wert) {
 function csvExportieren() {
     if (!aktuellerToern) return;
     const t = aktuellerToern;
-    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind kn;Wind Bft;Wind Richtung;Wetter;Notiz;GPS";
+    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind kn;Wind Bft;Wind Richtung;Wetter;Notiz;GPS;SOG kn";
     const zeilen = (t.events || [])
         .slice()
         .sort((a, b) =>
@@ -1052,7 +1068,8 @@ function csvExportieren() {
                 ev.weather ? ev.weather.windDirection : "",
                 ev.weather ? ev.weather.description : "",
                 ev.note,
-                posText(ev)
+                posText(ev),
+                ev.pos?.sog != null && ev.pos.sog > 0 ? ev.pos.sog : ""
             ].map(csvFeldEscapen).join(";");
         });
 
