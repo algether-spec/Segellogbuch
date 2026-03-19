@@ -223,6 +223,7 @@ function stoppZustandLaden() {
 
 function stoppZustandSpeichern(val) {
     localStorage.setItem("segel_logbuch_stopp", val);
+    if (aktuellerToern) aktuellerToern.stoppZustand = val;
 }
 
 function hafenSperrungAktualisieren(stopp) {
@@ -1023,6 +1024,8 @@ function toernLaden(tripId) {
     btnToernLoeschen.hidden = false;
     formularFuellen(aktuellerToern);
     toernSelectAktualisieren();
+    stoppZustandSpeichern(toern.stoppZustand || "hafen");
+    hafenSperrungAktualisieren(toern.stoppZustand || "hafen");
 }
 
 function neuerToernAnlegen() {
@@ -1031,6 +1034,8 @@ function neuerToernAnlegen() {
     formSection.hidden = false;
     btnToernLoeschen.hidden = true;
     toernSelect.value = "";
+    stoppZustandSpeichern("hafen");
+    hafenSperrungAktualisieren("hafen");
     fldTripName.focus();
     statusSetzen("Neuer Törn angelegt.", "ok");
 }

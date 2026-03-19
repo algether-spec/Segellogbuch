@@ -74,6 +74,7 @@ function neuerToern() {
             clouds: ""
         },
         notes: "",
+        stoppZustand: "hafen",
         events: [],
         track: {
             enabled: false,
