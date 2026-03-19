@@ -41,6 +41,7 @@ const abschlussDruckBereich = document.getElementById("abschluss-druck-bereich")
 const logZeit         = document.getElementById("log_zeit");
 const logTyp          = document.getElementById("log_typ");
 const logWind         = document.getElementById("log_wind");
+const logWindDir      = document.getElementById("log_wind_dir");
 const logRudergaenger = document.getElementById("rudergaenger");
 const logText         = document.getElementById("log_text");
 const logListe        = document.getElementById("log-liste");
@@ -80,6 +81,49 @@ function isoZuDatum(iso) {
 function posText(ev) {
     if (!ev.pos || ev.pos.lat == null || ev.pos.lon == null) return "";
     return ev.pos.lat.toFixed(4) + ", " + ev.pos.lon.toFixed(4);
+}
+
+/* m/s → Beaufort */
+function msToBft(ms) {
+    if (ms <  0.3) return 0;
+    if (ms <  1.6) return 1;
+    if (ms <  3.4) return 2;
+    if (ms <  5.5) return 3;
+    if (ms <  8.0) return 4;
+    if (ms < 10.8) return 5;
+    if (ms < 13.9) return 6;
+    if (ms < 17.2) return 7;
+    if (ms < 20.8) return 8;
+    if (ms < 24.5) return 9;
+    if (ms < 28.5) return 10;
+    if (ms < 32.7) return 11;
+    return 12;
+}
+
+/* Grad → Himmelsrichtung */
+function gradZuRichtung(deg) {
+    const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return dirs[Math.round(((deg % 360) + 360) % 360 / 45) % 8];
+}
+
+/* Open-Meteo API → { windForce, windDirection, description } oder null */
+async function wetterVonApi(lat, lon) {
+    try {
+        const url = "https://api.open-meteo.com/v1/forecast"
+            + "?latitude=" + lat + "&longitude=" + lon
+            + "&current=windspeed_10m,winddirection_10m"
+            + "&windspeed_unit=ms";
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const c = data.current;
+        if (!c) return null;
+        return {
+            windForce:     msToBft(c.windspeed_10m ?? 0),
+            windDirection: gradZuRichtung(c.winddirection_10m ?? 0),
+            description:   ""
+        };
+    } catch { return null; }
 }
 
 const MODUS_MAP = {
@@ -348,6 +392,20 @@ function crewHinzufuegen() {
 
 /* --- Ereignisse ------------------------------------------------- */
 
+function formWetterVorbelegen() {
+    if (!navigator.geolocation || !aktuellerToern) return;
+    navigator.geolocation.getCurrentPosition(
+        async pos => {
+            const w = await wetterVonApi(pos.coords.latitude, pos.coords.longitude);
+            if (!w) return;
+            if (!logWind.value)              logWind.value    = String(w.windForce);
+            if (logWindDir && !logWindDir.value) logWindDir.value = w.windDirection;
+        },
+        () => {},
+        { maximumAge: 30000, timeout: 8000, enableHighAccuracy: false }
+    );
+}
+
 function logZeitVorbefuellen() {
     const now = new Date();
     const pad = n => String(n).padStart(2, "0");
@@ -435,7 +493,8 @@ function logEintragSpeichern() {
         logZeit.focus();
         return;
     }
-    const windVal = logWind.value;
+    const windVal    = logWind.value;
+    const windDirVal = logWindDir ? logWindDir.value : "";
     const ev = {
         id:           generateId(),
         type:         logTyp.value,
@@ -443,7 +502,7 @@ function logEintragSpeichern() {
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
         note:         logText.value.trim(),
-        weather:      windVal ? { windForce: Number(windVal), windDirection: "", description: "" } : null
+        weather:      windVal ? { windForce: Number(windVal), windDirection: windDirVal, description: "" } : null
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
@@ -456,6 +515,7 @@ function logEintragSpeichern() {
     logText.value         = "";
     logRudergaenger.value = "";
     logWind.value         = "";
+    if (logWindDir) logWindDir.value = "";
     statusSetzen("Eintrag gespeichert.", "ok");
 }
 
@@ -1014,6 +1074,7 @@ function tabWechseln(tabId) {
         if (letzte.wind)         logWind.value         = letzte.wind || "";
         if (letzte.rudergaenger) logRudergaenger.value  = letzte.rudergaenger || "";
         logbuchStatusAktualisieren();
+        formWetterVorbelegen();
     }
 }
 
@@ -1055,6 +1116,9 @@ btnNeuerLog.onclick = () => {
     const letzte = ladeLetzteWerte() || {};
     if (letzte.wind)         logWind.value         = letzte.wind || "";
     if (letzte.rudergaenger) logRudergaenger.value  = letzte.rudergaenger || "";
+    logWind.value    = "";
+    if (logWindDir) logWindDir.value = "";
+    formWetterVorbelegen();
     logZeit.focus();
 };
 
@@ -1130,13 +1194,18 @@ if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
 function gpsAbfragen(ev) {
     if (!navigator.geolocation || !aktuellerToern) return;
     navigator.geolocation.getCurrentPosition(
-        pos => {
+        async pos => {
             const speedMs = pos.coords.speed;
             ev.pos = {
                 lat: parseFloat(pos.coords.latitude.toFixed(5)),
                 lon: parseFloat(pos.coords.longitude.toFixed(5)),
                 sog: speedMs != null ? parseFloat((speedMs * 1.94384).toFixed(1)) : null
             };
+            /* Wetter automatisch laden – nur wenn noch kein Wetter gesetzt */
+            if (!ev.weather) {
+                const w = await wetterVonApi(ev.pos.lat, ev.pos.lon);
+                if (w) ev.weather = w;
+            }
             toernSpeichern(aktuellerToern);
             zeigeLogs();
         },
