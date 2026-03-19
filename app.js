@@ -667,6 +667,9 @@ function logEintragSpeichern() {
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+    if (STOPP_EREIGNISSE[ev.type]) stoppZustandSpeichern(STOPP_EREIGNISSE[ev.type]);
+    else if (START_EREIGNISSE.has(ev.type)) stoppZustandSpeichern("fahrt");
+    hafenSperrungAktualisieren(stoppZustandLaden());
     gpsAbfragen(ev);
     speichereLetzteWerte(!isNaN(windKn) ? String(windKn) : "", logRudergaenger.value);
     toernSpeichern(aktuellerToern);
