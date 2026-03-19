@@ -635,12 +635,12 @@ function logModalOeffnen() {
     if (letzte.rudergaenger) logRudergaenger.value = letzte.rudergaenger;
     if (stoppZustandLaden() === "fahrt") formWetterVorbelegen();
     const overlay = document.getElementById("log-modal-overlay");
-    if (overlay) overlay.hidden = false;
+    if (overlay) overlay.style.display = "flex";
 }
 
 function logModalSchliessen() {
     const overlay = document.getElementById("log-modal-overlay");
-    if (overlay) overlay.hidden = true;
+    if (overlay) overlay.style.display = "none";
 }
 
 function logEintragSpeichern() {
