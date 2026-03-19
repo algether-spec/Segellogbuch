@@ -311,13 +311,17 @@ function logbuchStatusAktualisieren() {
     document.getElementById("ls-modus").textContent = modusText;
     document.getElementById("ls-seit").textContent  = "seit " + (seitIso.slice(11, 16) || "—");
 
-    /* Letztes Manöver – Zustandswechsel ausschließen, nur echte Manöver */
+    /* Letztes Manöver – nur echte Manöver NACH dem letzten Zustandswechsel */
     const KEIN_MANOEVER = new Set([
         "Motor an", "Segeln", "Abfahrt",
         "Ablegen", "Anlegen", "Ankern", "Anker lichten",
         "An Boje", "Von Boje"
     ]);
-    const letztesManoever = [...events].reverse().find(e => !KEIN_MANOEVER.has(e.type));
+    const letzterZustand = zustandResult ? evZeitIso(zustandResult.event) : "";
+    const letztesManoever = [...events].reverse().find(e =>
+        !KEIN_MANOEVER.has(e.type) &&
+        (!letzterZustand || evZeitIso(e) > letzterZustand)
+    );
     const manoeverWrap = document.getElementById("ls-manoever-wrap");
     if (manoeverWrap) {
         if (letztesManoever) {
