@@ -166,11 +166,12 @@ function logbuchStatusAktualisieren() {
         ruderSelect.appendChild(opt);
     });
 
-    /* Wind aus letztem Eintrag mit Winddaten */
+    /* Wind aus letztem Eintrag mit Winddaten – Fallback auf last_values */
     const mitWind   = [...events].reverse().find(e =>
         e.weather?.windForce !== undefined && e.weather?.windForce !== null && e.weather?.windForce !== ""
     );
-    const windWert  = mitWind ? String(mitWind.weather.windForce) : "";
+    const lv        = ladeLetzteWerte() || {};
+    const windWert  = mitWind ? String(mitWind.weather.windForce) : (lv.wind || "");
     const windSelect = document.getElementById("ls-wind-select");
     const windWrap  = document.getElementById("ls-wind-wrap");
     if (windSelect) {
@@ -188,7 +189,6 @@ function logbuchStatusAktualisieren() {
         if (windWrap) windWrap.hidden = false;
         /* last_values mit aktuellem Wind synchronisieren */
         if (windWert !== "") {
-            const lv = ladeLetzteWerte() || {};
             speichereLetzteWerte(windWert, lv.rudergaenger || "");
         }
     }
@@ -1118,6 +1118,7 @@ function gpsAbfragen(ev) {
                 sog: speedMs != null ? parseFloat((speedMs * 1.94384).toFixed(1)) : null
             };
             toernSpeichern(aktuellerToern);
+            zeigeLogs();
         },
         () => { /* kein GPS verfügbar oder verweigert – ignorieren */ },
         { maximumAge: 30000, timeout: 8000, enableHighAccuracy: false }
