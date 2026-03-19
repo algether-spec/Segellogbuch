@@ -286,12 +286,12 @@ function logbuchStatusAktualisieren() {
     }
 
     /* SOG aus letztem Eintrag mit Position und Geschwindigkeit */
-    const mitSog   = [...events].reverse().find(e => e.pos?.sog != null && e.pos.sog > 0);
+    const mitSog   = [...events].reverse().find(e => e.pos != null);
     const sogWrap  = document.getElementById("ls-sog-wrap");
     const sogEl    = document.getElementById("ls-sog");
     if (sogWrap && sogEl) {
         if (mitSog) {
-            sogEl.textContent = "🚀 " + mitSog.pos.sog + " kn SOG";
+            sogEl.textContent = "🚀 " + (mitSog.pos.sog ?? 0) + " kn SOG";
             sogWrap.hidden = false;
         } else {
             sogWrap.hidden = true;
@@ -515,7 +515,7 @@ function zeigeLogs() {
         const zeilen = events.map(ev => {
             const w     = ev.weather;
             const wind  = windText(w);
-            const sog   = ev.pos?.sog != null && ev.pos.sog > 0 ? ev.pos.sog + " kn SOG" : "";
+            const sog   = ev.pos != null ? (ev.pos.sog ?? 0) + " kn SOG" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
             const info  = [zeit, ev.type, wind, sog, ruder].filter(Boolean).join("  ·  ");
@@ -748,7 +748,7 @@ function toernAbschlussRendern(ab) {
                 <td>${w ? w.description  || "" : ""}</td>
                 <td>${ev.note || ""}</td>
                 <td>${pos}</td>
-                <td>${ev.pos?.sog != null && ev.pos.sog > 0 ? ev.pos.sog : ""}</td>
+                <td>${ev.pos != null ? (ev.pos.sog ?? 0) : ""}</td>
             </tr>`;
         }).join("")
         : `<tr><td colspan="11" class="ab-leer">Keine Ereignisse</td></tr>`;
@@ -1069,7 +1069,7 @@ function csvExportieren() {
                 ev.weather ? ev.weather.description : "",
                 ev.note,
                 posText(ev),
-                ev.pos?.sog != null && ev.pos.sog > 0 ? ev.pos.sog : ""
+                ev.pos != null ? (ev.pos.sog ?? 0) : ""
             ].map(csvFeldEscapen).join(";");
         });
 
