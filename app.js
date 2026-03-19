@@ -173,7 +173,7 @@ const KATEGORIE_MAP = {
     "Wende": "Segeln", "Halse": "Segeln", "Reffen": "Segeln",
     "Segel setzen": "Segeln", "Segel bergen": "Segeln",
     "Aufschießer": "Segeln", "Beidrehen": "Segeln", "Segeln": "Segeln",
-    "Ablegen": "Motor", "Anlegen": "Motor", "Motor an": "Motor",
+    "Ablegen": "Motor", "Anlegen": "Motor", "Motor an": "Motor", "Motor aus": "Motor",
     "Drehen Motor": "Motor", "Box-Manöver": "Motor", "Mooring": "Motor",
     "Ankern": "Anker", "Anker lichten": "Anker",
     "An Boje": "Boje", "Von Boje": "Boje",
@@ -611,7 +611,7 @@ function zeigeLogs() {
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
             const kat   = ev.kategorie || kategorieFuerTyp(ev.type);
-            const info  = [zeit, ev.type, kat, wind, sog, ruder].filter(Boolean).join("  ·  ");
+            const info  = [zeit, kat, ev.type, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
             if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
@@ -1042,6 +1042,10 @@ function toernLaden(tripId) {
     const toern = alle.find(t => t.tripId === tripId);
     if (!toern) return;
     aktuellerToern = toern;
+    /* Bestehende Einträge ohne Kategorie nachrüsten */
+    (aktuellerToern.events || []).forEach(ev => {
+        if (!ev.kategorie) ev.kategorie = kategorieFuerTyp(ev.type);
+    });
     formSection.hidden = false;
     btnToernLoeschen.hidden = false;
     formularFuellen(aktuellerToern);
