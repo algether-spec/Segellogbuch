@@ -201,12 +201,33 @@ function zustandSetzen(zustand) {
     schnellEintragSpeichern(zustand === "motor" ? "Motor an" : "Segeln");
 }
 
+/* --- Im-Hafen-Zustand ------------------------------------------- */
+
+function imHafenLaden() {
+    return localStorage.getItem("segel_logbuch_im_hafen") === "true";
+}
+
+function imHafenSpeichern(val) {
+    localStorage.setItem("segel_logbuch_im_hafen", val ? "true" : "false");
+}
+
+function hafenSperrungAktualisieren(imHafen) {
+    /* Alle Manöver- und Zustandsbuttons sperren/freigeben */
+    document.querySelectorAll(".btn-schnell-card, .btn-schnell-sm, .btn-zustand").forEach(btn => {
+        btn.disabled = imHafen;
+    });
+    /* Statusleiste: Modus-Text überschreiben */
+    const modus = document.getElementById("ls-modus");
+    if (imHafen && modus) modus.textContent = "🏁 Im Hafen";
+}
+
 function logbuchStatusAktualisieren() {
     const el = document.getElementById("logbuch-status");
     if (!el) return;
     if (!aktuellerToern || !(aktuellerToern.events || []).length) {
         el.hidden = true;
         zustandAktualisieren();
+        hafenSperrungAktualisieren(imHafenLaden());
         return;
     }
     const events = aktuellerToern.events.slice().sort((a, b) =>
@@ -307,6 +328,7 @@ function logbuchStatusAktualisieren() {
 
     el.hidden = false;
     zustandAktualisieren();
+    hafenSperrungAktualisieren(imHafenLaden());
 }
 
 function statusSetzen(text, typ = "ok", ms = 3000) {
@@ -1129,6 +1151,13 @@ function schnellEintragSpeichern(typ) {
     autoBackupSpeichern();
     backupStatusAktualisieren();
     zeigeLogs();
+    /* Im-Hafen-Zustand setzen/löschen */
+    if (typ === "Anlegen") {
+        imHafenSpeichern(true);
+    } else if (typ === "Ablegen") {
+        imHafenSpeichern(false);
+    }
+
     if (typ === "MOB") {
         statusSetzen("🆘 MOB – Mann über Bord! Zeit: " + ev.zeit.slice(11, 16), "error", 10000);
     } else {
@@ -1432,6 +1461,7 @@ formSection.hidden = true;
 btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
 tabInhaltToggeln();
+hafenSperrungAktualisieren(imHafenLaden());
 backupBannerPruefen();
 backupStatusAktualisieren();
 pwaMigrationPruefen();
