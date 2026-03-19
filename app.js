@@ -77,12 +77,12 @@ function isoZuDatum(iso) {
     return iso.slice(8, 10) + "." + iso.slice(5, 7) + "." + iso.slice(0, 4);
 }
 
-/* ev.weather → "3 Bft · 7.3 kn" oder "3 Bft" oder "" */
-function windText(w, trenner) {
-    if (!w || w.windForce === null || w.windForce === undefined) return "";
-    const bft = w.windForce + " Bft";
-    const kn  = w.windKnots != null ? w.windKnots + " kn" : "";
-    return kn ? bft + (trenner || " · ") + kn : bft;
+/* ev.weather → "7.3 kn" oder Fallback "3 Bft" oder "" */
+function windText(w) {
+    if (!w) return "";
+    if (w.windKnots != null)                              return w.windKnots + " kn";
+    if (w.windForce !== null && w.windForce !== undefined) return w.windForce + " Bft";
+    return "";
 }
 
 /* ev.pos → "52.1234, 9.5678" oder "" */
@@ -255,10 +255,14 @@ function logbuchStatusAktualisieren() {
 
     /* Wind aus letztem Eintrag mit Winddaten – Fallback auf last_values */
     const mitWind   = [...events].reverse().find(e =>
-        e.weather?.windForce !== undefined && e.weather?.windForce !== null && e.weather?.windForce !== ""
+        e.weather?.windKnots != null || (e.weather?.windForce !== undefined && e.weather?.windForce !== null)
     );
     const lv        = ladeLetzteWerte() || {};
-    const windWert  = mitWind ? String(mitWind.weather.windForce) : (lv.wind || "");
+    const windWert  = mitWind
+        ? (mitWind.weather.windKnots != null
+            ? String(mitWind.weather.windKnots)
+            : String(bftZuKnoten(mitWind.weather.windForce)))
+        : (lv.wind || "");
     const windSelect = document.getElementById("ls-wind-select");
     const windWrap  = document.getElementById("ls-wind-wrap");
     if (windSelect) {
@@ -267,14 +271,15 @@ function logbuchStatusAktualisieren() {
         emptyOpt.value = ""; emptyOpt.textContent = "💨 —";
         windSelect.appendChild(emptyOpt);
         for (let i = 0; i <= 12; i++) {
+            const kn = bftZuKnoten(i);
             const opt = document.createElement("option");
-            opt.value = String(i);
-            opt.textContent = "💨 " + i + " Bft";
-            if (String(i) === windWert) opt.selected = true;
+            opt.value = String(kn);
+            opt.textContent = "💨 " + kn + " kn";
+            if (String(kn) === windWert) opt.selected = true;
             windSelect.appendChild(opt);
         }
         if (windWrap) windWrap.hidden = false;
-        /* last_values mit aktuellem Wind synchronisieren */
+        /* last_values mit aktuellem Wind (kn) synchronisieren */
         if (windWert !== "") {
             speichereLetzteWerte(windWert, lv.rudergaenger || "");
         }
@@ -438,7 +443,7 @@ function formWetterVorbelegen() {
             /* GPS → API → Felder */
             const w = await wetterVonApi(pos.coords.latitude, pos.coords.longitude);
             if (w) {
-                logWind.value = String(w.windForce);
+                logWind.value = String(w.windKnots);
                 if (logWindDir) logWindDir.value = w.windDirection;
             }
             logWind.disabled    = false;
@@ -542,7 +547,7 @@ function logEintragSpeichern() {
         logZeit.focus();
         return;
     }
-    const windVal    = logWind.value;
+    const windKn     = logWind.value !== "" ? parseFloat(logWind.value) : NaN;
     const windDirVal = logWindDir ? logWindDir.value : "";
     const ev = {
         id:           generateId(),
@@ -551,12 +556,12 @@ function logEintragSpeichern() {
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
         note:         logText.value.trim(),
-        weather:      windVal ? { windForce: Number(windVal), windKnots: bftZuKnoten(Number(windVal)), windDirection: windDirVal, description: "" } : null
+        weather:      !isNaN(windKn) ? { windForce: msToBft(windKn / 1.94384), windKnots: windKn, windDirection: windDirVal, description: "" } : null
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
     gpsAbfragen(ev);
-    speichereLetzteWerte(logWind.value, logRudergaenger.value);
+    speichereLetzteWerte(!isNaN(windKn) ? String(windKn) : "", logRudergaenger.value);
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
@@ -724,7 +729,7 @@ function toernAbschlussRendern(ab) {
                 <td>${iso.slice(11, 16)}</td>
                 <td>${ev.ort  || ""}</td>
                 <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
-                <td>${windText(w, " / ")}</td>
+                <td>${windText(w)}</td>
                 <td>${w ? w.windDirection || "" : ""}</td>
                 <td>${w ? w.description  || "" : ""}</td>
                 <td>${ev.note || ""}</td>
@@ -771,7 +776,7 @@ function toernAbschlussRendern(ab) {
                 <table class="ab-tabelle">
                     <thead><tr>
                         <th>Typ</th><th>Datum</th><th>Zeit</th><th>Ort</th>
-                        <th>Rudergänger</th><th>Bft</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
+                        <th>Rudergänger</th><th>Wind kn</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
                     </tr></thead>
                     <tbody>${eventZeilen}</tbody>
                 </table>
@@ -806,7 +811,7 @@ function abschlussdrucken() {
             <td>${iso.slice(11, 16)}</td>
             <td>${ev.ort  || ""}</td>
             <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
-            <td>${w && w.windForce !== null && w.windForce !== undefined ? w.windForce : ""}</td>
+            <td>${windText(w)}</td>
             <td>${w ? w.windDirection || "" : ""}</td>
             <td>${w ? w.description  || "" : ""}</td>
             <td>${ev.note || ""}</td>
@@ -828,7 +833,7 @@ function abschlussdrucken() {
         <table class="adp-tabelle">
             <thead><tr>
                 <th>Typ</th><th>Datum</th><th>Zeit</th><th>Ort</th>
-                <th>Rudergänger</th><th>Bft</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
+                <th>Rudergänger</th><th>Wind kn</th><th>Richtung</th><th>Wetter</th><th>Notiz</th><th>GPS</th>
             </tr></thead>
             <tbody>${eventZeilen}</tbody>
         </table>
@@ -970,7 +975,7 @@ function druckenVorbereiten() {
             <td>${iso.slice(11, 16)}</td>
             <td>${ev.ort || ""}</td>
             <td>${ev.rudergaenger ? ev.rudergaenger.name : ""}</td>
-            <td>${w && w.windForce !== null && w.windForce !== undefined ? w.windForce : ""}</td>
+            <td>${windText(w)}</td>
             <td>${w ? w.windDirection || "" : ""}</td>
             <td>${w ? w.description || "" : ""}</td>
             <td>${ev.note || ""}</td>
@@ -999,7 +1004,7 @@ function druckenVorbereiten() {
                     <th>Zeit</th>
                     <th>Ort</th>
                     <th>Rudergänger</th>
-                    <th>Wind Bft</th>
+                    <th>Wind kn</th>
                     <th>Windrichtung</th>
                     <th>Wetter</th>
                     <th>Notiz</th>
@@ -1027,7 +1032,7 @@ function csvFeldEscapen(wert) {
 function csvExportieren() {
     if (!aktuellerToern) return;
     const t = aktuellerToern;
-    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind Bft;Wind kn;Wind Richtung;Wetter;Notiz;GPS";
+    const kopfzeile = "Toernname;Datum;Zeit;Typ;Ort;Rudergänger;Wind kn;Wind Bft;Wind Richtung;Wetter;Notiz;GPS";
     const zeilen = (t.events || [])
         .slice()
         .sort((a, b) =>
@@ -1042,8 +1047,8 @@ function csvExportieren() {
                 ev.type,
                 ev.ort,
                 ev.rudergaenger ? ev.rudergaenger.name : "",
-                ev.weather ? (ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : "") : "",
                 ev.weather ? (ev.weather.windKnots != null ? ev.weather.windKnots : "") : "",
+                ev.weather ? (ev.weather.windForce !== null && ev.weather.windForce !== undefined ? ev.weather.windForce : "") : "",
                 ev.weather ? ev.weather.windDirection : "",
                 ev.weather ? ev.weather.description : "",
                 ev.note,
@@ -1090,7 +1095,7 @@ function schnellEintragSpeichern(typ) {
         ort:          "",
         rudergaenger: ruder ? { name: ruder } : null,
         note:         "",
-        weather:      wind !== "" ? { windForce: Number(wind), windDirection: "", description: "" } : null
+        weather:      wind !== "" ? { windForce: msToBft(parseFloat(wind) / 1.94384), windKnots: parseFloat(wind), windDirection: "", description: "" } : null
     };
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
@@ -1196,7 +1201,7 @@ if (_ruderSelectEl) _ruderSelectEl.addEventListener("change", function () {
         rudergaenger: { name },
         note:         "",
         weather:      letzte.wind !== "" && letzte.wind !== undefined
-                        ? { windForce: Number(letzte.wind), windDirection: "", description: "" }
+                        ? { windForce: msToBft(parseFloat(letzte.wind) / 1.94384), windKnots: parseFloat(letzte.wind), windDirection: "", description: "" }
                         : null
     };
     aktuellerToern.events.push(ev);
@@ -1222,7 +1227,7 @@ if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
         ort:          "",
         rudergaenger: null,
         note:         "",
-        weather:      wind !== "" ? { windForce: Number(wind), windDirection: "", description: "" } : null
+        weather:      wind !== "" ? { windForce: msToBft(parseFloat(wind) / 1.94384), windKnots: parseFloat(wind), windDirection: "", description: "" } : null
     };
     aktuellerToern.events.push(ev);
     gpsAbfragen(ev);
@@ -1231,7 +1236,7 @@ if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
     autoBackupSpeichern();
     backupStatusAktualisieren();
     zeigeLogs();
-    if (wind !== "") statusSetzen("💨 Wind: " + wind + " Bft.", "ok", 2000);
+    if (wind !== "") statusSetzen("💨 Wind: " + wind + " kn.", "ok", 2000);
 }); // end ls-wind-select listener
 
 
