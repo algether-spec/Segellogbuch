@@ -266,8 +266,9 @@ function hafenSperrungAktualisieren(stopp) {
     });
     /* btnLogSpeichern bleibt immer aktiv – Modal ermöglicht Nachträge auch bei STOPP */
 
-    /* Bei FAHRT: Wende/Halse korrekt per Segeln/Motor-Zustand setzen */
-    if (!istStopp) zustandAktualisieren();
+    /* Bei FAHRT: Wende/Halse korrekt per Segeln/Motor-Zustand setzen + Track */
+    if (!istStopp) { zustandAktualisieren(); trackStarten(); }
+    else trackStoppen();
 
     /* Statusleiste: Modus-Text überschreiben wenn gestoppt */
     const modus = document.getElementById("ls-modus");
@@ -1038,6 +1039,7 @@ function toernUebersichtRendern() {
 /* --- Aktionen --------------------------------------------------- */
 
 function toernLaden(tripId) {
+    trackStoppen();
     const alle = alleToernsLaden();
     const toern = alle.find(t => t.tripId === tripId);
     if (!toern) return;
@@ -1055,6 +1057,7 @@ function toernLaden(tripId) {
 }
 
 function neuerToernAnlegen() {
+    trackStoppen();
     aktuellerToern = neuerToern();
     formularFuellen(aktuellerToern);
     formSection.hidden = false;
@@ -1081,6 +1084,7 @@ function toernSpeichernAktion() {
 function toernLoeschenAktion() {
     if (!aktuellerToern) return;
     if (!confirm(`Törn "${aktuellerToern.tripName || "(ohne Name)"}" wirklich löschen?`)) return;
+    trackStoppen();
     toernLoeschen(aktuellerToern.tripId);
     aktuellerToern = null;
     formSection.hidden = true;
@@ -1409,6 +1413,19 @@ if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
 
 /* --- GPS -------------------------------------------------------- */
 
+async function ortBestimmen(lat, lon) {
+    try {
+        const res = await fetch(
+            "https://nominatim.openstreetmap.org/reverse?lat=" + lat + "&lon=" + lon + "&format=json",
+            { headers: { "Accept-Language": "de" } }
+        );
+        if (!res.ok) return "";
+        const data = await res.json();
+        const a = data.address || {};
+        return a.city || a.town || a.village || a.hamlet || a.municipality || "";
+    } catch { return ""; }
+}
+
 function gpsAbfragen(ev) {
     if (!navigator.geolocation || !aktuellerToern) return;
     if (stoppZustandLaden() !== "fahrt") return;
@@ -1420,13 +1437,14 @@ function gpsAbfragen(ev) {
                 lon: parseFloat(pos.coords.longitude.toFixed(5)),
                 sog: speedMs != null ? parseFloat((speedMs * 1.94384).toFixed(1)) : null
             };
+            /* Ort per Reverse Geocoding bestimmen */
+            if (!ev.ort) ev.ort = await ortBestimmen(ev.pos.lat, ev.pos.lon);
             /* Wetter automatisch laden / ergänzen */
             const w = await wetterVonApi(ev.pos.lat, ev.pos.lon);
             if (w) {
                 if (!ev.weather) {
                     ev.weather = w;
                 } else {
-                    /* Windrichtung + Beschreibung nachfüllen wenn leer */
                     if (!ev.weather.windDirection) ev.weather.windDirection = w.windDirection;
                     if (!ev.weather.description)   ev.weather.description   = w.description;
                 }
@@ -1437,6 +1455,72 @@ function gpsAbfragen(ev) {
         () => { /* kein GPS verfügbar oder verweigert – ignorieren */ },
         { maximumAge: 30000, timeout: 8000, enableHighAccuracy: false }
     );
+}
+
+
+/* --- Autotracking ----------------------------------------------- */
+
+let _trackTimeout = null;
+
+function trackIntervallFuerSog(sogKn) {
+    if (sogKn <= 0) return 0;       /* kein Punkt, aber weiter prüfen */
+    if (sogKn < 3)  return 120000;  /* 0–3 kn → alle 2 min */
+    if (sogKn < 6)  return 60000;   /* 3–6 kn → alle 1 min */
+    return 30000;                   /* >6 kn  → alle 30 s  */
+}
+
+function trackStatusAnzeigen(aktiv) {
+    const el = document.getElementById("ls-track");
+    if (el) el.textContent = aktiv ? "🟢 Track" : "🔴 Track aus";
+}
+
+function trackPunktAufzeichnenUndPlanen() {
+    if (!aktuellerToern || stoppZustandLaden() !== "fahrt") {
+        trackStoppen();
+        return;
+    }
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            if (!aktuellerToern) return;
+            const sogMs = pos.coords.speed;
+            const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : 0;
+            const intervall = trackIntervallFuerSog(sogKn);
+            if (intervall > 0) {
+                if (!aktuellerToern.track)        aktuellerToern.track = {};
+                if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
+                aktuellerToern.track.points.push({
+                    lat:  parseFloat(pos.coords.latitude.toFixed(5)),
+                    lon:  parseFloat(pos.coords.longitude.toFixed(5)),
+                    sog:  sogKn,
+                    zeit: new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T")
+                });
+                toernSpeichern(aktuellerToern);
+                trackStatusAnzeigen(true);
+            } else {
+                trackStatusAnzeigen(false);
+            }
+            /* Nächsten Punkt planen – bei SOG=0 in 2 min neu prüfen */
+            _trackTimeout = setTimeout(trackPunktAufzeichnenUndPlanen, intervall > 0 ? intervall : 120000);
+        },
+        () => {
+            /* GPS-Fehler: in 60 s nochmal versuchen */
+            _trackTimeout = setTimeout(trackPunktAufzeichnenUndPlanen, 60000);
+        },
+        { maximumAge: 10000, timeout: 10000, enableHighAccuracy: true }
+    );
+}
+
+function trackStarten() {
+    trackStoppen();
+    if (!aktuellerToern || stoppZustandLaden() !== "fahrt") return;
+    if (!navigator.geolocation) return;
+    trackPunktAufzeichnenUndPlanen();
+}
+
+function trackStoppen() {
+    if (_trackTimeout) { clearTimeout(_trackTimeout); _trackTimeout = null; }
+    trackStatusAnzeigen(false);
 }
 
 
