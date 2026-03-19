@@ -106,12 +106,26 @@ function gradZuRichtung(deg) {
     return dirs[Math.round(((deg % 360) + 360) % 360 / 45) % 8];
 }
 
+/* WMO Wettercode → Kurztext */
+function wettercodeZuText(code) {
+    if (code === 0)                return "Klar";
+    if (code <= 3)                 return "Bewölkt";
+    if (code <= 48)                return "Nebel";
+    if (code <= 55)                return "Nieselregen";
+    if (code <= 65)                return "Regen";
+    if (code <= 77)                return "Schnee";
+    if (code <= 82)                return "Schauer";
+    if (code <= 86)                return "Schneeschauer";
+    if (code <= 99)                return "Gewitter";
+    return "";
+}
+
 /* Open-Meteo API → { windForce, windDirection, description } oder null */
 async function wetterVonApi(lat, lon) {
     try {
         const url = "https://api.open-meteo.com/v1/forecast"
             + "?latitude=" + lat + "&longitude=" + lon
-            + "&current=windspeed_10m,winddirection_10m"
+            + "&current=windspeed_10m,winddirection_10m,weathercode"
             + "&windspeed_unit=ms";
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) return null;
@@ -121,7 +135,7 @@ async function wetterVonApi(lat, lon) {
         return {
             windForce:     msToBft(c.windspeed_10m ?? 0),
             windDirection: gradZuRichtung(c.winddirection_10m ?? 0),
-            description:   ""
+            description:   c.weathercode != null ? wettercodeZuText(c.weathercode) : ""
         };
     } catch { return null; }
 }
@@ -1201,10 +1215,16 @@ function gpsAbfragen(ev) {
                 lon: parseFloat(pos.coords.longitude.toFixed(5)),
                 sog: speedMs != null ? parseFloat((speedMs * 1.94384).toFixed(1)) : null
             };
-            /* Wetter automatisch laden – nur wenn noch kein Wetter gesetzt */
-            if (!ev.weather) {
-                const w = await wetterVonApi(ev.pos.lat, ev.pos.lon);
-                if (w) ev.weather = w;
+            /* Wetter automatisch laden / ergänzen */
+            const w = await wetterVonApi(ev.pos.lat, ev.pos.lon);
+            if (w) {
+                if (!ev.weather) {
+                    ev.weather = w;
+                } else {
+                    /* Windrichtung + Beschreibung nachfüllen wenn leer */
+                    if (!ev.weather.windDirection) ev.weather.windDirection = w.windDirection;
+                    if (!ev.weather.description)   ev.weather.description   = w.description;
+                }
             }
             toernSpeichern(aktuellerToern);
             zeigeLogs();
