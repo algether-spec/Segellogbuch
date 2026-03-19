@@ -1290,6 +1290,23 @@ btnNeuerLog.onclick = () => {
     logZeit.focus();
 };
 
+/* --- Floating Buttons ------------------------------------------- */
+const _btnMob = document.getElementById("btn-mob");
+if (_btnMob) _btnMob.addEventListener("click", () => schnellEintragSpeichern("MOB"));
+
+/* --- Modal Event-Listener --------------------------------------- */
+const _modalOverlay = document.getElementById("log-modal-overlay");
+const _btnModalAbbrechen = document.getElementById("btn-modal-abbrechen");
+
+if (_btnModalAbbrechen) _btnModalAbbrechen.addEventListener("click", logModalSchliessen);
+
+/* Backdrop-Klick (außerhalb modal-box) schließt Modal */
+if (_modalOverlay) {
+    _modalOverlay.addEventListener("click", e => {
+        if (e.target === _modalOverlay) logModalSchliessen();
+    });
+}
+
 logRudergaenger.addEventListener("mousedown", () => {
     rudergaengerSelectFuellen();
 });
