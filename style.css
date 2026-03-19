@@ -288,6 +288,7 @@ button:active { opacity: 0.75; }
 }
 
 .btn-hafenmanover {
+    min-height: 52px;
     padding: 12px 6px;
     border-radius: 12px;
     font-size: 13px;
