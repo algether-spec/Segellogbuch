@@ -232,6 +232,37 @@ button:active { opacity: 0.75; }
     text-underline-offset: 3px;
 }
 
+/* --- Hafen-Manöver (Ablegen / Anlegen) -------------------------- */
+
+.hafenmanover-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-hafenmanover {
+    padding: 14px 10px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-hafenmanover:active { opacity: 0.8; transform: scale(0.97); }
+
+.btn-ablegen {
+    background: #0ea5e9;
+    color: #fff;
+}
+
+.btn-anlegen {
+    background: #10b981;
+    color: #fff;
+}
+
 /* --- Zustandsbuttons -------------------------------------------- */
 
 .zustand-bar {
@@ -298,6 +329,13 @@ button:active { opacity: 0.75; }
 }
 
 .btn-schnell-card:active { background: #bae6fd; }
+
+.btn-schnell-card:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.55;
+}
 
 .btn-weitere-card {
     background: #f1f5f9;
@@ -1174,6 +1212,10 @@ button:active { opacity: 0.75; }
 
     .tu-main    { background: #1e293b; color: #e2e8f0; }
     .tu-item    { border-color: #334155; }
+
+    .btn-ablegen { background: #0369a1; }
+    .btn-anlegen { background: #059669; }
+    .btn-schnell-card:disabled { background: #1e293b; color: #475569; }
 
     .btn-zustand { background: #1e293b; color: #94a3b8; }
     .btn-zustand-aktiv { background: #0c2a3f; color: #38bdf8; border-color: #1e4976; }

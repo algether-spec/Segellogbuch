@@ -165,8 +165,8 @@ const MODUS_MAP = {
 };
 
 /* Ereignistypen die den Fahrt-Zustand definieren */
-const MOTOR_TYPEN = new Set(["Motor an"]);
-const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt", "Ablegen"]);
+const MOTOR_TYPEN = new Set(["Motor an", "Ablegen", "Anlegen"]);
+const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt"]);
 
 function zustandErmitteln() {
     if (!aktuellerToern || !(aktuellerToern.events || []).length) return null;
@@ -188,6 +188,13 @@ function zustandAktualisieren() {
     if (!btnS || !btnM) return;
     btnS.classList.toggle("btn-zustand-aktiv", result?.zustand === "segeln");
     btnM.classList.toggle("btn-zustand-aktiv", result?.zustand === "motor");
+
+    /* Wende/Halse nur bei Segel-Zustand aktiv */
+    const istSegeln = result?.zustand === "segeln";
+    const btnWende = document.getElementById("btn-wende");
+    const btnHalse = document.getElementById("btn-halse");
+    if (btnWende) btnWende.disabled = !istSegeln;
+    if (btnHalse) btnHalse.disabled = !istSegeln;
 }
 
 function zustandSetzen(zustand) {
