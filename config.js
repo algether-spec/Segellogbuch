@@ -3,7 +3,7 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "1.6.5";
+const APP_VERSION = "1.6.6";
 
 function updateButtonInit() {
     const btn = document.getElementById("btn-update");
@@ -23,11 +23,24 @@ async function autoUpdatePruefen() {
         if (data.version && data.version !== APP_VERSION) {
             btn.textContent = "🔄 Update " + data.version;
             btn.classList.add("btn-update-available");
+            updateHinweisZeigen(data.version);
         } else {
             btn.textContent = "v" + APP_VERSION;
             btn.classList.remove("btn-update-available");
         }
     } catch { /* kein Netz – kein Problem */ }
+}
+
+function updateHinweisZeigen(neueVersion) {
+    if (document.getElementById("update-hinweis")) return;
+    const div = document.createElement("div");
+    div.id = "update-hinweis";
+    div.className = "update-hinweis";
+    div.innerHTML =
+        "<span>⚠️ Update " + neueVersion + " – Backup empfohlen!</span>" +
+        "<button type=\"button\" onclick=\"exportJSON()\">💾 Backup erstellen</button>";
+    const versionBar = document.querySelector(".version-bar");
+    if (versionBar) versionBar.insertAdjacentElement("beforebegin", div);
 }
 
 async function updateErzwingen() {

@@ -1521,6 +1521,9 @@ function pwaMigrationPruefen() {
 
 /* --- Start ------------------------------------------------------ */
 
+/* Permanentes Backup prüfen – automatisch wiederherstellen wenn Daten fehlen */
+const _datenWiederhergestellt = permanentBackupPruefen();
+
 toernSelectAktualisieren();
 formSection.hidden = true;
 btnToernLoeschen.hidden = true;
@@ -1530,3 +1533,8 @@ hafenSperrungAktualisieren(stoppZustandLaden());
 backupBannerPruefen();
 backupStatusAktualisieren();
 pwaMigrationPruefen();
+
+if (_datenWiederhergestellt) {
+    toernSelectAktualisieren();
+    statusSetzen("✅ Daten automatisch wiederhergestellt.", "ok", 6000);
+}

@@ -504,6 +504,36 @@ button:active { opacity: 0.75; }
 /* Abstand damit Content nicht unter MOB-Button endet */
 .app { padding-bottom: 96px; }
 
+/* --- Update-Hinweis --------------------------------------------- */
+
+.update-hinweis {
+    background: #fff7ed;
+    border: 1px solid #f97316;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #9a3412;
+    flex-wrap: wrap;
+}
+
+.update-hinweis button {
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: #f97316;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
 /* --- Auto-Backup-Banner ----------------------------------------- */
 
 .backup-banner {
@@ -1334,6 +1364,8 @@ button:active { opacity: 0.75; }
     #ls-seit        { color: #38bdf8; }
     .ls-ruder-select { color: #7dd3fc; text-decoration-color: #1e4976; }
 
+    .update-hinweis { background: #2d1a0a; border-color: #c2410c; color: #fdba74; }
+    .update-hinweis button { background: #c2410c; }
     .backup-banner { background: #2d2a14; border-color: #ca8a04; color: #fde047; }
 
     .delete-row .btn-danger { background: #7f1d1d; }

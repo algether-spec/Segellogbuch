@@ -3,10 +3,11 @@
    localStorage-Verwaltung – zentrale Datenhaltung
 ====================== */
 
-const KEY_TOERNS = "segel_logbuch_toerns";
-const KEY_CREW   = "segel_logbuch_crew";
-const KEY_AUTOBACKUP   = "segel_logbuch_autobackup"; /* wird NIE beim Update gelöscht */
-const KEY_LETZTE_WERTE = "last_values";
+const KEY_TOERNS          = "segel_logbuch_toerns";
+const KEY_CREW            = "segel_logbuch_crew";
+const KEY_AUTOBACKUP      = "segel_logbuch_autobackup";
+const KEY_PERMANENT_BACKUP = "segel_logbuch_backup_permanent";
+const KEY_LETZTE_WERTE    = "last_values";
 
 
 /* --- Hilfsfunktion ---------------------------------------------- */
@@ -159,7 +160,9 @@ function autoBackupSpeichern() {
         crew: ladeCrew()
     };
     try {
-        localStorage.setItem(KEY_AUTOBACKUP, JSON.stringify(backup));
+        const json = JSON.stringify(backup);
+        localStorage.setItem(KEY_AUTOBACKUP, json);
+        localStorage.setItem(KEY_PERMANENT_BACKUP, json); /* immer beide aktuell halten */
     } catch { /* Storage voll – ignorieren */ }
 }
 
@@ -173,6 +176,47 @@ function backupLaden() {
 function backupWiederherstellen(backup) {
     speichereToerns(backup.toerns);
     if (Array.isArray(backup.crew)) speichereCrew(backup.crew);
+}
+
+
+/* --- Permanentes Backup (überlebt normale Updates) -------------- */
+
+function permanentBackupSpeichern() {
+    const toerns = ladeToerns();
+    if (toerns.length === 0) return;
+    try {
+        localStorage.setItem(KEY_PERMANENT_BACKUP, JSON.stringify({
+            timestamp: new Date().toISOString(),
+            toerns,
+            crew: ladeCrew()
+        }));
+    } catch { /* Storage voll */ }
+}
+
+function permanentBackupLaden() {
+    try {
+        const raw = localStorage.getItem(KEY_PERMANENT_BACKUP);
+        return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+}
+
+/* Prüft beim Start ob Daten fehlen aber Backup vorhanden.
+   Wenn ja: automatisch wiederherstellen.
+   Wenn nein: Backup aktualisieren.
+   Gibt true zurück wenn Wiederherstellung stattfand. */
+function permanentBackupPruefen() {
+    const toerns = ladeToerns();
+    if (toerns.length > 0) {
+        permanentBackupSpeichern(); /* Backup immer aktuell halten */
+        return false;
+    }
+    const backup = permanentBackupLaden();
+    if (backup && Array.isArray(backup.toerns) && backup.toerns.length > 0) {
+        speichereToerns(backup.toerns);
+        if (Array.isArray(backup.crew)) speichereCrew(backup.crew);
+        return true;
+    }
+    return false;
 }
 
 
