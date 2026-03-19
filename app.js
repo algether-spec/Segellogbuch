@@ -141,16 +141,16 @@ async function wetterVonApi(lat, lon) {
         const url = "https://api.open-meteo.com/v1/forecast"
             + "?latitude=" + lat + "&longitude=" + lon
             + "&current=windspeed_10m,winddirection_10m,weathercode"
-            + "&windspeed_unit=ms";
+            + "&windspeed_unit=kn";
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) return null;
         const data = await res.json();
         const c = data.current;
         if (!c) return null;
-        const ms = c.windspeed_10m ?? 0;
+        const kn = c.windspeed_10m ?? 0;
         return {
-            windForce:     msToBft(ms),
-            windKnots:     Math.round(ms * 1.94384 * 10) / 10,
+            windForce:     msToBft(kn / 1.94384),
+            windKnots:     Math.round(kn * 10) / 10,
             windDirection: gradZuRichtung(c.winddirection_10m ?? 0),
             description:   c.weathercode != null ? wettercodeZuText(c.weathercode) : ""
         };
