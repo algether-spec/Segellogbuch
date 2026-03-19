@@ -203,17 +203,12 @@
 
                     <button type="button" id="btn-wende" class="btn-schnell-card" onclick="schnellEintragSpeichern('Wende')">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11a5 5 0 0 1 0 10H5"/><polyline points="7 3 3 7 7 11"/></svg>
-                        <span>Wende</span>
+                        <span>↩️ Wende</span>
                     </button>
 
                     <button type="button" id="btn-halse" class="btn-schnell-card" onclick="schnellEintragSpeichern('Halse')">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7H10a5 5 0 0 0 0 10h9"/><polyline points="17 3 21 7 17 11"/></svg>
-                        <span>Halse</span>
-                    </button>
-
-                    <button type="button" class="btn-schnell-card" onclick="schnellEintragSpeichern('Ankern')">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="19"/><line x1="5" y1="11" x2="19" y2="11"/><path d="M5 19a7 7 0 0 0 14 0"/></svg>
-                        <span>Ankern</span>
+                        <span>↪️ Halse</span>
                     </button>
 
                     <button type="button" class="btn-schnell-card btn-weitere-card" onclick="schnellWeitereToggeln()">
@@ -225,16 +220,38 @@
 
                 <!-- "Weitere" Panel -->
                 <div id="schnell-weitere" class="schnell-weitere" hidden>
-                    <div class="schnell-weitere-grid">
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Aufschießer')">Aufschießer</button>
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Beidrehen')">Beidrehen</button>
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Q-Wende')">Q-Wende</button>
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Segel setzen')">Segel setzen</button>
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Segel bergen')">Segel bergen</button>
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Drehen Motor')">Drehen Motor</button>
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Box-Manöver')">Box-Manöver</button>
-                        <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Mooring')">Mooring</button>
+
+                    <div class="weitere-gruppe">
+                        <span class="weitere-label">⛵ Unter Segel</span>
+                        <div class="schnell-weitere-grid">
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Reffen')">Reffen</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Segel setzen')">Segel setzen</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Segel bergen')">Segel bergen</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Aufschießer')">Aufschießer</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Beidrehen')">Beidrehen</button>
+                        </div>
                     </div>
+
+                    <div class="weitere-gruppe">
+                        <span class="weitere-label">🔧 Motor / Hafen</span>
+                        <div class="schnell-weitere-grid">
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Box-Manöver')">Box-Manöver</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Mooring')">Mooring</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Drehen Motor')">Drehen Motor</button>
+                        </div>
+                    </div>
+
+                    <div class="weitere-gruppe">
+                        <span class="weitere-label">— Allgemein</span>
+                        <div class="schnell-weitere-grid">
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Ankern')">Ankern</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Ruderwechsel')">Ruderwechsel</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Sichtung')">Sichtung</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Wetterwechsel')">Wetterwechsel</button>
+                            <button type="button" class="btn-schnell-sm" onclick="schnellEintragSpeichern('Notfall')">Notfall</button>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="event-add-row">
