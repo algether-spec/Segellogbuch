@@ -140,10 +140,10 @@ button:active { opacity: 0.75; }
 
 .tab-nav {
     display: flex;
-    gap: 4px;
+    gap: 6px;
     background: #e2e8f0;
-    border-radius: 13px;
-    padding: 4px;
+    border-radius: 14px;
+    padding: 5px;
     margin-bottom: 16px;
 }
 
@@ -151,10 +151,11 @@ button:active { opacity: 0.75; }
     flex: 1;
     background: transparent;
     color: #64748b;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
-    padding: 8px 4px;
-    border-radius: 9px;
+    min-height: 48px;
+    padding: 10px 4px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
@@ -164,7 +165,8 @@ button:active { opacity: 0.75; }
 .tab-btn.tab-aktiv {
     background: #fff;
     color: #0f4c81;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 .tab-panel  { display: block; }
