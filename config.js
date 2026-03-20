@@ -3,7 +3,7 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "1.7.10";
+const APP_VERSION = "1.7.11";
 
 function updateButtonInit() {
     const btn = document.getElementById("btn-update");
