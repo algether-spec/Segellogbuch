@@ -163,17 +163,9 @@
         <div id="tab-logbuch-inhalt" hidden>
 
             <div class="card" id="log-card">
+                <h2>📘 Logbucheintrag</h2>
 
-                <!-- Titel + Rudergänger in einer Zeile -->
-                <div class="log-card-header">
-                    <h2>📘 Logbucheintrag</h2>
-                    <div id="ruder-bar" class="ruder-bar">
-                        <button type="button" id="btn-rudergaenger" class="btn-rudergaenger" onclick="ruderDropdownToggeln()">👤 —</button>
-                        <div id="ruder-dropdown" class="ruder-dropdown" hidden></div>
-                    </div>
-                </div>
-
-                <!-- Statusleiste (ganz oben) -->
+                <!-- 1. Statusleiste -->
                 <div id="logbuch-status" class="logbuch-status" hidden>
                     <span id="ls-modus"></span>
                     <span id="ls-manoever-wrap" hidden><span class="ls-sep">·</span><span id="ls-manoever"></span></span>
@@ -185,21 +177,13 @@
                     <span id="ls-seit"></span>
                 </div>
 
-                <!-- Fahrt-Start Buttons (wenn gestoppt) -->
-                <div id="fahrt-start-bar" class="hafenmanover-bar" hidden>
-                    <button type="button" class="btn-hafenmanover btn-ablegen" onclick="schnellEintragSpeichern('Ablegen')">🚢 Ablegen</button>
-                    <button type="button" class="btn-hafenmanover btn-anker-lichten" onclick="schnellEintragSpeichern('Anker lichten')">⚓ Anker lichten</button>
-                    <button type="button" class="btn-hafenmanover btn-von-boje" onclick="schnellEintragSpeichern('Von Boje')">🔵 Von Boje</button>
+                <!-- 2. Rudergänger (volle Breite) -->
+                <div id="ruder-bar" class="ruder-bar">
+                    <button type="button" id="btn-rudergaenger" class="btn-rudergaenger" onclick="ruderDropdownToggeln()">👤 —</button>
+                    <div id="ruder-dropdown" class="ruder-dropdown" hidden></div>
                 </div>
 
-                <!-- Fahrt-Stopp Buttons (wenn unterwegs) -->
-                <div id="fahrt-stopp-bar" class="hafenmanover-bar">
-                    <button type="button" id="btn-anlegen" class="btn-hafenmanover btn-anlegen" onclick="schnellEintragSpeichern('Anlegen')">🏁 Anlegen</button>
-                    <button type="button" class="btn-hafenmanover btn-ankern" onclick="schnellEintragSpeichern('Ankern')">⚓ Ankern</button>
-                    <button type="button" class="btn-hafenmanover btn-an-boje" onclick="schnellEintragSpeichern('An Boje')">🔵 An Boje</button>
-                </div>
-
-                <!-- Zustandsbuttons (nur bei FAHRT) -->
+                <!-- 3. Zustandsbuttons (Segeln | Motor) -->
                 <div id="zustand-bar" class="zustand-bar">
                     <button type="button" id="btn-zustand-segeln" class="btn-zustand" onclick="zustandSetzen('segeln')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 20h16L12 2z"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
@@ -211,7 +195,21 @@
                     </button>
                 </div>
 
-                <!-- Manöver-Schnellbuttons (nur bei FAHRT) -->
+                <!-- 4a. Fahrt-Start Buttons (wenn gestoppt) -->
+                <div id="fahrt-start-bar" class="hafenmanover-bar" hidden>
+                    <button type="button" class="btn-hafenmanover btn-ablegen" onclick="schnellEintragSpeichern('Ablegen')">🚢 Ablegen</button>
+                    <button type="button" class="btn-hafenmanover btn-anker-lichten" onclick="schnellEintragSpeichern('Anker lichten')">⚓ Anker lichten</button>
+                    <button type="button" class="btn-hafenmanover btn-von-boje" onclick="schnellEintragSpeichern('Von Boje')">🔵 Von Boje</button>
+                </div>
+
+                <!-- 4b. Fahrt-Stopp Buttons (wenn unterwegs) -->
+                <div id="fahrt-stopp-bar" class="hafenmanover-bar">
+                    <button type="button" id="btn-anlegen" class="btn-hafenmanover btn-anlegen" onclick="schnellEintragSpeichern('Anlegen')">🏁 Anlegen</button>
+                    <button type="button" class="btn-hafenmanover btn-ankern" onclick="schnellEintragSpeichern('Ankern')">⚓ Ankern</button>
+                    <button type="button" class="btn-hafenmanover btn-an-boje" onclick="schnellEintragSpeichern('An Boje')">🔵 An Boje</button>
+                </div>
+
+                <!-- 5. Manöver-Schnellbuttons -->
                 <div id="manoever-grid" class="schnell-grid">
 
                     <button type="button" id="btn-wende" class="btn-schnell-card" onclick="schnellEintragSpeichern('Wende')">
@@ -231,7 +229,7 @@
 
                 </div>
 
-                <!-- Detaillierter Eintrag Button (immer sichtbar) -->
+                <!-- 6. Detaillierter Eintrag Button -->
                 <button type="button" class="btn-detail-eintrag" onclick="logModalOeffnen()">✏️ Detaillierter Eintrag</button>
             </div>
 
