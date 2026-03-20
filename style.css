@@ -358,6 +358,16 @@ button:active { opacity: 0.75; }
 
 .btn-zustand:active { opacity: 0.8; }
 
+/* --- Logbuch Sticky Bar (Rudergänger + Segeln/Motor) ----------- */
+
+.logbuch-sticky {
+    position: sticky;
+    top: 60px;          /* Höhe der Tab-Nav */
+    z-index: 40;
+    background: #f0f4f8;
+    padding-bottom: 8px;
+}
+
 /* --- Log-Card Header (Titel + Rudergänger nebeneinander) -------- */
 
 .log-card-header {
@@ -1457,6 +1467,7 @@ button:active { opacity: 0.75; }
     .btn-zustand-aktiv { background: #0c2a3f; color: #38bdf8; border-color: #1e4976; }
     .btn-zustand[id="btn-zustand-motor"].btn-zustand-aktiv { background: #2d1a0a; color: #fb923c; border-color: #7c2d12; }
 
+    .logbuch-sticky { background: #0f172a; }
     .log-card-header { border-bottom-color: #334155; }
     .btn-rudergaenger { color: #94a3b8; border-color: #334155; }
     .btn-rudergaenger:active { background: #1e293b; color: #e2e8f0; }
