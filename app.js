@@ -1224,43 +1224,67 @@ function csvExportieren() {
 
 /* --- Schnellbuttons --------------------------------------------- */
 
+function gpsUndWetterHolen(timeoutMs) {
+    return new Promise(resolve => {
+        const done = setTimeout(() => resolve(null), timeoutMs);
+        if (!navigator.geolocation) { clearTimeout(done); resolve(null); return; }
+        navigator.geolocation.getCurrentPosition(
+            async pos => {
+                clearTimeout(done);
+                const lat = parseFloat(pos.coords.latitude.toFixed(5));
+                const lon = parseFloat(pos.coords.longitude.toFixed(5));
+                const sog = pos.coords.speed != null
+                    ? parseFloat((pos.coords.speed * 1.94384).toFixed(1)) : null;
+                const [weather, ort] = await Promise.all([
+                    wetterVonApi(lat, lon),
+                    ortBestimmen(lat, lon)
+                ]);
+                resolve({ lat, lon, sog, weather, ort: ort || "" });
+            },
+            () => { clearTimeout(done); resolve(null); },
+            { maximumAge: 10000, timeout: timeoutMs, enableHighAccuracy: false }
+        );
+    });
+}
 
-function schnellEintragSpeichern(typ) {
+async function schnellEintragSpeichern(typ) {
     if (!aktuellerToern) {
         statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
         return;
     }
-    const letzte    = ladeLetzteWerte() || {};
-    const windSel   = document.getElementById("ls-wind-select");
-    const windAlter = letzte.windTs ? (Date.now() - letzte.windTs) : Infinity;
-    const windFrisch = windAlter < 30 * 60 * 1000; /* < 30 Minuten */
-    const wind      = windFrisch && (windSel && windSel.value !== "") ? windSel.value
-                    : windFrisch && letzte.wind ? letzte.wind
-                    : "";
-    const ruder     = letzte.rudergaenger || "";
-    /* Lokale Zeit als ISO-String "2026-03-18T14:35" */
+    const letzte  = ladeLetzteWerte() || {};
+    const ruder   = letzte.rudergaenger || "";
     const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
+
+    /* Ladeanzeige – max 3 Sekunden sichtbar */
+    statusSetzen("⏳ GPS + Wind…", "ok", 3500);
+
+    /* GPS + frisches Wetter mit 3s Timeout */
+    const gps = await gpsUndWetterHolen(3000);
+
     const ev = {
         id:           generateId(),
         type:         typ,
         kategorie:    kategorieFuerTyp(typ),
         antrieb:      zustandErmitteln()?.zustand || "",
         zeit:         zeitIso,
-        ort:          "",
+        ort:          gps?.ort || "",
         rudergaenger: ruder ? { name: ruder } : null,
         note:         "",
-        weather:      wind !== "" ? { windForce: msToBft(parseFloat(wind) / 1.94384), windKnots: parseFloat(wind), windDirection: "", description: "" } : null
+        weather:      gps?.weather || null
     };
+    if (gps) ev.pos = { lat: gps.lat, lon: gps.lon, sog: gps.sog };
+
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+
     /* Stopp-Zustand VOR zeigeLogs speichern – sonst liest UI alten Zustand */
-    if (STOPP_EREIGNISSE[typ]) {
-        stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
-    } else if (START_EREIGNISSE.has(typ)) {
-        stoppZustandSpeichern("fahrt");
-    }
-    gpsAbfragen(ev);
-    speichereLetzteWerte(wind, ruder);
+    if (STOPP_EREIGNISSE[typ])      stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
+    else if (START_EREIGNISSE.has(typ)) stoppZustandSpeichern("fahrt");
+
+    if (gps?.weather) speichereLetzteWerte(String(gps.weather.windKnots), ruder);
+    else              speichereLetzteWerte("", ruder);
+
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
