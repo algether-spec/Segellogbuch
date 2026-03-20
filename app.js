@@ -1306,6 +1306,9 @@ function tabWechseln(tabId) {
     document.querySelectorAll(".tab-btn").forEach(b =>
         b.classList.toggle("tab-aktiv", b.dataset.tab === tabId)
     );
+    /* Logbuch-Sticky ein-/ausblenden */
+    const sticky = document.getElementById("logbuch-sticky");
+    if (sticky) sticky.hidden = !(tabId === "tab-logbuch" && !!aktuellerToern);
     /* Beim Wechsel zum Logbuch: Zeit und letzte Werte vorausfüllen */
     if (tabId === "tab-logbuch" && aktuellerToern) {
         logZeitVorbefuellen();
@@ -1329,6 +1332,10 @@ function tabInhaltToggeln() {
         if (leer)   leer.hidden   = aktiv;
         if (inhalt) inhalt.hidden = !aktiv;
     });
+    /* Logbuch-Sticky: nur sichtbar wenn Törn aktiv UND Logbuch-Tab offen */
+    const sticky   = document.getElementById("logbuch-sticky");
+    const aktivTab = document.querySelector(".tab-btn.tab-aktiv");
+    if (sticky) sticky.hidden = !(aktiv && aktivTab && aktivTab.dataset.tab === "tab-logbuch");
     const bar = document.getElementById("aktiver-toern-bar");
     bar.hidden = !aktiv;
     if (aktiv) {
