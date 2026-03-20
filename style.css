@@ -246,6 +246,18 @@ button:active { opacity: 0.75; }
 
 /* --- Schnellbuttons Grid ---------------------------------------- */
 
+/* --- Logbuch Lade-Status (GPS + Wind) -------------------------- */
+
+.log-lade-status {
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 10px;
+    background: #d1fae5;
+    color: #065f46;
+}
+
 /* --- Logbuch-Statusleiste --------------------------------------- */
 
 .logbuch-status {
@@ -1469,6 +1481,7 @@ button:active { opacity: 0.75; }
     .btn-zustand[id="btn-zustand-motor"].btn-zustand-aktiv { background: #2d1a0a; color: #fb923c; border-color: #7c2d12; }
 
     .logbuch-sticky { background: #0f172a; }
+    .log-lade-status { background: #064e3b; color: #6ee7b7; }
     .log-card-header { border-bottom-color: #334155; }
     .btn-rudergaenger { color: #94a3b8; border-color: #334155; }
     .btn-rudergaenger:active { background: #1e293b; color: #e2e8f0; }

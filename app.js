@@ -396,6 +396,14 @@ function statusSetzen(text, typ = "ok", ms = 3000) {
     if (text) setTimeout(() => { statusMsg.hidden = true; }, ms);
 }
 
+function logLadeStatusSetzen(text, ms = 3000) {
+    const el = document.getElementById("log-lade-status");
+    if (!el) return;
+    el.textContent = text;
+    el.hidden = !text;
+    if (text) setTimeout(() => { el.hidden = true; }, ms);
+}
+
 function validieren() {
     if (!fldTripName.value.trim()) {
         statusSetzen("Törnname darf nicht leer sein.", "error");
@@ -1254,8 +1262,8 @@ async function schnellEintragSpeichern(typ) {
     const ruder   = letzte.rudergaenger || "";
     const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
 
-    /* Ladeanzeige – max 3 Sekunden sichtbar */
-    statusSetzen("⏳ GPS + Wind…", "ok", 3500);
+    /* Ladeanzeige im Logbuch-Card unten */
+    logLadeStatusSetzen("⏳ GPS + Wind…", 3500);
 
     /* GPS + frisches Wetter mit 3s Timeout */
     const gps = await gpsUndWetterHolen(3000);
@@ -1291,7 +1299,7 @@ async function schnellEintragSpeichern(typ) {
     if (typ === "MOB") {
         statusSetzen("🆘 MOB – Mann über Bord! Zeit: " + ev.zeit.slice(11, 16), "error", 10000);
     } else {
-        statusSetzen("✅ " + typ + " gespeichert.", "ok", 2000);
+        logLadeStatusSetzen("✅ " + typ + " gespeichert.", 2000);
     }
 }
 
