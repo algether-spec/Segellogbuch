@@ -1232,7 +1232,11 @@ function schnellEintragSpeichern(typ) {
     }
     const letzte    = ladeLetzteWerte() || {};
     const windSel   = document.getElementById("ls-wind-select");
-    const wind      = (windSel && windSel.value !== "") ? windSel.value : (letzte.wind || "");
+    const windAlter = letzte.windTs ? (Date.now() - letzte.windTs) : Infinity;
+    const windFrisch = windAlter < 30 * 60 * 1000; /* < 30 Minuten */
+    const wind      = windFrisch && (windSel && windSel.value !== "") ? windSel.value
+                    : windFrisch && letzte.wind ? letzte.wind
+                    : "";
     const ruder     = letzte.rudergaenger || "";
     /* Lokale Zeit als ISO-String "2026-03-18T14:35" */
     const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");

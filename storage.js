@@ -146,7 +146,8 @@ function ladeLetzteWerte() {
 }
 
 function speichereLetzteWerte(wind, rudergaenger) {
-    localStorage.setItem(KEY_LETZTE_WERTE, JSON.stringify({ wind, rudergaenger }));
+    const windTs = wind ? Date.now() : 0;
+    localStorage.setItem(KEY_LETZTE_WERTE, JSON.stringify({ wind, rudergaenger, windTs }));
 }
 
 
