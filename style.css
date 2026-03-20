@@ -358,11 +358,35 @@ button:active { opacity: 0.75; }
 
 .btn-zustand:active { opacity: 0.8; }
 
+/* --- Log-Card Header (Titel + Rudergänger nebeneinander) -------- */
+
+.log-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.log-card-header h2 {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    flex: 1;
+}
+
 /* --- Rudergänger-Button ----------------------------------------- */
 
 .ruder-bar {
     position: relative;
     margin-bottom: 10px;
+}
+
+.log-card-header .ruder-bar {
+    margin-bottom: 0;
+    flex-shrink: 0;
 }
 
 .btn-rudergaenger {
@@ -379,6 +403,13 @@ button:active { opacity: 0.75; }
     text-align: left;
     transition: background 0.15s;
 }
+
+.log-card-header .btn-rudergaenger {
+    width: auto;
+    min-width: 110px;
+    white-space: nowrap;
+}
+
 .btn-rudergaenger:active { background: #e2e8f0; }
 
 .ruder-dropdown {
@@ -1425,6 +1456,8 @@ button:active { opacity: 0.75; }
     .btn-zustand { background: #1e293b; color: #94a3b8; }
     .btn-zustand-aktiv { background: #0c2a3f; color: #38bdf8; border-color: #1e4976; }
     .btn-zustand[id="btn-zustand-motor"].btn-zustand-aktiv { background: #2d1a0a; color: #fb923c; border-color: #7c2d12; }
+
+    .log-card-header { border-bottom-color: #334155; }
 
     .logbuch-status { background: #0c2a3f; border-color: #1e4976; color: #7dd3fc; }
     .ls-sep         { color: #1e4976; }
