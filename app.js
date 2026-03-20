@@ -254,13 +254,10 @@ function hafenSperrungAktualisieren(stopp) {
     if (startBar) startBar.hidden = !istStopp;
     if (stoppBar) stoppBar.hidden = istStopp;
 
-    /* Zustand- und Manöver-Bereiche: nur bei FAHRT sichtbar */
-    const zustandBar   = document.getElementById("zustand-bar");
-    const ruderBar     = document.getElementById("ruder-bar");
+    /* Manöver-Bereich: nur bei FAHRT sichtbar */
     const manoeverGrid = document.getElementById("manoever-grid");
-    if (zustandBar)   zustandBar.hidden   = istStopp;
-    if (ruderBar)     ruderBar.hidden     = istStopp;
     if (manoeverGrid) manoeverGrid.hidden = istStopp;
+    /* Dropdown schließen wenn gestoppt */
     if (istStopp) { const dd = document.getElementById("ruder-dropdown"); if (dd) dd.hidden = true; }
 
     /* btn-schnell-sm in Weitere-Panel + Formular-Speichern-Button */
@@ -269,8 +266,9 @@ function hafenSperrungAktualisieren(stopp) {
     });
     /* btnLogSpeichern bleibt immer aktiv – Modal ermöglicht Nachträge auch bei STOPP */
 
-    /* Bei FAHRT: Wende/Halse korrekt per Segeln/Motor-Zustand setzen + Track */
-    if (!istStopp) { zustandAktualisieren(); trackStarten(); }
+    /* Wende/Halse/Reffen-Zustand immer aktualisieren, Track je nach Status */
+    zustandAktualisieren();
+    if (!istStopp) trackStarten();
     else trackStoppen();
 
     /* Statusleiste: Modus-Text überschreiben wenn gestoppt */
