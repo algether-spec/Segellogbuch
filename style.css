@@ -251,15 +251,16 @@ button:active { opacity: 0.75; }
 .logbuch-status {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: #f0f9ff;
-    border: 1.5px solid #bae6fd;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 10px;
-    padding: 9px 14px;
-    margin-bottom: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #0c4a6e;
+    padding: 8px 12px;
+    margin-top: 10px;
+    margin-bottom: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
     flex-wrap: wrap;
 }
 
@@ -1472,10 +1473,10 @@ button:active { opacity: 0.75; }
     .btn-rudergaenger { color: #94a3b8; border-color: #334155; }
     .btn-rudergaenger:active { background: #1e293b; color: #e2e8f0; }
 
-    .logbuch-status { background: #0c2a3f; border-color: #1e4976; color: #7dd3fc; }
-    .ls-sep         { color: #1e4976; }
-    #ls-seit        { color: #38bdf8; }
-    .ls-ruder-select { color: #7dd3fc; text-decoration-color: #1e4976; }
+    .logbuch-status { background: #1e293b; border-color: #334155; color: #64748b; }
+    .ls-sep         { color: #334155; }
+    #ls-seit        { color: #64748b; }
+    .ls-ruder-select { color: #64748b; text-decoration-color: #334155; }
 
     .update-hinweis { background: #2d1a0a; border-color: #c2410c; color: #fdba74; }
     .update-hinweis button { background: #c2410c; }
