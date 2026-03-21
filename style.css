@@ -28,6 +28,13 @@ header {
     margin-bottom: 16px;
 }
 
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 header h1 {
     font-size: 22px;
     font-weight: 800;
@@ -38,6 +45,116 @@ header p {
     font-size: 13px;
     opacity: 0.7;
     margin-top: 3px;
+}
+
+.btn-hamburger {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.btn-hamburger:active { background: rgba(255,255,255,0.3); }
+
+/* --- Sidebar ---------------------------------------------------- */
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.5);
+    z-index: 300;
+}
+
+.sidebar-overlay.sidebar-open { display: block; }
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    max-width: 80vw;
+    background: #fff;
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+}
+
+.sidebar.sidebar-open { transform: translateX(0); }
+
+.sidebar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px 14px;
+    background: #0f4c81;
+    color: #fff;
+}
+
+.sidebar-titel {
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.btn-sidebar-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-sidebar-close:active { background: rgba(255,255,255,0.3); }
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+    flex: 1;
+}
+
+.sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    border-radius: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-btn:active { background: #f1f5f9; }
+
+.sidebar-btn.sidebar-aktiv {
+    color: #0f4c81;
+    background: #eff6ff;
+    border-left-color: #0f4c81;
+    font-weight: 700;
 }
 
 /* --- Törnauswahl ------------------------------------------------ */
@@ -375,7 +492,7 @@ button:active { opacity: 0.75; }
 
 .logbuch-sticky {
     position: sticky;
-    top: 60px;          /* Höhe der Tab-Nav */
+    top: 0;
     z-index: 40;
     background: #f0f4f8;
     padding-bottom: 8px;
@@ -1559,6 +1676,9 @@ button:active { opacity: 0.75; }
     .btn-zustand-aktiv { background: #0c2a3f; color: #38bdf8; border-color: #1e4976; }
     .btn-zustand[id="btn-zustand-motor"].btn-zustand-aktiv { background: #2d1a0a; color: #fb923c; border-color: #7c2d12; }
 
+    .sidebar { background: #1e293b; }
+    .sidebar-btn { color: #cbd5e1; }
+    .sidebar-btn.sidebar-aktiv { color: #7dd3fc; background: #0c2a3f; border-left-color: #38bdf8; }
     .logbuch-sticky { background: #0f172a; }
     .log-lade-status { background: #064e3b; color: #6ee7b7; }
     .log-card-header { border-bottom-color: #334155; }

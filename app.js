@@ -1067,6 +1067,13 @@ function toernLaden(tripId) {
     stoppZustandSpeichern(toern.stoppZustand || "hafen");
     hafenSperrungAktualisieren(toern.stoppZustand || "hafen");
     speichereAktivenToern(tripId);
+    /* Logbuch + Log direkt initialisieren (kein Tab-Wechsel mehr nötig) */
+    logZeitVorbefuellen();
+    rudergaengerSelectFuellen();
+    const _lv = ladeLetzteWerte() || {};
+    if (_lv.rudergaenger) logRudergaenger.value = _lv.rudergaenger;
+    logbuchStatusAktualisieren();
+    zeigeLogs();
 }
 
 function neuerToernAnlegen() {
@@ -1306,35 +1313,74 @@ async function schnellEintragSpeichern(typ) {
 }
 
 
-/* --- Tab-Navigation --------------------------------------------- */
+/* --- Sidebar ---------------------------------------------------- */
 
-function tabWechseln(tabId) {
-    document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("tab-hidden"));
-    document.getElementById(tabId).classList.remove("tab-hidden");
-    document.querySelectorAll(".tab-btn").forEach(b =>
-        b.classList.toggle("tab-aktiv", b.dataset.tab === tabId)
-    );
-    /* Logbuch-Sticky ein-/ausblenden */
-    const sticky = document.getElementById("logbuch-sticky");
-    if (sticky) sticky.hidden = !(tabId === "tab-logbuch" && !!aktuellerToern);
-    /* Beim Wechsel zum Logbuch: Zeit und letzte Werte vorausfüllen */
-    if (tabId === "tab-logbuch" && aktuellerToern) {
-        logZeitVorbefuellen();
-        rudergaengerSelectFuellen();
-        const letzte = ladeLetzteWerte() || {};
-        if (letzte.rudergaenger) logRudergaenger.value = letzte.rudergaenger || "";
-        logbuchStatusAktualisieren();
-        formWetterVorbelegen();
-    }
-    /* Beim Wechsel zum Log-Tab: Liste aktualisieren */
-    if (tabId === "tab-log" && aktuellerToern) {
-        zeigeLogs();
-    }
-    /* Beim Wechsel zum Statistik-Tab: Track-Karte rendern */
-    if (tabId === "tab-statistik" && aktuellerToern) {
-        trackKarteRendern(aktuellerToern);
-    }
+function sidebarOeffnen() {
+    document.getElementById("sidebar").classList.add("sidebar-open");
+    document.getElementById("sidebar-overlay").classList.add("sidebar-open");
 }
+
+function sidebarSchliessen() {
+    document.getElementById("sidebar").classList.remove("sidebar-open");
+    document.getElementById("sidebar-overlay").classList.remove("sidebar-open");
+}
+
+/* Swipe-nach-links schließt Sidebar */
+(function () {
+    let _xStart = null;
+    document.getElementById("sidebar").addEventListener("touchstart", e => {
+        _xStart = e.touches[0].clientX;
+    }, { passive: true });
+    document.getElementById("sidebar").addEventListener("touchend", e => {
+        if (_xStart === null) return;
+        if (_xStart - e.changedTouches[0].clientX > 60) sidebarSchliessen();
+        _xStart = null;
+    }, { passive: true });
+})();
+
+/* --- Seitennavigation ------------------------------------------- */
+
+let _aktiveSeitenId = null;
+
+function seitenWechseln(seiteId) {
+    const seitenPanels = ["tab-toern", "tab-crew", "tab-statistik"];
+    const hauptBereich = document.getElementById("haupt-bereich");
+
+    _aktiveSeitenId = seiteId || null;
+
+    if (!seiteId) {
+        /* Hauptbereich (Logbuch + Log) anzeigen */
+        if (hauptBereich) hauptBereich.hidden = false;
+        seitenPanels.forEach(id => {
+            const p = document.getElementById(id);
+            if (p) p.classList.add("tab-hidden");
+        });
+    } else {
+        /* Sidebar-Panel anzeigen */
+        if (hauptBereich) hauptBereich.hidden = true;
+        seitenPanels.forEach(id => {
+            const p = document.getElementById(id);
+            if (p) p.classList.toggle("tab-hidden", id !== seiteId);
+        });
+        if (seiteId === "tab-statistik" && aktuellerToern) {
+            trackKarteRendern(aktuellerToern);
+        }
+    }
+
+    /* Aktiven Sidebar-Button hervorheben */
+    document.querySelectorAll(".sidebar-btn").forEach(b =>
+        b.classList.toggle("sidebar-aktiv", b.dataset.seite === seiteId)
+    );
+
+    /* Logbuch-Sticky: nur sichtbar im Hauptbereich mit aktivem Törn */
+    const sticky = document.getElementById("logbuch-sticky");
+    if (sticky) sticky.hidden = !(!!aktuellerToern && !seiteId);
+
+    sidebarSchliessen();
+}
+
+/* Rückwärtskompatibilität – wird nicht mehr von HTML aufgerufen */
+function tabWechseln(tabId) { seitenWechseln(tabId); }
 
 function tabInhaltToggeln() {
     const aktiv = !!aktuellerToern;
@@ -1344,10 +1390,9 @@ function tabInhaltToggeln() {
         if (leer)   leer.hidden   = aktiv;
         if (inhalt) inhalt.hidden = !aktiv;
     });
-    /* Logbuch-Sticky: nur sichtbar wenn Törn aktiv UND Logbuch-Tab offen */
-    const sticky   = document.getElementById("logbuch-sticky");
-    const aktivTab = document.querySelector(".tab-btn.tab-aktiv");
-    if (sticky) sticky.hidden = !(aktiv && aktivTab && aktivTab.dataset.tab === "tab-logbuch");
+    /* Logbuch-Sticky: sichtbar wenn Törn aktiv UND Hauptbereich sichtbar */
+    const sticky = document.getElementById("logbuch-sticky");
+    if (sticky) sticky.hidden = !(aktiv && !_aktiveSeitenId);
     const bar = document.getElementById("aktiver-toern-bar");
     bar.hidden = !aktiv;
     if (aktiv) {
@@ -1845,6 +1890,13 @@ toernSelectAktualisieren();
 formSection.hidden = true;
 btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
+
+/* Hauptbereich anzeigen, Sidebar-Panels verstecken */
+["tab-toern", "tab-crew", "tab-statistik"].forEach(id => {
+    const p = document.getElementById(id);
+    if (p) p.classList.add("tab-hidden");
+});
+document.getElementById("haupt-bereich").hidden = false;
 
 /* Letzten aktiven Törn wiederherstellen */
 const _letzterToernId = ladeAktivenToernId();

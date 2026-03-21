@@ -14,9 +14,30 @@
 <div class="app">
 
     <header>
-        <h1>⛵ Segellogbuch</h1>
-        <p>Törns erfassen und verwalten</p>
+        <div class="header-content">
+            <div>
+                <h1>⛵ Segellogbuch</h1>
+                <p>Törns erfassen und verwalten</p>
+            </div>
+            <button type="button" id="btn-hamburger" class="btn-hamburger" onclick="sidebarOeffnen()">☰</button>
+        </div>
     </header>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="sidebarSchliessen()"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-top">
+            <span class="sidebar-titel">⛵ Menü</span>
+            <button type="button" class="btn-sidebar-close" onclick="sidebarSchliessen()">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+            <button type="button" class="sidebar-btn" data-seite="tab-toern"     onclick="seitenWechseln('tab-toern')">📋 Törn</button>
+            <button type="button" class="sidebar-btn" data-seite="tab-crew"      onclick="seitenWechseln('tab-crew')">👥 Crew</button>
+            <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
+        </nav>
+    </div>
 
     <!-- Status -->
     <div id="status-msg" class="status-msg" hidden></div>
@@ -25,15 +46,6 @@
     <div id="aktiver-toern-bar" class="aktiver-toern-bar" hidden>
         <span id="aktiver-toern-label"></span>
     </div>
-
-    <!-- Tab-Navigation -->
-    <nav class="tab-nav">
-        <button class="tab-btn tab-aktiv" data-tab="tab-toern"     onclick="tabWechseln('tab-toern')">📋 Törn</button>
-        <button class="tab-btn"           data-tab="tab-crew"      onclick="tabWechseln('tab-crew')">👥 Crew</button>
-        <button class="tab-btn"           data-tab="tab-logbuch"   onclick="tabWechseln('tab-logbuch')">📘 Logbuch</button>
-        <button class="tab-btn"           data-tab="tab-log"       onclick="tabWechseln('tab-log')">📋 Log</button>
-        <button class="tab-btn"           data-tab="tab-statistik" onclick="tabWechseln('tab-statistik')">📊 Statistik</button>
-    </nav>
 
     <!-- Logbuch Sticky Bar (Rudergänger + Segeln/Motor) -->
     <div id="logbuch-sticky" class="logbuch-sticky" hidden>
@@ -172,8 +184,11 @@
 
     </div><!-- /tab-crew -->
 
-    <!-- ═══ Tab 3: Logbuch ═════════════════════════════════════════ -->
-    <div id="tab-logbuch" class="tab-panel tab-hidden">
+    <!-- ═══ Hauptbereich: Logbuch + Log (immer sichtbar) ══════════ -->
+    <div id="haupt-bereich">
+
+    <!-- Logbuch -->
+    <div id="tab-logbuch" class="tab-panel">
 
         <div class="tab-leer" id="tab-logbuch-leer">
             <p>⬆ Bitte zuerst einen Törn auswählen oder anlegen.</p>
@@ -241,8 +256,8 @@
 
     </div><!-- /tab-logbuch -->
 
-    <!-- ═══ Tab 4: Log ═════════════════════════════════════════════ -->
-    <div id="tab-log" class="tab-panel tab-hidden">
+    <!-- Log -->
+    <div id="tab-log" class="tab-panel">
 
         <div class="tab-leer" id="tab-log-leer">
             <p>⬆ Bitte zuerst einen Törn auswählen oder anlegen.</p>
@@ -253,6 +268,8 @@
         </div>
 
     </div><!-- /tab-log -->
+
+    </div><!-- /haupt-bereich -->
 
     <!-- ═══ Tab 5: Statistik ═══════════════════════════════════════ -->
     <div id="tab-statistik" class="tab-panel tab-hidden">
