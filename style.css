@@ -496,6 +496,9 @@ button:active { opacity: 0.75; }
     z-index: 40;
     background: #f0f4f8;
     padding-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 /* --- Log-Card Header (Titel + Rudergänger nebeneinander) -------- */
@@ -521,7 +524,6 @@ button:active { opacity: 0.75; }
 
 .ruder-bar {
     position: relative;
-    margin-bottom: 10px;
 }
 
 .log-card-header .ruder-bar {
