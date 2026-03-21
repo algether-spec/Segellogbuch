@@ -1066,6 +1066,7 @@ function toernLaden(tripId) {
     toernSelectAktualisieren();
     stoppZustandSpeichern(toern.stoppZustand || "hafen");
     hafenSperrungAktualisieren(toern.stoppZustand || "hafen");
+    speichereAktivenToern(tripId);
 }
 
 function neuerToernAnlegen() {
@@ -1099,6 +1100,7 @@ function toernLoeschenAktion() {
     trackStoppen();
     toernLoeschen(aktuellerToern.tripId);
     aktuellerToern = null;
+    speichereAktivenToern(null);
     formSection.hidden = true;
     btnToernLoeschen.hidden = true;
     toernSelect.value = "";
@@ -1407,7 +1409,7 @@ crewInput.addEventListener("keydown", e => {
 toernSelect.onchange = () => {
     const val = toernSelect.value;
     if (val) toernLaden(val);
-    else { formSection.hidden = true; aktuellerToern = null; tabInhaltToggeln(); }
+    else { formSection.hidden = true; aktuellerToern = null; speichereAktivenToern(null); tabInhaltToggeln(); }
 };
 
 function ruderDropdownToggeln() {
@@ -1843,8 +1845,16 @@ toernSelectAktualisieren();
 formSection.hidden = true;
 btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
-tabInhaltToggeln();
-hafenSperrungAktualisieren(stoppZustandLaden());
+
+/* Letzten aktiven Törn wiederherstellen */
+const _letzterToernId = ladeAktivenToernId();
+if (_letzterToernId && alleToernsLaden().find(t => t.tripId === _letzterToernId)) {
+    toernLaden(_letzterToernId);
+    tabInhaltToggeln();
+} else {
+    tabInhaltToggeln();
+    hafenSperrungAktualisieren(stoppZustandLaden());
+}
 backupBannerPruefen();
 backupStatusAktualisieren();
 pwaMigrationPruefen();

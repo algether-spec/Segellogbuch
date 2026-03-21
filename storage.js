@@ -8,6 +8,7 @@ const KEY_CREW            = "segel_logbuch_crew";
 const KEY_AUTOBACKUP      = "segel_logbuch_autobackup";
 const KEY_PERMANENT_BACKUP = "segel_logbuch_backup_permanent";
 const KEY_LETZTE_WERTE    = "last_values";
+const KEY_AKTIVER_TOERN   = "segel_logbuch_aktiver_toern";
 
 
 /* --- Hilfsfunktion ---------------------------------------------- */
@@ -148,6 +149,18 @@ function ladeLetzteWerte() {
 function speichereLetzteWerte(wind, rudergaenger) {
     const windTs = wind ? Date.now() : 0;
     localStorage.setItem(KEY_LETZTE_WERTE, JSON.stringify({ wind, rudergaenger, windTs }));
+}
+
+
+/* --- Aktiver Törn ----------------------------------------------- */
+
+function speichereAktivenToern(tripId) {
+    if (tripId) localStorage.setItem(KEY_AKTIVER_TOERN, tripId);
+    else        localStorage.removeItem(KEY_AKTIVER_TOERN);
+}
+
+function ladeAktivenToernId() {
+    return localStorage.getItem(KEY_AKTIVER_TOERN) || null;
 }
 
 
