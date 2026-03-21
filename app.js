@@ -1325,17 +1325,28 @@ function sidebarSchliessen() {
     document.getElementById("sidebar-overlay").classList.remove("sidebar-open");
 }
 
-/* Swipe-nach-links schließt Sidebar */
+/* Sidebar schließen: Overlay antippen (click + touchend für iOS) */
 (function () {
+    const overlay = document.getElementById("sidebar-overlay");
+    overlay.addEventListener("click",      () => sidebarSchliessen());
+    overlay.addEventListener("touchend",   e  => { e.preventDefault(); sidebarSchliessen(); });
+
+    /* Swipe nach links schließt Sidebar */
     let _xStart = null;
-    document.getElementById("sidebar").addEventListener("touchstart", e => {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.addEventListener("touchstart", e => {
         _xStart = e.touches[0].clientX;
     }, { passive: true });
-    document.getElementById("sidebar").addEventListener("touchend", e => {
+    sidebar.addEventListener("touchend", e => {
         if (_xStart === null) return;
         if (_xStart - e.changedTouches[0].clientX > 60) sidebarSchliessen();
         _xStart = null;
     }, { passive: true });
+
+    /* Escape-Taste */
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") sidebarSchliessen();
+    });
 })();
 
 /* --- Seitennavigation ------------------------------------------- */
