@@ -237,7 +237,7 @@ function stoppZustandLaden() {
         localStorage.setItem("segel_logbuch_stopp", "hafen");
         localStorage.removeItem("segel_logbuch_im_hafen");
     }
-    return localStorage.getItem("segel_logbuch_stopp") || "fahrt";
+    return localStorage.getItem("segel_logbuch_stopp") || "hafen";
 }
 
 function stoppZustandSpeichern(val) {
