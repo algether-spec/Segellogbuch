@@ -1340,7 +1340,25 @@ function sidebarSchliessen() {
 
 /* --- Seitennavigation ------------------------------------------- */
 
-let _aktiveSeitenId = null;
+let _aktiveSeitenId  = null;
+let _aktiverHauptTab = "tab-logbuch";
+
+function hauptTabWechseln(tabId) {
+    const hauptTabs = ["tab-logbuch", "tab-log", "tab-karte"];
+    _aktiverHauptTab = tabId;
+    hauptTabs.forEach(id => {
+        const p = document.getElementById(id);
+        if (p) p.classList.toggle("tab-hidden", id !== tabId);
+    });
+    document.querySelectorAll(".haupt-tab-btn").forEach(b =>
+        b.classList.toggle("haupt-tab-aktiv", b.dataset.tab === tabId)
+    );
+    /* Logbuch-Sticky nur beim Logbuch-Tab anzeigen */
+    const sticky = document.getElementById("logbuch-sticky");
+    if (sticky) sticky.hidden = !(!!aktuellerToern && !_aktiveSeitenId && tabId === "tab-logbuch");
+    /* Karte rendern wenn Tab gewechselt */
+    if (tabId === "tab-karte" && aktuellerToern) karteTabRendern(aktuellerToern);
+}
 
 function seitenWechseln(seiteId) {
     const seitenPanels = ["tab-toern", "tab-crew", "tab-statistik"];
@@ -1372,9 +1390,9 @@ function seitenWechseln(seiteId) {
         b.classList.toggle("sidebar-aktiv", b.dataset.seite === seiteId)
     );
 
-    /* Logbuch-Sticky: nur sichtbar im Hauptbereich mit aktivem Törn */
+    /* Logbuch-Sticky: nur sichtbar im Hauptbereich auf Logbuch-Tab mit aktivem Törn */
     const sticky = document.getElementById("logbuch-sticky");
-    if (sticky) sticky.hidden = !(!!aktuellerToern && !seiteId);
+    if (sticky) sticky.hidden = !(!!aktuellerToern && !seiteId && _aktiverHauptTab === "tab-logbuch");
 
     sidebarSchliessen();
 }
@@ -1384,15 +1402,15 @@ function tabWechseln(tabId) { seitenWechseln(tabId); }
 
 function tabInhaltToggeln() {
     const aktiv = !!aktuellerToern;
-    ["crew", "logbuch", "log", "statistik"].forEach(t => {
+    ["crew", "logbuch", "log", "karte", "statistik"].forEach(t => {
         const leer   = document.getElementById("tab-" + t + "-leer");
         const inhalt = document.getElementById("tab-" + t + "-inhalt");
         if (leer)   leer.hidden   = aktiv;
         if (inhalt) inhalt.hidden = !aktiv;
     });
-    /* Logbuch-Sticky: sichtbar wenn Törn aktiv UND Hauptbereich sichtbar */
+    /* Logbuch-Sticky: sichtbar wenn Törn aktiv, Hauptbereich sichtbar, Logbuch-Tab aktiv */
     const sticky = document.getElementById("logbuch-sticky");
-    if (sticky) sticky.hidden = !(aktiv && !_aktiveSeitenId);
+    if (sticky) sticky.hidden = !(aktiv && !_aktiveSeitenId && _aktiverHauptTab === "tab-logbuch");
     const bar = document.getElementById("aktiver-toern-bar");
     bar.hidden = !aktiv;
     if (aktiv) {
@@ -1781,7 +1799,8 @@ function pwaMigrationPruefen() {
 
 /* --- Track-Karte (Leaflet) --------------------------------------- */
 
-let _trackMap = null;
+let _trackMap  = null;
+let _hauptKarte = null;
 
 function haversineKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -1879,6 +1898,43 @@ function trackTabelleRendern(pts) {
         <thead><tr><th>Zeit</th><th>Lat</th><th>Lon</th><th>SOG (kn)</th><th>Intervall</th></tr></thead>
         <tbody>${zeilen}</tbody>
     </table>`;
+}
+
+function karteTabRendern(toern) {
+    const mapDiv = document.getElementById("haupt-karte");
+    if (!mapDiv) return;
+    const pts = (toern?.track?.points) || [];
+    if (pts.length < 2) {
+        mapDiv.innerHTML = "<p style='padding:16px;color:#64748b'>Keine Track-Daten vorhanden.</p>";
+        return;
+    }
+    if (_hauptKarte) { _hauptKarte.remove(); _hauptKarte = null; }
+    _hauptKarte = L.map(mapDiv);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
+        maxZoom: 18
+    }).addTo(_hauptKarte);
+
+    const latlngs = pts.map(p => [p.lat, p.lon]);
+    L.polyline(latlngs, { color: "#0ea5e9", weight: 3, opacity: 0.85 }).addTo(_hauptKarte);
+
+    const startIcon = L.divIcon({ className: "", html: "<div style='background:#16a34a;border:2px solid #fff;border-radius:50%;width:12px;height:12px;box-shadow:0 1px 4px rgba(0,0,0,.4)'></div>", iconSize: [12, 12], iconAnchor: [6, 6] });
+    L.marker(latlngs[0], { icon: startIcon }).addTo(_hauptKarte)
+        .bindPopup("▶ Start · " + pts[0].zeit.slice(11, 16));
+
+    const endeIcon = L.divIcon({ className: "", html: "<div style='background:#dc2626;border:2px solid #fff;border-radius:50%;width:12px;height:12px;box-shadow:0 1px 4px rgba(0,0,0,.4)'></div>", iconSize: [12, 12], iconAnchor: [6, 6] });
+    L.marker(latlngs[latlngs.length - 1], { icon: endeIcon }).addTo(_hauptKarte)
+        .bindPopup("⏹ Ende · " + pts[pts.length - 1].zeit.slice(11, 16));
+
+    const evIcon = L.divIcon({ className: "", html: "<div style='background:#f59e0b;border:2px solid #fff;border-radius:50%;width:9px;height:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)'></div>", iconSize: [9, 9], iconAnchor: [4, 4] });
+    (toern.events || []).forEach(ev => {
+        if (ev.pos?.lat && ev.pos?.lon) {
+            L.marker([ev.pos.lat, ev.pos.lon], { icon: evIcon }).addTo(_hauptKarte)
+                .bindPopup(ev.type + " · " + (ev.zeit || "").slice(11, 16));
+        }
+    });
+
+    _hauptKarte.fitBounds(L.latLngBounds(latlngs).pad(0.15));
 }
 
 /* --- Start ------------------------------------------------------ */

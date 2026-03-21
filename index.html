@@ -15,11 +15,11 @@
 
     <header>
         <div class="header-content">
+            <button type="button" id="btn-hamburger" class="btn-hamburger" onclick="sidebarOeffnen()">☰</button>
             <div>
                 <h1>⛵ Segellogbuch</h1>
                 <p>Törns erfassen und verwalten</p>
             </div>
-            <button type="button" id="btn-hamburger" class="btn-hamburger" onclick="sidebarOeffnen()">☰</button>
         </div>
     </header>
 
@@ -184,8 +184,14 @@
 
     </div><!-- /tab-crew -->
 
-    <!-- ═══ Hauptbereich: Logbuch + Log (immer sichtbar) ══════════ -->
+    <!-- ═══ Hauptbereich: Logbuch + Log + Karte ══════════════════ -->
     <div id="haupt-bereich">
+
+    <nav class="haupt-tab-nav">
+        <button type="button" class="haupt-tab-btn haupt-tab-aktiv" data-tab="tab-logbuch" onclick="hauptTabWechseln('tab-logbuch')">📘 Logbuch</button>
+        <button type="button" class="haupt-tab-btn" data-tab="tab-log" onclick="hauptTabWechseln('tab-log')">📋 Log</button>
+        <button type="button" class="haupt-tab-btn" data-tab="tab-karte" onclick="hauptTabWechseln('tab-karte')">🗺️ Karte</button>
+    </nav>
 
     <!-- Logbuch -->
     <div id="tab-logbuch" class="tab-panel">
@@ -257,7 +263,7 @@
     </div><!-- /tab-logbuch -->
 
     <!-- Log -->
-    <div id="tab-log" class="tab-panel">
+    <div id="tab-log" class="tab-panel tab-hidden">
 
         <div class="tab-leer" id="tab-log-leer">
             <p>⬆ Bitte zuerst einen Törn auswählen oder anlegen.</p>
@@ -268,6 +274,19 @@
         </div>
 
     </div><!-- /tab-log -->
+
+    <!-- Karte -->
+    <div id="tab-karte" class="tab-panel tab-hidden">
+
+        <div class="tab-leer" id="tab-karte-leer">
+            <p>⬆ Bitte zuerst einen Törn auswählen oder anlegen.</p>
+        </div>
+
+        <div id="tab-karte-inhalt" hidden>
+            <div id="haupt-karte" class="haupt-karte"></div>
+        </div>
+
+    </div><!-- /tab-karte -->
 
     </div><!-- /haupt-bereich -->
 
