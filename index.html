@@ -15,7 +15,7 @@
 
     <header>
         <div class="header-content">
-            <button type="button" id="btn-hamburger" class="btn-hamburger" onclick="sidebarOeffnen()">☰</button>
+            <button type="button" id="btn-hamburger" class="btn-hamburger" onclick="hamburgerKlick()">☰</button>
             <div>
                 <h1>⛵ Segellogbuch</h1>
                 <p>Törns erfassen und verwalten</p>
@@ -37,6 +37,11 @@
             <button type="button" class="sidebar-btn" data-seite="tab-crew"      onclick="seitenWechseln('tab-crew')">👥 Crew</button>
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
         </nav>
+    </div>
+
+    <!-- Zurück-Bar (nur sichtbar wenn Sidebar-Panel offen) -->
+    <div id="zurueck-bar" class="zurueck-bar" hidden>
+        <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
     </div>
 
     <!-- Status -->

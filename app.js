@@ -1315,6 +1315,14 @@ async function schnellEintragSpeichern(typ) {
 
 /* --- Sidebar ---------------------------------------------------- */
 
+function hamburgerKlick() {
+    if (_aktiveSeitenId) {
+        seitenWechseln(null);
+    } else {
+        sidebarOeffnen();
+    }
+}
+
 function sidebarOeffnen() {
     document.getElementById("sidebar").classList.add("sidebar-open");
     document.getElementById("sidebar-overlay").classList.add("sidebar-open");
@@ -1404,6 +1412,12 @@ function seitenWechseln(seiteId) {
     /* Logbuch-Sticky: nur sichtbar im Hauptbereich auf Logbuch-Tab mit aktivem Törn */
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(!!aktuellerToern && !seiteId && _aktiverHauptTab === "tab-logbuch");
+
+    /* Zurück-Bar + Hamburger-Icon */
+    const zurueckBar = document.getElementById("zurueck-bar");
+    if (zurueckBar) zurueckBar.hidden = !seiteId;
+    const hamburger = document.getElementById("btn-hamburger");
+    if (hamburger) hamburger.textContent = seiteId ? "←" : "☰";
 
     sidebarSchliessen();
 }

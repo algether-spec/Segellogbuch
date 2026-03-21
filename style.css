@@ -255,6 +255,26 @@ button:active { opacity: 0.75; }
     font-weight: 700;
 }
 
+/* --- Zurück-Bar ------------------------------------------------- */
+
+.zurueck-bar {
+    margin-bottom: 10px;
+}
+
+.btn-zurueck {
+    background: none;
+    border: none;
+    color: #0f4c81;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 6px 0;
+    cursor: pointer;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-zurueck:active { opacity: 0.6; }
+
 /* --- Tab-Navigation --------------------------------------------- */
 
 .tab-nav {
