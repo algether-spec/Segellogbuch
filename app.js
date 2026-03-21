@@ -290,7 +290,6 @@ function logbuchStatusAktualisieren() {
     if (!el) return;
     if (!aktuellerToern || !(aktuellerToern.events || []).length) {
         el.hidden = true;
-        zustandAktualisieren();
         hafenSperrungAktualisieren(stoppZustandLaden());
         return;
     }
@@ -385,7 +384,6 @@ function logbuchStatusAktualisieren() {
     }
 
     el.hidden = false;
-    zustandAktualisieren();
     hafenSperrungAktualisieren(stoppZustandLaden());
 }
 
@@ -694,7 +692,6 @@ function logEintragSpeichern() {
     aktuellerToern.events.push(ev);
     if (STOPP_EREIGNISSE[ev.type]) stoppZustandSpeichern(STOPP_EREIGNISSE[ev.type]);
     else if (START_EREIGNISSE.has(ev.type)) stoppZustandSpeichern("fahrt");
-    hafenSperrungAktualisieren(stoppZustandLaden());
     gpsAbfragen(ev);
     speichereLetzteWerte(!isNaN(windKn) ? String(windKn) : "", logRudergaenger.value);
     toernSpeichern(aktuellerToern);
@@ -1630,6 +1627,7 @@ function gpsAbfragen(ev) {
 /* --- Autotracking ----------------------------------------------- */
 
 let _trackTimeout = null;
+let _trackLaeuft  = false; /* GPS-Anfrage läuft gerade – verhindert Doppelstart */
 
 function trackIntervallFuerSog(sogKn) {
     if (sogKn <= 0) return 0;       /* kein Punkt, aber weiter prüfen */
@@ -1644,13 +1642,16 @@ function trackStatusAnzeigen(aktiv) {
 }
 
 function trackPunktAufzeichnenUndPlanen() {
+    _trackLaeuft = true;
+    _trackTimeout = null;
     if (!aktuellerToern || stoppZustandLaden() !== "fahrt") {
         trackStoppen();
         return;
     }
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) { _trackLaeuft = false; return; }
     navigator.geolocation.getCurrentPosition(
         pos => {
+            _trackLaeuft = false;
             if (!aktuellerToern) return;
             const sogMs = pos.coords.speed;
             const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : 0;
@@ -1674,6 +1675,7 @@ function trackPunktAufzeichnenUndPlanen() {
         },
         () => {
             /* GPS-Fehler: in 60 s nochmal versuchen */
+            _trackLaeuft = false;
             _trackTimeout = setTimeout(trackPunktAufzeichnenUndPlanen, 60000);
         },
         { maximumAge: 10000, timeout: 10000, enableHighAccuracy: true }
@@ -1681,7 +1683,8 @@ function trackPunktAufzeichnenUndPlanen() {
 }
 
 function trackStarten() {
-    trackStoppen();
+    /* Idempotent: läuft bereits → nicht neu starten (sonst wird Timer bei jedem Event-Save zurückgesetzt) */
+    if (_trackTimeout !== null || _trackLaeuft) return;
     if (!aktuellerToern || stoppZustandLaden() !== "fahrt") return;
     if (!navigator.geolocation) return;
     trackPunktAufzeichnenUndPlanen();
@@ -1689,6 +1692,7 @@ function trackStarten() {
 
 function trackStoppen() {
     if (_trackTimeout) { clearTimeout(_trackTimeout); _trackTimeout = null; }
+    _trackLaeuft = false;
     trackStatusAnzeigen(false);
 }
 
