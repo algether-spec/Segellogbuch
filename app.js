@@ -1795,8 +1795,8 @@ function trackKarteRendern(toern) {
     /* Logbuch-Ereignisse als Punkte */
     const evIcon = L.divIcon({ className: "", html: "<div style='background:#f59e0b;border:2px solid #fff;border-radius:50%;width:9px;height:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)'></div>", iconSize: [9, 9], iconAnchor: [4, 4] });
     (toern.events || []).forEach(ev => {
-        if (ev.lat && ev.lon) {
-            L.marker([ev.lat, ev.lon], { icon: evIcon }).addTo(_trackMap)
+        if (ev.pos?.lat && ev.pos?.lon) {
+            L.marker([ev.pos.lat, ev.pos.lon], { icon: evIcon }).addTo(_trackMap)
                 .bindPopup(ev.type + " · " + (ev.zeit || "").slice(11, 16));
         }
     });
