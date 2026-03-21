@@ -1181,6 +1181,85 @@ button:active { opacity: 0.75; }
 .stat-typ  { color: #334155; }
 .stat-anz  { font-weight: 700; color: #0f4c81; }
 
+/* --- Track-Karte ------------------------------------------------ */
+
+.track-stat-mini {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.track-stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.track-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+}
+
+.track-stat-wert {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f4c81;
+    line-height: 1;
+}
+
+.track-karte {
+    height: 280px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.track-tabelle-wrap {
+    overflow-x: auto;
+    margin-top: 4px;
+}
+
+.track-tabelle {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.track-tabelle th {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.track-tabelle td {
+    border: 1px solid #e2e8f0;
+    padding: 5px 8px;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.track-tabelle tbody tr:nth-child(even) td { background: #f8fafc; }
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .track-stat-wert  { color: #7dd3fc; }
+    .track-stat-label { color: #475569; }
+    .track-karte      { border-color: #334155; }
+    .track-tabelle th { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    .track-tabelle td { border-color: #334155; color: #cbd5e1; }
+    .track-tabelle tbody tr:nth-child(even) td { background: #0f172a; }
+}
+
 /* --- Responsive ------------------------------------------------- */
 
 @media (max-width: 480px) {

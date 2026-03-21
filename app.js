@@ -1328,6 +1328,10 @@ function tabWechseln(tabId) {
     if (tabId === "tab-log" && aktuellerToern) {
         zeigeLogs();
     }
+    /* Beim Wechsel zum Statistik-Tab: Track-Karte rendern */
+    if (tabId === "tab-statistik" && aktuellerToern) {
+        trackKarteRendern(aktuellerToern);
+    }
 }
 
 function tabInhaltToggeln() {
@@ -1727,6 +1731,108 @@ function pwaMigrationPruefen() {
     pwaMigrationModalZeigen();
 }
 
+
+/* --- Track-Karte (Leaflet) --------------------------------------- */
+
+let _trackMap = null;
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2
+            + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
+            * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function trackDistanzNm(pts) {
+    let km = 0;
+    for (let i = 1; i < pts.length; i++)
+        km += haversineKm(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon);
+    return (km * 0.539957).toFixed(1);
+}
+
+function trackKarteRendern(toern) {
+    const section = document.getElementById("track-section");
+    if (!section) return;
+    const pts = (toern?.track?.points) || [];
+    if (pts.length < 2) { section.hidden = true; return; }
+    section.hidden = false;
+
+    /* Mini-Statistik */
+    const distNm = trackDistanzNm(pts);
+    const sogSum = pts.reduce((s, p) => s + (p.sog || 0), 0);
+    const avgSog = pts.length ? (sogSum / pts.length).toFixed(1) : "—";
+    document.getElementById("track-stat-mini").innerHTML =
+        `<div class="track-stat-item"><span class="track-stat-label">Punkte</span><span class="track-stat-wert">${pts.length}</span></div>` +
+        `<div class="track-stat-item"><span class="track-stat-label">Distanz</span><span class="track-stat-wert">${distNm} nm</span></div>` +
+        `<div class="track-stat-item"><span class="track-stat-label">Ø SOG</span><span class="track-stat-wert">${avgSog} kn</span></div>`;
+
+    /* Leaflet Karte */
+    const mapDiv = document.getElementById("track-karte");
+    if (_trackMap) { _trackMap.remove(); _trackMap = null; }
+    _trackMap = L.map(mapDiv);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
+        maxZoom: 18
+    }).addTo(_trackMap);
+
+    /* Route als Linie */
+    const latlngs = pts.map(p => [p.lat, p.lon]);
+    L.polyline(latlngs, { color: "#0ea5e9", weight: 3, opacity: 0.85 }).addTo(_trackMap);
+
+    /* Start-Marker (grün) */
+    const startIcon = L.divIcon({ className: "", html: "<div style='background:#16a34a;border:2px solid #fff;border-radius:50%;width:12px;height:12px;box-shadow:0 1px 4px rgba(0,0,0,.4)'></div>", iconSize: [12, 12], iconAnchor: [6, 6] });
+    L.marker(latlngs[0], { icon: startIcon }).addTo(_trackMap)
+        .bindPopup("▶ Start · " + pts[0].zeit.slice(11, 16));
+
+    /* Ende-Marker (rot) */
+    const endeIcon = L.divIcon({ className: "", html: "<div style='background:#dc2626;border:2px solid #fff;border-radius:50%;width:12px;height:12px;box-shadow:0 1px 4px rgba(0,0,0,.4)'></div>", iconSize: [12, 12], iconAnchor: [6, 6] });
+    L.marker(latlngs[latlngs.length - 1], { icon: endeIcon }).addTo(_trackMap)
+        .bindPopup("⏹ Ende · " + pts[pts.length - 1].zeit.slice(11, 16));
+
+    /* Logbuch-Ereignisse als Punkte */
+    const evIcon = L.divIcon({ className: "", html: "<div style='background:#f59e0b;border:2px solid #fff;border-radius:50%;width:9px;height:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)'></div>", iconSize: [9, 9], iconAnchor: [4, 4] });
+    (toern.events || []).forEach(ev => {
+        if (ev.lat && ev.lon) {
+            L.marker([ev.lat, ev.lon], { icon: evIcon }).addTo(_trackMap)
+                .bindPopup(ev.type + " · " + (ev.zeit || "").slice(11, 16));
+        }
+    });
+
+    /* Karte auf Route zentrieren */
+    _trackMap.fitBounds(L.latLngBounds(latlngs).pad(0.15));
+
+    /* Tabelle */
+    trackTabelleRendern(pts);
+}
+
+function trackTabelleRendern(pts) {
+    const wrap = document.getElementById("track-tabelle-wrap");
+    if (!wrap) return;
+    const zeilen = pts.map((p, i) => {
+        let intervall = "—";
+        if (i > 0) {
+            const diffMs = new Date(pts[i].zeit) - new Date(pts[i-1].zeit);
+            if (!isNaN(diffMs) && diffMs > 0) {
+                const min = Math.round(diffMs / 60000);
+                intervall = min + " min";
+            }
+        }
+        return `<tr>
+            <td>${p.zeit.slice(11, 16)}</td>
+            <td>${p.lat.toFixed(4)}</td>
+            <td>${p.lon.toFixed(4)}</td>
+            <td>${p.sog ?? "—"}</td>
+            <td>${intervall}</td>
+        </tr>`;
+    }).join("");
+    wrap.innerHTML = `<table class="track-tabelle">
+        <thead><tr><th>Zeit</th><th>Lat</th><th>Lon</th><th>SOG (kn)</th><th>Intervall</th></tr></thead>
+        <tbody>${zeilen}</tbody>
+    </table>`;
+}
 
 /* --- Start ------------------------------------------------------ */
 

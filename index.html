@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#0f4c81">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 
@@ -262,6 +263,15 @@
 
         <div id="tab-statistik-inhalt" hidden>
             <div id="toern-statistik"></div>
+
+            <!-- Track-Karte + Tabelle -->
+            <div id="track-section" class="card" hidden>
+                <h2>🗺 Track</h2>
+                <div id="track-stat-mini" class="track-stat-mini"></div>
+                <div id="track-karte" class="track-karte"></div>
+                <div id="track-tabelle-wrap" class="track-tabelle-wrap"></div>
+            </div>
+
             <div id="toern-abschluss"></div>
             <button type="button" id="btn-csv-export"      class="btn-export">⬇ Export CSV</button>
             <button type="button" id="btn-json-export"     class="btn-export">💾 Backup JSON</button>
@@ -349,6 +359,7 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="storage.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
