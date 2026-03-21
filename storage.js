@@ -48,7 +48,12 @@ function toernSpeichern(toern) {
 }
 
 function toernLoeschen(tripId) {
-    speichereToerns(ladeToerns().filter(t => t.tripId !== tripId));
+    const verbleibend = ladeToerns().filter(t => t.tripId !== tripId);
+    speichereToerns(verbleibend);
+    /* Crew-Namen bereinigen: nur Namen behalten die noch in anderen Törns vorkommen */
+    const nochVorhanden = new Set();
+    verbleibend.forEach(t => (t.crew || []).forEach(p => { if (p.name) nochVorhanden.add(p.name); }));
+    speichereCrew([...nochVorhanden]);
 }
 
 function neuerToern() {
