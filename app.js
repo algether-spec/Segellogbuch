@@ -55,6 +55,11 @@ const btnLogSpeichern = document.getElementById("btn-log-speichern");
  * ISO-String "2026-03-18T14:35" → "18.03. 14:35" (lokale Formatierung)
  * Leerer String bei fehlendem Wert.
  */
+function formatDatum(d) {
+    if (!d) return "";
+    return d.slice(8) + "." + d.slice(5, 7) + "." + d.slice(0, 4);
+}
+
 function formatDatumZeit(iso) {
     if (!iso) return "";
     const d = iso.slice(0, 10);
@@ -426,7 +431,7 @@ function toernSelectAktualisieren() {
         const opt = document.createElement("option");
         opt.value = t.tripId;
         opt.textContent = t.tripName || "(ohne Name)";
-        if (t.startDate) opt.textContent += "  · " + t.startDate;
+        if (t.startDate) opt.textContent += "  · " + formatDatum(t.startDate);
         toernSelect.appendChild(opt);
     });
     if (aktuellerToern) toernSelect.value = aktuellerToern.tripId;
@@ -988,7 +993,7 @@ function toernUebersichtRendern() {
         return;
     }
     const items = alle.map(t => {
-        const zeitraum = [t.startDate, t.endDate].filter(Boolean).join(" – ") || "—";
+        const zeitraum = [t.startDate, t.endDate].filter(Boolean).map(formatDatum).join(" – ") || "—";
         const anzahl   = (t.events || []).length;
 
         const li = document.createElement("li");
@@ -1069,6 +1074,7 @@ function toernLaden(tripId) {
     rudergaengerSelectFuellen();
     const _lv = ladeLetzteWerte() || {};
     if (_lv.rudergaenger) logRudergaenger.value = _lv.rudergaenger;
+    tabInhaltToggeln();
     logbuchStatusAktualisieren();
     zeigeLogs();
 }
@@ -1410,9 +1416,7 @@ function seitenWechseln(seiteId) {
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(!!aktuellerToern && !seiteId && _aktiverHauptTab === "tab-logbuch");
 
-    /* Zurück-Bar + Hamburger-Icon */
-    const zurueckBar = document.getElementById("zurueck-bar");
-    if (zurueckBar) zurueckBar.hidden = !seiteId;
+    /* Hamburger-Icon: ☰ normal, ← wenn Panel offen */
     const hamburger = document.getElementById("btn-hamburger");
     if (hamburger) hamburger.textContent = seiteId ? "←" : "☰";
 
@@ -1438,7 +1442,7 @@ function tabInhaltToggeln() {
     if (aktiv) {
         document.getElementById("aktiver-toern-label").textContent =
             (aktuellerToern.tripName || "(ohne Name)") + "  ·  " +
-            (aktuellerToern.startDate || "kein Datum");
+            (formatDatum(aktuellerToern.startDate) || "kein Datum");
     }
 }
 
