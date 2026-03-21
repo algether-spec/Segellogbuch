@@ -1,5 +1,11 @@
 # Entwicklungsregeln – Segellogbuch
 
+## ⛔ Pflicht vor jeder Änderung
+
+1. **LOGIK.md lesen** bevor UI oder Logik angefasst wird
+2. **Geschützte Funktionen** aus LOGIK.md **NIE verändern** (zustandAktualisieren, hafenSperrungAktualisieren, stoppZustandSpeichern, schnellEintragSpeichern, trackPunktAufzeichnenUndPlanen, trackIntervallFuerSog, gpsAbfragen, stoppZustandLaden)
+3. **Nach jeder Änderung**: Logik-Check — prüfen ob Aufrufkette intakt ist
+
 ## Arbeitsweise
 - Schritt für Schritt – immer nur die aktuelle Aufgabe umsetzen
 - Nur ändern, was für die aktuelle Aufgabe notwendig ist
