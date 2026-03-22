@@ -580,10 +580,8 @@ function logZeitVorbefuellen() {
 }
 
 function rudergaengerSelectFuellen() {
-    /* Globale Crew + aktuelle Törn-Crew kombinieren */
-    const global     = ladeCrew();
-    const toernNamen = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name) : [];
-    const alle       = [...new Set([...global, ...toernNamen])].filter(Boolean);
+    /* Nur Crew des aktiven Törns */
+    const alle = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name).filter(Boolean) : [];
 
     logRudergaenger.innerHTML = '<option value="">— Rudergänger —</option>';
     if (alle.length === 0) {
@@ -1505,9 +1503,7 @@ function ruderDropdownToggeln() {
     const dd = document.getElementById("ruder-dropdown");
     if (!dd) return;
     if (!dd.hidden) { dd.hidden = true; return; }
-    const global = ladeCrew();
-    const toernN = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name) : [];
-    const alle   = [...new Set([...global, ...toernN])].filter(Boolean);
+    const alle = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name).filter(Boolean) : [];
     const mitRuder = [...(aktuellerToern?.events || [])].reverse().find(e => e.rudergaenger?.name);
     const aktRuder = mitRuder?.rudergaenger.name || "";
     dd.innerHTML = alle.length === 0
