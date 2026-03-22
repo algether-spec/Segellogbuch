@@ -604,7 +604,7 @@ function rudergaengerSelectFuellen() {
 function zeigeLogs() {
     if (!aktuellerToern) { logListe.innerHTML = ""; return; }
     const events = (aktuellerToern.events || []).slice().sort((a, b) =>
-        evZeitIso(a) < evZeitIso(b) ? -1 : evZeitIso(a) > evZeitIso(b) ? 1 : 0
+        evZeitIso(a) > evZeitIso(b) ? -1 : evZeitIso(a) < evZeitIso(b) ? 1 : 0
     );
     if (events.length === 0) {
         logListe.innerHTML = '<div class="card"><p class="event-empty">Noch keine Einträge.</p></div>';
