@@ -1069,7 +1069,6 @@ function toernLaden(tripId) {
     speichereAktivenToern(tripId);
     /* Logbuch + Log direkt initialisieren (kein Tab-Wechsel mehr nötig) */
     logZeitVorbefuellen();
-    rudergaengerSelectFuellen();
     const _lv = ladeLetzteWerte() || {};
     if (_lv.rudergaenger) logRudergaenger.value = _lv.rudergaenger;
     tabInhaltToggeln();
