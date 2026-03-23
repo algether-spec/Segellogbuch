@@ -666,8 +666,7 @@ function zeigeLogs() {
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
             const kat     = ev.kategorie || kategorieFuerTyp(ev.type);
-            const antrieb = ev.antrieb === "motor" ? "Motor" : ev.antrieb === "segeln" ? "Segeln" : "";
-            const info    = [zeit, kat, ev.type, antrieb, wind, sog, ruder].filter(Boolean).join("  ·  ");
+            const info    = [zeit, kat, ev.type, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
             if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
