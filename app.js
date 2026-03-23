@@ -1530,7 +1530,7 @@ async function schnellEintragSpeichern(typ) {
     }
     const letzte  = ladeLetzteWerte() || {};
     const ruder   = letzte.rudergaenger || "";
-    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
+    const zeitIso = new Date().toISOString().slice(0, 19);
 
     /* Ladeanzeige im Logbuch-Card unten */
     logLadeStatusSetzen("⏳ GPS + Wind…", 3500);
@@ -1815,7 +1815,7 @@ function rudergaengerWechseln(name) {
     if (!name || !aktuellerToern) return;
     const letzte  = ladeLetzteWerte() || {};
     speichereLetzteWerte(letzte.wind || "", name);
-    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
+    const zeitIso = new Date().toISOString().slice(0, 19);
     const ev = {
         id:           generateId(),
         type:         "Ruderwechsel",
@@ -1849,7 +1849,7 @@ const _windSelectEl = document.getElementById("ls-wind-select");
 if (_windSelectEl) _windSelectEl.addEventListener("change", function () {
     const wind = this.value;
     if (!aktuellerToern) return;
-    const zeitIso = new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T");
+    const zeitIso = new Date().toISOString().slice(0, 19);
     const letzte  = ladeLetzteWerte() || {};
     const ev = {
         id:           generateId(),
