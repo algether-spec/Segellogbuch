@@ -171,7 +171,7 @@ const MODUS_MAP = {
 
 /* Ereignistypen die den Fahrt-Zustand definieren */
 const MOTOR_TYPEN = new Set(["Motor an"]);
-const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt"]);
+const SEGEL_TYPEN = new Set(["Segeln"]); /* "Abfahrt" entfernt – Antrieb wird dynamisch ermittelt */
 
 /* Erlaubte Fahrt-Zustände pro Ereignistyp */
 const ERLAUBTE_ZUSTAENDE = {
@@ -207,9 +207,21 @@ function kategorieFuerTyp(typ) {
     return KATEGORIE_MAP[typ] || "Allgemein";
 }
 
+function antriebAusUI() {
+    const btnS = document.getElementById("btn-zustand-segeln");
+    const btnM = document.getElementById("btn-zustand-motor");
+    if (btnS?.classList.contains("btn-zustand-aktiv")) return "segeln";
+    if (btnM?.classList.contains("btn-zustand-aktiv")) return "motor";
+    return null;
+}
+
 function antriebFuerTyp(typ) {
     if (MOTOR_TYPEN.has(typ)) return "motor";
     if (SEGEL_TYPEN.has(typ)) return "segeln";
+    /* Ablegen/Abfahrt: Zustand → UI-Buttons → Standardwert motor */
+    if (typ === "Ablegen" || typ === "Abfahrt") {
+        return zustandErmitteln()?.zustand || antriebAusUI() || "motor";
+    }
     return zustandErmitteln()?.zustand || "";
 }
 
