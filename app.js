@@ -668,11 +668,14 @@ function zeigeLogs() {
         const zeilen = events.map(ev => {
             const w     = ev.weather;
             const wind  = windText(w);
-            const sog   = ev.pos != null ? (ev.pos.sog ?? 0) + " kn SOG" : "";
+            const sogWert = ev.pos?.sog ?? 0;
+            const sog   = sogWert > 0 ? sogWert + " kn SOG" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
-            const kat     = ev.kategorie || kategorieFuerTyp(ev.type);
-            const info    = [zeit, kat, ev.type, wind, sog, ruder].filter(Boolean).join("  ·  ");
+            const antriebIcon = ev.antrieb === "segeln" ? "⛵" : ev.antrieb === "motor" ? "🔧" : "";
+            const STOPP_ICON  = { "Ankern": "⚓", "An Boje": "🔵", "Anlegen": "🏠" };
+            const stoppIcon   = STOPP_ICON[ev.type] || "";
+            const info    = [zeit, ev.type, antriebIcon, stoppIcon, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
             if (ev.pos && ev.pos.lat != null && ev.pos.lon != null) {
