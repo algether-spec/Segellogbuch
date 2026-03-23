@@ -642,6 +642,7 @@ function rudergaengerSelectFuellen() {
 }
 
 function zeigeLogs() {
+    const _scrollY = window.scrollY;
     if (!aktuellerToern) { logListe.innerHTML = ""; return; }
     let events = (aktuellerToern.events || []).slice().sort((a, b) =>
         evZeitIso(a) > evZeitIso(b) ? -1 : evZeitIso(a) < evZeitIso(b) ? 1 : 0
@@ -694,6 +695,7 @@ function zeigeLogs() {
     toernStatistikRendern(toernStatistikBerechnen(aktuellerToern));
     toernAbschlussRendern(toernAbschlussBerechnen(aktuellerToern));
     logbuchStatusAktualisieren();
+    requestAnimationFrame(() => window.scrollTo(0, _scrollY));
 }
 
 function logModalOeffnen() {
@@ -2181,7 +2183,14 @@ function karteTabRendern(toern) {
         mapDiv.innerHTML = "<p style='padding:16px;color:#64748b'>Keine Track-Daten vorhanden.</p>";
         return;
     }
-    if (_hauptKarte) { _hauptKarte.remove(); _hauptKarte = null; }
+    let _savedCenter = null;
+    let _savedZoom   = null;
+    if (_hauptKarte) {
+        _savedCenter = _hauptKarte.getCenter();
+        _savedZoom   = _hauptKarte.getZoom();
+        _hauptKarte.remove();
+        _hauptKarte = null;
+    }
     _hauptKarte = L.map(mapDiv);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
@@ -2231,7 +2240,11 @@ function karteTabRendern(toern) {
         }
     });
 
-    _hauptKarte.fitBounds(L.latLngBounds(latlngs).pad(0.15));
+    if (_savedCenter && _savedZoom !== null) {
+        _hauptKarte.setView(_savedCenter, _savedZoom);
+    } else {
+        _hauptKarte.fitBounds(L.latLngBounds(latlngs).pad(0.15));
+    }
 }
 
 /* --- Track-Bearbeitung ------------------------------------------ */
