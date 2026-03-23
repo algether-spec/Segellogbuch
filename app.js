@@ -250,6 +250,15 @@ function zustandAktualisieren() {
     if (btnAnlegen) btnAnlegen.disabled = !istMotor;
 }
 
+function startButtonsSperren(stopp) {
+    const btnAblegen      = document.querySelector(".btn-ablegen");
+    const btnAnkerLichten = document.querySelector(".btn-anker-lichten");
+    const btnVonBoje      = document.querySelector(".btn-von-boje");
+    if (btnAblegen)      btnAblegen.disabled      = stopp !== "hafen";
+    if (btnAnkerLichten) btnAnkerLichten.disabled = stopp !== "anker";
+    if (btnVonBoje)      btnVonBoje.disabled      = stopp !== "boje";
+}
+
 function zustandSetzen(zustand) {
     notizUndSpeichern(zustand === "motor" ? "Motor an" : "Segeln");
 }
@@ -320,6 +329,7 @@ function logbuchStatusAktualisieren() {
     if (!aktuellerToern || !(aktuellerToern.events || []).length) {
         el.hidden = true;
         hafenSperrungAktualisieren(stoppZustandLaden());
+        startButtonsSperren(stoppZustandLaden());
         return;
     }
     const events = aktuellerToern.events.slice().sort((a, b) =>
@@ -430,6 +440,7 @@ function logbuchStatusAktualisieren() {
 
     el.hidden = false;
     hafenSperrungAktualisieren(stoppZustandLaden());
+    startButtonsSperren(stoppZustandLaden());
 }
 
 function statusSetzen(text, typ = "ok", ms = 3000) {
@@ -1130,6 +1141,7 @@ function neuerToernAnlegen() {
     toernSelect.value = "";
     stoppZustandSpeichern("hafen");
     hafenSperrungAktualisieren("hafen");
+    startButtonsSperren("hafen");
     fldTripName.focus();
     statusSetzen("Neuer Törn angelegt.", "ok");
 }
@@ -2320,6 +2332,7 @@ if (_letzterToernId && alleToernsLaden().find(t => t.tripId === _letzterToernId)
 } else {
     tabInhaltToggeln();
     hafenSperrungAktualisieren(stoppZustandLaden());
+    startButtonsSperren(stoppZustandLaden());
 }
 backupBannerPruefen();
 backupStatusAktualisieren();
