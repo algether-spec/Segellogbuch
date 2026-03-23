@@ -411,6 +411,22 @@ function logbuchStatusAktualisieren() {
         }
     }
 
+    /* Seemeilen gesamt und heute aus track.points */
+    const trackPts   = aktuellerToern.track?.points || [];
+    const nmGesamt   = trackDistanzNm(trackPts);
+    const ptsHeute   = trackPts.filter(p => (p.zeit || "").slice(0, 10) === heuteIso());
+    const nmHeute    = trackDistanzNm(ptsHeute);
+    const nmGesamtWrap = document.getElementById("ls-nm-gesamt-wrap");
+    const nmHeuteWrap  = document.getElementById("ls-nm-heute-wrap");
+    if (nmGesamtWrap) {
+        nmGesamtWrap.hidden = parseFloat(nmGesamt) === 0;
+        document.getElementById("ls-nm-gesamt").textContent = "⚓ " + nmGesamt + " nm";
+    }
+    if (nmHeuteWrap) {
+        nmHeuteWrap.hidden = parseFloat(nmHeute) === 0;
+        document.getElementById("ls-nm-heute").textContent = "📅 " + nmHeute + " nm heute";
+    }
+
     el.hidden = false;
     hafenSperrungAktualisieren(stoppZustandLaden());
 }
