@@ -73,7 +73,9 @@ function formatDatumZeit(iso) {
  * Neue Events haben ev.zeit, alte ev.date + ev.time.
  */
 function evZeitIso(ev) {
-    return ev.zeit || ((ev.date || "") + "T" + (ev.time || "00:00"));
+    const iso = ev.zeit || ((ev.date || "") + "T" + (ev.time || "00:00"));
+    /* Sekunden normalisieren: 16-Zeichen-Format ("...T14:35") → 19 Zeichen ("...T14:35:00") */
+    return iso.length === 16 ? iso + ":00" : iso;
 }
 
 /* ISO-Datum "2026-03-19" → "19.03.2026" */
@@ -781,7 +783,7 @@ function logEintragSpeichern() {
         type:         logTyp.value,
         kategorie:    kategorieFuerTyp(logTyp.value),
         antrieb:      antriebFuerTyp(logTyp.value),
-        zeit:         logZeit.value,   /* "2026-03-18T14:35" aus datetime-local */
+        zeit:         logZeit.value.length === 16 ? logZeit.value + ":00" : logZeit.value,
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
         note:         logText.value.trim(),
