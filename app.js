@@ -1459,8 +1459,9 @@ function sidebarSchliessen() {
 
 let _aktiveSeitenId  = null;
 let _aktiverHauptTab = "tab-logbuch";
-let _logFilter       = "gesamt";
-let _karteFilter     = "gesamt";
+let _logFilter            = "gesamt";
+let _karteFilter          = "gesamt";
+let _karteBearbeitenModus = false;
 
 function heuteIso() {
     return new Date().toLocaleString("sv").slice(0, 10);
@@ -1477,6 +1478,11 @@ function karteFilterSetzen(filter) {
     _karteFilter = filter;
     document.getElementById("karte-filter-gesamt")?.classList.toggle("filter-btn-aktiv", filter === "gesamt");
     document.getElementById("karte-filter-heute")?.classList.toggle("filter-btn-aktiv", filter === "heute");
+    if (aktuellerToern) karteTabRendern(aktuellerToern);
+}
+
+function karteBearbeitenToggeln() {
+    _karteBearbeitenModus = !_karteBearbeitenModus;
     if (aktuellerToern) karteTabRendern(aktuellerToern);
 }
 
@@ -2056,6 +2062,13 @@ function karteTabRendern(toern) {
         pts  = pts.filter(p  => (p.zeit  || "").slice(0, 10) === heute);
         evts = evts.filter(ev => (ev.zeit || "").slice(0, 10) === heute);
     }
+    /* Bearbeiten-Button synchronisieren */
+    const _btnBearbeiten = document.getElementById("btn-karte-bearbeiten");
+    if (_btnBearbeiten) {
+        _btnBearbeiten.textContent = _karteBearbeitenModus ? "✅ Fertig" : "✏️ Bearbeiten";
+        _btnBearbeiten.classList.toggle("btn-karte-bearbeiten-aktiv", _karteBearbeitenModus);
+    }
+
     if (pts.length < 2) {
         mapDiv.innerHTML = "<p style='padding:16px;color:#64748b'>Keine Track-Daten vorhanden.</p>";
         return;
@@ -2070,21 +2083,29 @@ function karteTabRendern(toern) {
     const latlngs = pts.map(p => [p.lat, p.lon]);
     L.polyline(latlngs, { color: "#0ea5e9", weight: 3, opacity: 0.85 }).addTo(_hauptKarte);
 
-    /* Interaktive Track-Punkt-Marker: langer Druck → Lösch-Popup */
-    const tpIcon = L.divIcon({ className: "", html: "<div style='background:#94a3b8;border:2px solid #fff;border-radius:50%;width:8px;height:8px;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer'></div>", iconSize: [8, 8], iconAnchor: [4, 4] });
-    pts.forEach(pt => {
-        let _t = null;
-        const m = L.marker([pt.lat, pt.lon], { icon: tpIcon }).addTo(_hauptKarte);
-        m.bindPopup(
-            `<div style="text-align:center;min-width:120px">` +
-            `<div style="font-size:12px;margin-bottom:6px">${pt.zeit.slice(11, 16)} · ${pt.sog ?? 0} kn</div>` +
-            `<button type="button" onclick="trackPunktLoeschen('${pt.zeit.replace(/'/g, "\\'")}')" ` +
-            `style="background:#dc2626;color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:13px">` +
-            `🗑 Löschen</button></div>`
-        );
-        m.on("mousedown touchstart", () => { _t = setTimeout(() => m.openPopup(), 600); });
-        m.on("mouseup mouseout touchend touchcancel", () => { clearTimeout(_t); _t = null; });
-    });
+    /* Track-Punkt-Marker: im Bearbeitungs-Modus rote X, sonst grau mit langem Druck */
+    if (_karteBearbeitenModus) {
+        const delIcon = L.divIcon({ className: "", html: "<div style='background:#dc2626;color:#fff;border:2px solid #fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3)'>✕</div>", iconSize: [20, 20], iconAnchor: [10, 10] });
+        pts.forEach(pt => {
+            L.marker([pt.lat, pt.lon], { icon: delIcon }).addTo(_hauptKarte)
+                .on("click", () => trackPunktLoeschen(pt.zeit));
+        });
+    } else {
+        const tpIcon = L.divIcon({ className: "", html: "<div style='background:#94a3b8;border:2px solid #fff;border-radius:50%;width:8px;height:8px;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer'></div>", iconSize: [8, 8], iconAnchor: [4, 4] });
+        pts.forEach(pt => {
+            let _t = null;
+            const m = L.marker([pt.lat, pt.lon], { icon: tpIcon }).addTo(_hauptKarte);
+            m.bindPopup(
+                `<div style="text-align:center;min-width:120px">` +
+                `<div style="font-size:12px;margin-bottom:6px">${pt.zeit.slice(11, 16)} · ${pt.sog ?? 0} kn</div>` +
+                `<button type="button" onclick="trackPunktLoeschen('${pt.zeit.replace(/'/g, "\\'")}')" ` +
+                `style="background:#dc2626;color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:13px">` +
+                `🗑 Löschen</button></div>`
+            );
+            m.on("mousedown touchstart", () => { _t = setTimeout(() => m.openPopup(), 600); });
+            m.on("mouseup mouseout touchend touchcancel", () => { clearTimeout(_t); _t = null; });
+        });
+    }
 
     const startIcon = L.divIcon({ className: "", html: "<div style='background:#16a34a;border:2px solid #fff;border-radius:50%;width:12px;height:12px;box-shadow:0 1px 4px rgba(0,0,0,.4)'></div>", iconSize: [12, 12], iconAnchor: [6, 6] });
     L.marker(latlngs[0], { icon: startIcon }).addTo(_hauptKarte)

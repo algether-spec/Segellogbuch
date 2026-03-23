@@ -1830,3 +1830,13 @@ button:active { opacity: 0.75; }
     .btn-karte-aktion { background: #1e293b; border-color: #334155; color: #e2e8f0; }
     .btn-karte-aktion:active { background: #334155; }
 }
+
+.btn-karte-bearbeiten-aktiv {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+    .btn-karte-bearbeiten-aktiv { background: #dc2626; border-color: #dc2626; color: white; }
+}
