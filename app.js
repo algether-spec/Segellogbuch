@@ -1675,12 +1675,11 @@ function tabInhaltToggeln() {
     /* Logbuch-Sticky: sichtbar wenn Törn aktiv, Hauptbereich sichtbar, Logbuch-Tab aktiv */
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(aktiv && !_aktiveSeitenId && _aktiverHauptTab === "tab-logbuch");
-    const bar = document.getElementById("aktiver-toern-bar");
-    bar.hidden = !aktiv;
-    if (aktiv) {
-        document.getElementById("aktiver-toern-label").textContent =
-            (aktuellerToern.tripName || "(ohne Name)") + "  ·  " +
-            (formatDatum(aktuellerToern.startDate) || "kein Datum");
+    const subtitle = document.getElementById("header-subtitle");
+    if (subtitle) {
+        subtitle.textContent = aktiv
+            ? (aktuellerToern.tripName || "(ohne Name)") + "  ·  " + (formatDatum(aktuellerToern.startDate) || "kein Datum")
+            : "Törns erfassen und verwalten";
     }
 }
 
