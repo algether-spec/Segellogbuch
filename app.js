@@ -189,12 +189,6 @@ const ERLAUBTE_ZUSTAENDE = {
     "Ruderwechsel":  ["fahrt"],
 };
 
-/* SOG-Grenzwerte (kn) – Warnung wenn überschritten */
-const SOG_GRENZWERTE = {
-    "Ankern":  0.5,
-    "An Boje": 0.5,
-    "Anlegen": 1.0,
-};
 
 /* Kategorie-Mapping */
 const KATEGORIE_MAP = {
@@ -1317,12 +1311,6 @@ function eventErlaubt(typ, zustand) {
     return erlaubt.includes(zustand);
 }
 
-function sogWarnungPruefen(typ, sog) {
-    const grenze = SOG_GRENZWERTE[typ];
-    if (!grenze || sog == null) return null;
-    if (sog > grenze) return `⚠️ SOG ${sog} kn – zu schnell für „${typ}"`;
-    return null;
-}
 
 function antriebKonsistenzPruefen(typ, antrieb) {
     if (["Wende", "Halse", "Reffen"].includes(typ) && antrieb !== "segeln") {
@@ -1340,16 +1328,13 @@ function validierungsWarnung(meldung) {
 }
 
 async function schnellEintragSpeichern(typ) {
-    const _zustand    = stoppZustandLaden();
-    const _sog        = aktuellerToern?.track?.points?.slice(-1)[0]?.sog ?? null;
-    const _antrieb    = zustandErmitteln()?.zustand ?? "";
+    const _zustand = stoppZustandLaden();
+    const _antrieb = zustandErmitteln()?.zustand ?? "";
 
     if (!eventErlaubt(typ, _zustand)) {
         validierungsWarnung(`„${typ}" ist im Zustand „${_zustand}" nicht möglich`);
         return;
     }
-    const _sogHinweis = sogWarnungPruefen(typ, _sog);
-    if (_sogHinweis) validierungsWarnung(_sogHinweis);
     const _antriebHinweis = antriebKonsistenzPruefen(typ, _antrieb);
     if (_antriebHinweis) validierungsWarnung(_antriebHinweis);
 
