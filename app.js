@@ -1767,13 +1767,19 @@ function trackPunktAufzeichnenUndPlanen() {
             if (intervall > 0) {
                 if (!aktuellerToern.track)        aktuellerToern.track = {};
                 if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
-                aktuellerToern.track.points.push({
-                    lat:  parseFloat(pos.coords.latitude.toFixed(5)),
-                    lon:  parseFloat(pos.coords.longitude.toFixed(5)),
-                    sog:  sogKn,
-                    zeit: new Date().toISOString().slice(0, 19)
-                });
-                toernSpeichern(aktuellerToern);
+                const newLat  = parseFloat(pos.coords.latitude.toFixed(5));
+                const newLon  = parseFloat(pos.coords.longitude.toFixed(5));
+                const letzter = aktuellerToern.track.points[aktuellerToern.track.points.length - 1];
+                const distM   = letzter ? haversineKm(letzter.lat, letzter.lon, newLat, newLon) * 1000 : Infinity;
+                if (distM >= 50) {
+                    aktuellerToern.track.points.push({
+                        lat:  newLat,
+                        lon:  newLon,
+                        sog:  sogKn,
+                        zeit: new Date().toISOString().slice(0, 19)
+                    });
+                    toernSpeichern(aktuellerToern);
+                }
                 trackStatusAnzeigen(true);
             } else {
                 trackStatusAnzeigen(false);
