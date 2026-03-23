@@ -462,6 +462,17 @@ function logbuchStatusAktualisieren() {
     el.hidden = false;
     hafenSperrungAktualisieren(stoppZustandLaden());
     startButtonsSperren(stoppZustandLaden());
+    antriebHinweisAktualisieren();
+}
+
+function antriebHinweisAktualisieren() {
+    const btnS = document.getElementById("btn-zustand-segeln");
+    const btnM = document.getElementById("btn-zustand-motor");
+    const fahrtOhneAntrieb = stoppZustandLaden() === "fahrt" && zustandErmitteln() === null;
+    [btnS, btnM].forEach(btn => {
+        if (!btn) return;
+        btn.classList.toggle("antrieb-hinweis", fahrtOhneAntrieb);
+    });
 }
 
 function statusSetzen(text, typ = "ok", ms = 3000) {
