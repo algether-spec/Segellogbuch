@@ -173,6 +173,29 @@ const MODUS_MAP = {
 const MOTOR_TYPEN = new Set(["Motor an", "Ablegen"]);
 const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt"]);
 
+/* Erlaubte Fahrt-Zustände pro Ereignistyp */
+const ERLAUBTE_ZUSTAENDE = {
+    "Ablegen":       ["hafen"],
+    "Anker lichten": ["anker"],
+    "Von Boje":      ["boje"],
+    "Anlegen":       ["fahrt"],
+    "Ankern":        ["fahrt"],
+    "An Boje":       ["fahrt"],
+    "Wende":         ["fahrt"],
+    "Halse":         ["fahrt"],
+    "Reffen":        ["fahrt"],
+    "Motor an":      ["fahrt"],
+    "Segeln":        ["fahrt"],
+    "Ruderwechsel":  ["fahrt"],
+};
+
+/* SOG-Grenzwerte (kn) – Warnung wenn überschritten */
+const SOG_GRENZWERTE = {
+    "Ankern":  0.5,
+    "An Boje": 0.5,
+    "Anlegen": 1.0,
+};
+
 /* Kategorie-Mapping */
 const KATEGORIE_MAP = {
     "Wende": "Segeln", "Halse": "Segeln", "Reffen": "Segeln",
@@ -1262,7 +1285,48 @@ function gpsUndWetterHolen(timeoutMs) {
     });
 }
 
+function eventErlaubt(typ, zustand) {
+    const erlaubt = ERLAUBTE_ZUSTAENDE[typ];
+    if (!erlaubt) return true;
+    return erlaubt.includes(zustand);
+}
+
+function sogWarnungPruefen(typ, sog) {
+    const grenze = SOG_GRENZWERTE[typ];
+    if (!grenze || sog == null) return null;
+    if (sog > grenze) return `⚠️ SOG ${sog} kn – zu schnell für „${typ}"`;
+    return null;
+}
+
+function antriebKonsistenzPruefen(typ, antrieb) {
+    if (["Wende", "Halse", "Reffen"].includes(typ) && antrieb !== "segeln") {
+        return `⚠️ „${typ}" nur bei aktivem Segeln möglich`;
+    }
+    return null;
+}
+
+function validierungsWarnung(meldung) {
+    const toast = document.createElement("div");
+    toast.className = "validierung-toast";
+    toast.textContent = meldung;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
 async function schnellEintragSpeichern(typ) {
+    const _zustand    = stoppZustandLaden();
+    const _sog        = aktuellerToern?.track?.points?.slice(-1)[0]?.sog ?? null;
+    const _antrieb    = zustandErmitteln()?.zustand ?? "";
+
+    if (!eventErlaubt(typ, _zustand)) {
+        validierungsWarnung(`„${typ}" ist im Zustand „${_zustand}" nicht möglich`);
+        return;
+    }
+    const _sogHinweis = sogWarnungPruefen(typ, _sog);
+    if (_sogHinweis) validierungsWarnung(_sogHinweis);
+    const _antriebHinweis = antriebKonsistenzPruefen(typ, _antrieb);
+    if (_antriebHinweis) validierungsWarnung(_antriebHinweis);
+
     if (!aktuellerToern) {
         statusSetzen("Bitte zuerst einen Törn auswählen.", "error");
         return;
