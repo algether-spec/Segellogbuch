@@ -2123,3 +2123,19 @@ if (_datenWiederhergestellt) {
     toernSelectAktualisieren();
     statusSetzen("✅ Daten automatisch wiederhergestellt.", "ok", 6000);
 }
+
+/* --- Testdaten -------------------------------------------------- */
+
+async function testdatenLaden() {
+    try {
+        const res = await fetch("testdaten-adria.json?t=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const anzahl = importJSON(data);
+        toernSelectAktualisieren();
+        seitenWechseln(null);
+        statusSetzen("✅ " + anzahl + " Testtoern(s) geladen.", "ok", 4000);
+    } catch (e) {
+        statusSetzen("❌ Testdaten konnten nicht geladen werden: " + e.message, "error", 5000);
+    }
+}

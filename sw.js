@@ -3,7 +3,7 @@
    Offline-Cache für Segellogbuch
 ====================== */
 
-const CACHE = "segellogbuch-v2.0.7";
+const CACHE = "segellogbuch-v2.0.8";
 
 const ASSETS = [
     "./index.html",
@@ -12,7 +12,8 @@ const ASSETS = [
     "./config.js",
     "./style.css",
     "./manifest.json",
-    "./version.json"
+    "./version.json",
+    "./testdaten-adria.json"
 ];
 
 self.addEventListener("install", e => {
