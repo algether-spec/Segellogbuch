@@ -2070,6 +2070,22 @@ function karteTabRendern(toern) {
     const latlngs = pts.map(p => [p.lat, p.lon]);
     L.polyline(latlngs, { color: "#0ea5e9", weight: 3, opacity: 0.85 }).addTo(_hauptKarte);
 
+    /* Interaktive Track-Punkt-Marker: langer Druck → Lösch-Popup */
+    const tpIcon = L.divIcon({ className: "", html: "<div style='background:#94a3b8;border:2px solid #fff;border-radius:50%;width:8px;height:8px;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer'></div>", iconSize: [8, 8], iconAnchor: [4, 4] });
+    pts.forEach(pt => {
+        let _t = null;
+        const m = L.marker([pt.lat, pt.lon], { icon: tpIcon }).addTo(_hauptKarte);
+        m.bindPopup(
+            `<div style="text-align:center;min-width:120px">` +
+            `<div style="font-size:12px;margin-bottom:6px">${pt.zeit.slice(11, 16)} · ${pt.sog ?? 0} kn</div>` +
+            `<button type="button" onclick="trackPunktLoeschen('${pt.zeit.replace(/'/g, "\\'")}')" ` +
+            `style="background:#dc2626;color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:13px">` +
+            `🗑 Löschen</button></div>`
+        );
+        m.on("mousedown touchstart", () => { _t = setTimeout(() => m.openPopup(), 600); });
+        m.on("mouseup mouseout touchend touchcancel", () => { clearTimeout(_t); _t = null; });
+    });
+
     const startIcon = L.divIcon({ className: "", html: "<div style='background:#16a34a;border:2px solid #fff;border-radius:50%;width:12px;height:12px;box-shadow:0 1px 4px rgba(0,0,0,.4)'></div>", iconSize: [12, 12], iconAnchor: [6, 6] });
     L.marker(latlngs[0], { icon: startIcon }).addTo(_hauptKarte)
         .bindPopup("▶ Start · " + pts[0].zeit.slice(11, 16));
@@ -2087,6 +2103,49 @@ function karteTabRendern(toern) {
     });
 
     _hauptKarte.fitBounds(L.latLngBounds(latlngs).pad(0.15));
+}
+
+/* --- Track-Bearbeitung ------------------------------------------ */
+
+function trackPunktLoeschen(zeit) {
+    if (!aktuellerToern?.track?.points) return;
+    aktuellerToern.track.points = aktuellerToern.track.points.filter(p => p.zeit !== zeit);
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
+    karteTabRendern(aktuellerToern);
+    statusSetzen("🗑 Track-Punkt gelöscht.", "ok", 2000);
+}
+
+function trackPunktHinzufuegen() {
+    if (!aktuellerToern) { statusSetzen("Bitte zuerst einen Törn auswählen.", "error"); return; }
+    const statusEl = document.getElementById("karte-aktion-status");
+    if (statusEl) { statusEl.textContent = "⏳ GPS…"; statusEl.hidden = false; }
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const pt = {
+                lat:  parseFloat(pos.coords.latitude.toFixed(5)),
+                lon:  parseFloat(pos.coords.longitude.toFixed(5)),
+                sog:  0,
+                zeit: new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T")
+            };
+            if (!aktuellerToern.track)        aktuellerToern.track = {};
+            if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
+            aktuellerToern.track.points.push(pt);
+            aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
+            toernSpeichern(aktuellerToern);
+            autoBackupSpeichern();
+            backupStatusAktualisieren();
+            if (statusEl) statusEl.hidden = true;
+            karteTabRendern(aktuellerToern);
+            statusSetzen("📍 Track-Punkt hinzugefügt.", "ok", 2000);
+        },
+        () => {
+            if (statusEl) statusEl.hidden = true;
+            statusSetzen("❌ GPS nicht verfügbar.", "error", 3000);
+        },
+        { maximumAge: 10000, timeout: 8000, enableHighAccuracy: true }
+    );
 }
 
 /* --- Start ------------------------------------------------------ */
