@@ -676,8 +676,10 @@ function zeigeLogs() {
             const KAT_ICON    = { "Segeln": "⛵", "Motor": "🔧", "Anker": "⚓", "Boje": "🔵" };
             const antriebIcon = ev.antrieb === "segeln" ? "⛵"
                               : ev.antrieb === "motor"  ? "🔧"
-                              : KAT_ICON[kat] || "";
-            const stoppIcon   = ev.type === "Anlegen" ? "🏠" : "";
+                              : ev.antrieb == null      ? KAT_ICON[kat] || ""
+                              : ""; /* ev.antrieb === "" → kein Icon */
+            const STOPP_ICON  = { "Ankern": "⚓", "An Boje": "🔵", "Anlegen": "🏠" };
+            const stoppIcon   = STOPP_ICON[ev.type] || "";
             const info    = [zeit, ev.type, antriebIcon, stoppIcon, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
