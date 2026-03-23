@@ -672,9 +672,12 @@ function zeigeLogs() {
             const sog   = sogWert > 0 ? sogWert + " kn SOG" : "";
             const ruder = ev.rudergaenger ? ev.rudergaenger.name : "";
             const zeit  = formatDatumZeit(evZeitIso(ev)) || "—";
-            const antriebIcon = ev.antrieb === "segeln" ? "⛵" : ev.antrieb === "motor" ? "🔧" : "";
-            const STOPP_ICON  = { "Ankern": "⚓", "An Boje": "🔵", "Anlegen": "🏠" };
-            const stoppIcon   = STOPP_ICON[ev.type] || "";
+            const kat = ev.kategorie || kategorieFuerTyp(ev.type);
+            const KAT_ICON    = { "Segeln": "⛵", "Motor": "🔧", "Anker": "⚓", "Boje": "🔵" };
+            const antriebIcon = ev.antrieb === "segeln" ? "⛵"
+                              : ev.antrieb === "motor"  ? "🔧"
+                              : KAT_ICON[kat] || "";
+            const stoppIcon   = ev.type === "Anlegen" ? "🏠" : "";
             const info    = [zeit, ev.type, antriebIcon, stoppIcon, wind, sog, ruder].filter(Boolean).join("  ·  ");
 
             let posHtml = "";
