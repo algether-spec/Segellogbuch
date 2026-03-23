@@ -208,32 +208,32 @@
 
                 <!-- Fahrt-Start Buttons (wenn gestoppt) -->
                 <div id="fahrt-start-bar" class="hafenmanover-bar" hidden>
-                    <button type="button" class="btn-hafenmanover btn-ablegen" onclick="schnellEintragSpeichern('Ablegen')">🚢 Ablegen</button>
-                    <button type="button" class="btn-hafenmanover btn-anker-lichten" onclick="schnellEintragSpeichern('Anker lichten')">⚓ Anker lichten</button>
-                    <button type="button" class="btn-hafenmanover btn-von-boje" onclick="schnellEintragSpeichern('Von Boje')">🔵 Von Boje</button>
+                    <button type="button" class="btn-hafenmanover btn-ablegen" onclick="notizUndSpeichern('Ablegen')">🚢 Ablegen</button>
+                    <button type="button" class="btn-hafenmanover btn-anker-lichten" onclick="notizUndSpeichern('Anker lichten')">⚓ Anker lichten</button>
+                    <button type="button" class="btn-hafenmanover btn-von-boje" onclick="notizUndSpeichern('Von Boje')">🔵 Von Boje</button>
                 </div>
 
                 <!-- Fahrt-Stopp Buttons (wenn unterwegs) -->
                 <div id="fahrt-stopp-bar" class="hafenmanover-bar">
-                    <button type="button" id="btn-anlegen" class="btn-hafenmanover btn-anlegen" onclick="schnellEintragSpeichern('Anlegen')">🏁 Anlegen</button>
-                    <button type="button" class="btn-hafenmanover btn-ankern" onclick="schnellEintragSpeichern('Ankern')">⚓ Ankern</button>
-                    <button type="button" class="btn-hafenmanover btn-an-boje" onclick="schnellEintragSpeichern('An Boje')">🔵 An Boje</button>
+                    <button type="button" id="btn-anlegen" class="btn-hafenmanover btn-anlegen" onclick="notizUndSpeichern('Anlegen')">🏁 Anlegen</button>
+                    <button type="button" class="btn-hafenmanover btn-ankern" onclick="notizUndSpeichern('Ankern')">⚓ Ankern</button>
+                    <button type="button" class="btn-hafenmanover btn-an-boje" onclick="notizUndSpeichern('An Boje')">🔵 An Boje</button>
                 </div>
 
                 <!-- Manöver-Schnellbuttons -->
                 <div id="manoever-grid" class="schnell-grid">
 
-                    <button type="button" id="btn-wende" class="btn-schnell-card" onclick="schnellEintragSpeichern('Wende')">
+                    <button type="button" id="btn-wende" class="btn-schnell-card" onclick="notizUndSpeichern('Wende')">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11a5 5 0 0 1 0 10H5"/><polyline points="7 3 3 7 7 11"/></svg>
                         <span>↩️ Wende</span>
                     </button>
 
-                    <button type="button" id="btn-halse" class="btn-schnell-card" onclick="schnellEintragSpeichern('Halse')">
+                    <button type="button" id="btn-halse" class="btn-schnell-card" onclick="notizUndSpeichern('Halse')">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7H10a5 5 0 0 0 0 10h9"/><polyline points="17 3 21 7 17 11"/></svg>
                         <span>↪️ Halse</span>
                     </button>
 
-                    <button type="button" id="btn-reffen" class="btn-schnell-card" onclick="schnellEintragSpeichern('Reffen')">
+                    <button type="button" id="btn-reffen" class="btn-schnell-card" onclick="notizUndSpeichern('Reffen')">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                         <span>⛵ Reffen</span>
                     </button>
@@ -356,6 +356,21 @@
 <!-- Druckbereich (nur beim Drucken sichtbar) -->
 <div id="druck-bereich"></div>
 <div id="abschluss-druck-bereich"></div>
+
+<!-- Notiz-Popup (erscheint nach jedem Schnell-Eintrag) -->
+<div id="notiz-popup-overlay" class="notiz-popup-overlay" style="display:none">
+    <div class="notiz-popup-box">
+        <div class="notiz-popup-header">
+            <span id="notiz-popup-typ" class="notiz-popup-typ-label"></span>
+            <span id="notiz-countdown" class="notiz-countdown">5</span>
+        </div>
+        <div class="notiz-input-zeile">
+            <textarea id="notiz-text" class="notiz-text" placeholder="Notiz (optional)…" rows="3"></textarea>
+            <button type="button" id="btn-notiz-mic" class="btn-notiz-mic" onclick="notizMikrofonKlick()">🎤</button>
+        </div>
+        <button type="button" class="btn-notiz-speichern" onclick="notizPopupSpeichern()">💾 Speichern</button>
+    </div>
+</div>
 
 <!-- Detaillierter Eintrag Modal -->
 <div id="log-modal-overlay" class="modal-overlay" style="display:none">

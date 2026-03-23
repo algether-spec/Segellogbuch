@@ -1840,3 +1840,124 @@ button:active { opacity: 0.75; }
 @media (prefers-color-scheme: dark) {
     .btn-karte-bearbeiten-aktiv { background: #dc2626; border-color: #dc2626; color: white; }
 }
+
+/* --- Notiz-Popup ------------------------------------------------- */
+
+.notiz-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1100;
+    padding: 0 0 env(safe-area-inset-bottom, 0);
+}
+
+.notiz-popup-box {
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 28px;
+    width: 100%;
+    max-width: 680px;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.notiz-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notiz-popup-typ-label {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.notiz-countdown {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0ea5e9;
+    min-width: 28px;
+    text-align: right;
+}
+
+.notiz-input-zeile {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.notiz-text {
+    flex: 1;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: none;
+    color: #1e293b;
+    background: #f8fafc;
+    line-height: 1.5;
+}
+
+.notiz-text:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    background: #fff;
+}
+
+.btn-notiz-mic {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.btn-notiz-mic:active { background: #e0f2fe; }
+
+.btn-notiz-speichern {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 0;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s;
+}
+
+.btn-notiz-speichern:active { background: #0284c7; }
+
+/* Log-Eintrag Notiz-Zeile */
+.event-note-text {
+    display: block;
+    font-size: 13px;
+    color: #475569;
+    font-style: italic;
+    margin-top: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .notiz-popup-box    { background: #1e293b; }
+    .notiz-popup-typ-label { color: #e2e8f0; }
+    .notiz-text         { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .notiz-text:focus   { background: #0f172a; border-color: #0ea5e9; }
+    .btn-notiz-mic      { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .btn-notiz-mic:active { background: #1e3a5f; }
+    .event-note-text    { color: #94a3b8; }
+}

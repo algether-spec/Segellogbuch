@@ -251,7 +251,7 @@ function zustandAktualisieren() {
 }
 
 function zustandSetzen(zustand) {
-    schnellEintragSpeichern(zustand === "motor" ? "Motor an" : "Segeln");
+    notizUndSpeichern(zustand === "motor" ? "Motor an" : "Segeln");
 }
 
 /* --- Stopp-Zustand (hafen / anker / boje / fahrt) --------------- */
@@ -1327,6 +1327,118 @@ function validierungsWarnung(meldung) {
     setTimeout(() => toast.remove(), 3000);
 }
 
+/* --- Notiz-Popup ------------------------------------------------- */
+
+let _pendingNote        = "";
+let _notizCountdownTimer = null;
+let _notizCountdownWert  = 5;
+let _notizResolve        = null;
+let _notizSpeechRunning  = false;
+let _notizSpeechRecog    = null;
+
+function notizUndSpeichern(typ) {
+    notizPopupZeigen(typ).then(() => schnellEintragSpeichern(typ));
+}
+
+function notizPopupZeigen(typ) {
+    return new Promise(resolve => {
+        _notizResolve = resolve;
+        const overlay  = document.getElementById("notiz-popup-overlay");
+        const typLabel = document.getElementById("notiz-popup-typ");
+        const textarea = document.getElementById("notiz-text");
+        const micBtn   = document.getElementById("btn-notiz-mic");
+
+        if (typLabel) typLabel.textContent = typ;
+        if (textarea) { textarea.value = ""; textarea.oninput = () => { if (_notizCountdownTimer) _notizCountdownStoppUiAktualisieren(); }; }
+
+        /* Mikrofon nur anzeigen wenn SpeechRecognition verfügbar */
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (micBtn) micBtn.style.display = SpeechRec ? "" : "none";
+
+        if (overlay) overlay.style.display = "flex";
+        if (textarea) textarea.focus();
+
+        _notizCountdownWert = 5;
+        _notizCountdownAnzeigen();
+        _notizCountdownTimer = setInterval(_notizCountdownTick, 1000);
+    });
+}
+
+function _notizCountdownAnzeigen() {
+    const el = document.getElementById("notiz-countdown");
+    if (el) el.textContent = _notizCountdownWert;
+}
+
+function _notizCountdownTick() {
+    _notizCountdownWert--;
+    _notizCountdownAnzeigen();
+    if (_notizCountdownWert <= 0) notizPopupSpeichern();
+}
+
+function _notizCountdownStoppUiAktualisieren() {
+    clearInterval(_notizCountdownTimer);
+    _notizCountdownTimer = null;
+    const el = document.getElementById("notiz-countdown");
+    if (el) el.textContent = "—";
+}
+
+function notizPopupSpeichern() {
+    clearInterval(_notizCountdownTimer);
+    _notizCountdownTimer = null;
+    if (_notizSpeechRecog) { try { _notizSpeechRecog.abort(); } catch (_) {} _notizSpeechRecog = null; }
+    _notizSpeechRunning = false;
+    const micBtn = document.getElementById("btn-notiz-mic");
+    if (micBtn) micBtn.textContent = "🎤";
+    const textarea = document.getElementById("notiz-text");
+    _pendingNote = textarea ? textarea.value.trim() : "";
+    const overlay = document.getElementById("notiz-popup-overlay");
+    if (overlay) overlay.style.display = "none";
+    if (_notizResolve) { _notizResolve(); _notizResolve = null; }
+}
+
+function notizMikrofonKlick() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) return;
+
+    if (_notizSpeechRunning) {
+        if (_notizSpeechRecog) _notizSpeechRecog.stop();
+        return;
+    }
+
+    /* Countdown pausieren während Aufnahme läuft */
+    _notizCountdownStoppUiAktualisieren();
+
+    _notizSpeechRunning = true;
+    const micBtn = document.getElementById("btn-notiz-mic");
+    if (micBtn) micBtn.textContent = "⏹";
+
+    const recog = new SpeechRec();
+    recog.lang             = "de-AT";
+    recog.interimResults   = false;
+    recog.maxAlternatives  = 1;
+    _notizSpeechRecog = recog;
+
+    recog.onresult = e => {
+        const text = e.results[0][0].transcript;
+        const ta   = document.getElementById("notiz-text");
+        if (ta) ta.value = (ta.value ? ta.value + " " : "") + text;
+    };
+
+    const _nachAufnahme = () => {
+        _notizSpeechRunning = false;
+        _notizSpeechRecog   = null;
+        if (micBtn) micBtn.textContent = "🎤";
+        /* Countdown neu starten */
+        _notizCountdownWert = 5;
+        _notizCountdownAnzeigen();
+        _notizCountdownTimer = setInterval(_notizCountdownTick, 1000);
+    };
+
+    recog.onend   = _nachAufnahme;
+    recog.onerror = _nachAufnahme;
+    recog.start();
+}
+
 async function schnellEintragSpeichern(typ) {
     const _zustand = stoppZustandLaden();
     const _antrieb = zustandErmitteln()?.zustand ?? "";
@@ -1360,9 +1472,10 @@ async function schnellEintragSpeichern(typ) {
         zeit:         zeitIso,
         ort:          gps?.ort || "",
         rudergaenger: ruder ? { name: ruder } : null,
-        note:         "",
+        note:         _pendingNote,
         weather:      gps?.weather || null
     };
+    _pendingNote = "";
     if (gps) ev.pos = { lat: gps.lat, lon: gps.lon, sog: gps.sog };
 
     if (!aktuellerToern.events) aktuellerToern.events = [];
