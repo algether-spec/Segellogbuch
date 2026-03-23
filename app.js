@@ -1372,7 +1372,7 @@ async function schnellEintragSpeichern(typ) {
     if (ev.pos) {
         if (!aktuellerToern.track)        aktuellerToern.track = {};
         if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
-        aktuellerToern.track.points.push({ lat: ev.pos.lat, lon: ev.pos.lon, sog: ev.pos.sog, zeit: ev.zeit });
+        aktuellerToern.track.points.push({ lat: ev.pos.lat, lon: ev.pos.lon, sog: ev.pos.sog, zeit: new Date().toISOString().slice(0, 19) });
         aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
     }
 
@@ -1771,7 +1771,7 @@ function trackPunktAufzeichnenUndPlanen() {
                     lat:  parseFloat(pos.coords.latitude.toFixed(5)),
                     lon:  parseFloat(pos.coords.longitude.toFixed(5)),
                     sog:  sogKn,
-                    zeit: new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T")
+                    zeit: new Date().toISOString().slice(0, 19)
                 });
                 toernSpeichern(aktuellerToern);
                 trackStatusAnzeigen(true);
@@ -2137,7 +2137,7 @@ function trackPunktHinzufuegen() {
                 lat:  parseFloat(pos.coords.latitude.toFixed(5)),
                 lon:  parseFloat(pos.coords.longitude.toFixed(5)),
                 sog:  0,
-                zeit: new Date().toLocaleString("sv").slice(0, 16).replace(" ", "T")
+                zeit: new Date().toISOString().slice(0, 19)
             };
             if (!aktuellerToern.track)        aktuellerToern.track = {};
             if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
