@@ -1398,6 +1398,11 @@ function notizPopupSpeichern() {
     if (_notizResolve) { _notizResolve(); _notizResolve = null; }
 }
 
+function notizTextLeeren() {
+    const ta = document.getElementById("notiz-text");
+    if (ta) { ta.value = ""; ta.focus(); }
+}
+
 function notizMikrofonKlick() {
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRec) return;

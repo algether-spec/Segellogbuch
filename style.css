@@ -1886,14 +1886,8 @@ button:active { opacity: 0.75; }
     text-align: right;
 }
 
-.notiz-input-zeile {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-}
-
 .notiz-text {
-    flex: 1;
+    width: 100%;
     border: 1.5px solid #cbd5e1;
     border-radius: 10px;
     padding: 10px 12px;
@@ -1911,7 +1905,13 @@ button:active { opacity: 0.75; }
     background: #fff;
 }
 
-.btn-notiz-mic {
+.notiz-btn-zeile {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-notiz-aktion {
     flex-shrink: 0;
     width: 46px;
     height: 46px;
@@ -1926,7 +1926,7 @@ button:active { opacity: 0.75; }
     transition: background 0.15s;
 }
 
-.btn-notiz-mic:active { background: #e0f2fe; }
+.btn-notiz-aktion:active { background: #e0f2fe; }
 
 .btn-notiz-speichern {
     background: #0ea5e9;
@@ -1957,7 +1957,7 @@ button:active { opacity: 0.75; }
     .notiz-popup-typ-label { color: #e2e8f0; }
     .notiz-text         { background: #0f172a; border-color: #334155; color: #e2e8f0; }
     .notiz-text:focus   { background: #0f172a; border-color: #0ea5e9; }
-    .btn-notiz-mic      { background: #0f172a; border-color: #334155; color: #e2e8f0; }
-    .btn-notiz-mic:active { background: #1e3a5f; }
+    .btn-notiz-aktion      { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .btn-notiz-aktion:active { background: #1e3a5f; }
     .event-note-text    { color: #94a3b8; }
 }
