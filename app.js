@@ -1357,6 +1357,13 @@ async function schnellEintragSpeichern(typ) {
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
 
+    /* GPS-Position des Events auch als Track-Punkt speichern */
+    if (ev.pos) {
+        if (!aktuellerToern.track)        aktuellerToern.track = {};
+        if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
+        aktuellerToern.track.points.push({ lat: ev.pos.lat, lon: ev.pos.lon, sog: ev.pos.sog, zeit: ev.zeit });
+    }
+
     /* Stopp-Zustand VOR zeigeLogs speichern – sonst liest UI alten Zustand */
     if (STOPP_EREIGNISSE[typ])      stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
     else if (START_EREIGNISSE.has(typ)) stoppZustandSpeichern("fahrt");
