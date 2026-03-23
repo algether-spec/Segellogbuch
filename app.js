@@ -208,9 +208,8 @@ function kategorieFuerTyp(typ) {
 }
 
 function antriebFuerTyp(typ) {
-    if (MOTOR_TYPEN.has(typ))          return "motor";
-    if (SEGEL_TYPEN.has(typ))          return "segeln";
-    if (STOPP_EREIGNISSE[typ] != null) return "";
+    if (MOTOR_TYPEN.has(typ)) return "motor";
+    if (SEGEL_TYPEN.has(typ)) return "segeln";
     return zustandErmitteln()?.zustand || "";
 }
 
