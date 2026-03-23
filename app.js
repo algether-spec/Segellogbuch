@@ -213,6 +213,13 @@ function kategorieFuerTyp(typ) {
     return KATEGORIE_MAP[typ] || "Allgemein";
 }
 
+function antriebFuerTyp(typ) {
+    if (MOTOR_TYPEN.has(typ))          return "motor";
+    if (SEGEL_TYPEN.has(typ))          return "segeln";
+    if (STOPP_EREIGNISSE[typ] != null) return "";
+    return zustandErmitteln()?.zustand || "";
+}
+
 function zustandErmitteln() {
     if (!aktuellerToern || !(aktuellerToern.events || []).length) return null;
     const sorted = aktuellerToern.events.slice().sort((a, b) =>
@@ -727,7 +734,7 @@ function logEintragSpeichern() {
         id:           generateId(),
         type:         logTyp.value,
         kategorie:    kategorieFuerTyp(logTyp.value),
-        antrieb:      zustandErmitteln()?.zustand || "",
+        antrieb:      antriebFuerTyp(logTyp.value),
         zeit:         logZeit.value,   /* "2026-03-18T14:35" aus datetime-local */
         ort:          "",
         rudergaenger: logRudergaenger.value ? { name: logRudergaenger.value } : null,
@@ -1365,7 +1372,7 @@ async function schnellEintragSpeichern(typ) {
         id:           generateId(),
         type:         typ,
         kategorie:    kategorieFuerTyp(typ),
-        antrieb:      zustandErmitteln()?.zustand || "",
+        antrieb:      antriebFuerTyp(typ),
         zeit:         zeitIso,
         ort:          gps?.ort || "",
         rudergaenger: ruder ? { name: ruder } : null,
@@ -1636,7 +1643,7 @@ function rudergaengerWechseln(name) {
         id:           generateId(),
         type:         "Ruderwechsel",
         kategorie:    "Allgemein",
-        antrieb:      zustandErmitteln()?.zustand || "",
+        antrieb:      antriebFuerTyp("Ruderwechsel"),
         zeit:         zeitIso,
         ort:          "",
         rudergaenger: { name },
