@@ -2062,6 +2062,10 @@ function karteTabRendern(toern) {
         pts  = pts.filter(p  => (p.zeit  || "").slice(0, 10) === heute);
         evts = evts.filter(ev => (ev.zeit || "").slice(0, 10) === heute);
     }
+    /* Sortieren + Duplikate nach zeit entfernen (Timer & Event-GPS können gleiche Minute haben) */
+    pts = pts.slice().sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
+    const _seenZeit = new Set();
+    pts = pts.filter(p => { if (_seenZeit.has(p.zeit)) return false; _seenZeit.add(p.zeit); return true; });
     /* Bearbeiten-Button synchronisieren */
     const _btnBearbeiten = document.getElementById("btn-karte-bearbeiten");
     if (_btnBearbeiten) {
