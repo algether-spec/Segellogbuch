@@ -270,6 +270,10 @@
         </div>
 
         <div id="tab-log-inhalt" hidden>
+            <div class="filter-bar">
+                <button type="button" class="filter-btn filter-btn-aktiv" id="log-filter-gesamt" onclick="logFilterSetzen('gesamt')">Gesamt</button>
+                <button type="button" class="filter-btn" id="log-filter-heute" onclick="logFilterSetzen('heute')">Heute</button>
+            </div>
             <div id="log-liste"></div>
         </div>
 
@@ -283,6 +287,10 @@
         </div>
 
         <div id="tab-karte-inhalt" hidden>
+            <div class="filter-bar">
+                <button type="button" class="filter-btn filter-btn-aktiv" id="karte-filter-gesamt" onclick="karteFilterSetzen('gesamt')">Gesamt</button>
+                <button type="button" class="filter-btn" id="karte-filter-heute" onclick="karteFilterSetzen('heute')">Heute</button>
+            </div>
             <div id="haupt-karte" class="haupt-karte"></div>
         </div>
 

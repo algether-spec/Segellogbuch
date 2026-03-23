@@ -626,9 +626,13 @@ function rudergaengerSelectFuellen() {
 
 function zeigeLogs() {
     if (!aktuellerToern) { logListe.innerHTML = ""; return; }
-    const events = (aktuellerToern.events || []).slice().sort((a, b) =>
+    let events = (aktuellerToern.events || []).slice().sort((a, b) =>
         evZeitIso(a) > evZeitIso(b) ? -1 : evZeitIso(a) < evZeitIso(b) ? 1 : 0
     );
+    if (_logFilter === "heute") {
+        const heute = heuteIso();
+        events = events.filter(ev => evZeitIso(ev).slice(0, 10) === heute);
+    }
     if (events.length === 0) {
         logListe.innerHTML = '<div class="card"><p class="event-empty">Noch keine Einträge.</p></div>';
     } else {
@@ -1432,6 +1436,26 @@ function sidebarSchliessen() {
 
 let _aktiveSeitenId  = null;
 let _aktiverHauptTab = "tab-logbuch";
+let _logFilter       = "gesamt";
+let _karteFilter     = "gesamt";
+
+function heuteIso() {
+    return new Date().toLocaleString("sv").slice(0, 10);
+}
+
+function logFilterSetzen(filter) {
+    _logFilter = filter;
+    document.getElementById("log-filter-gesamt")?.classList.toggle("filter-btn-aktiv", filter === "gesamt");
+    document.getElementById("log-filter-heute")?.classList.toggle("filter-btn-aktiv", filter === "heute");
+    zeigeLogs();
+}
+
+function karteFilterSetzen(filter) {
+    _karteFilter = filter;
+    document.getElementById("karte-filter-gesamt")?.classList.toggle("filter-btn-aktiv", filter === "gesamt");
+    document.getElementById("karte-filter-heute")?.classList.toggle("filter-btn-aktiv", filter === "heute");
+    if (aktuellerToern) karteTabRendern(aktuellerToern);
+}
 
 function hauptTabWechseln(tabId) {
     const hauptTabs = ["tab-logbuch", "tab-log", "tab-karte"];
@@ -2002,7 +2026,13 @@ function trackTabelleRendern(pts) {
 function karteTabRendern(toern) {
     const mapDiv = document.getElementById("haupt-karte");
     if (!mapDiv) return;
-    const pts = (toern?.track?.points) || [];
+    let pts  = (toern?.track?.points) || [];
+    let evts = (toern?.events) || [];
+    if (_karteFilter === "heute") {
+        const heute = heuteIso();
+        pts  = pts.filter(p  => (p.zeit  || "").slice(0, 10) === heute);
+        evts = evts.filter(ev => (ev.zeit || "").slice(0, 10) === heute);
+    }
     if (pts.length < 2) {
         mapDiv.innerHTML = "<p style='padding:16px;color:#64748b'>Keine Track-Daten vorhanden.</p>";
         return;
@@ -2026,7 +2056,7 @@ function karteTabRendern(toern) {
         .bindPopup("⏹ Ende · " + pts[pts.length - 1].zeit.slice(11, 16));
 
     const evIcon = L.divIcon({ className: "", html: "<div style='background:#f59e0b;border:2px solid #fff;border-radius:50%;width:9px;height:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)'></div>", iconSize: [9, 9], iconAnchor: [4, 4] });
-    (toern.events || []).forEach(ev => {
+    evts.forEach(ev => {
         if (ev.pos?.lat && ev.pos?.lon) {
             L.marker([ev.pos.lat, ev.pos.lon], { icon: evIcon }).addTo(_hauptKarte)
                 .bindPopup(ev.type + " · " + (ev.zeit || "").slice(11, 16));

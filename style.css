@@ -1770,3 +1770,31 @@ button:active { opacity: 0.75; }
     75%  { opacity: 1; }
     100% { opacity: 0; }
 }
+
+/* --- Filter-Bar (Log + Karte) ----------------------------------- */
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 0 6px;
+}
+
+.filter-btn {
+    padding: 5px 16px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 13px;
+    cursor: pointer;
+    color: #475569;
+}
+
+.filter-btn.filter-btn-aktiv {
+    background: #0ea5e9;
+    color: white;
+    border-color: #0ea5e9;
+}
+
+@media (prefers-color-scheme: dark) {
+    .filter-btn { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    .filter-btn.filter-btn-aktiv { background: #0ea5e9; border-color: #0ea5e9; color: white; }
+}
