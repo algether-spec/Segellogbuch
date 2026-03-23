@@ -1350,10 +1350,18 @@ function gpsUndWetterHolen(timeoutMs) {
     });
 }
 
+const ANTRIEB_PFLICHT_TYPEN = new Set(["Ablegen", "Abfahrt", "Anker lichten", "Von Boje"]);
+
+function antriebAktiv() {
+    return zustandErmitteln() !== null || antriebAusUI() !== null;
+}
+
 function eventErlaubt(typ, zustand) {
     const erlaubt = ERLAUBTE_ZUSTAENDE[typ];
     if (!erlaubt) return true;
-    return erlaubt.includes(zustand);
+    if (!erlaubt.includes(zustand)) return false;
+    if (ANTRIEB_PFLICHT_TYPEN.has(typ) && !antriebAktiv()) return false;
+    return true;
 }
 
 
@@ -1382,6 +1390,10 @@ let _notizSpeechRunning  = false;
 let _notizSpeechRecog    = null;
 
 function notizUndSpeichern(typ) {
+    if (ANTRIEB_PFLICHT_TYPEN.has(typ) && !antriebAktiv()) {
+        validierungsWarnung("Bitte zuerst Motor oder Segeln aktivieren");
+        return;
+    }
     notizPopupZeigen(typ).then(() => schnellEintragSpeichern(typ));
 }
 
