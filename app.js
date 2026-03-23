@@ -170,7 +170,7 @@ const MODUS_MAP = {
 };
 
 /* Ereignistypen die den Fahrt-Zustand definieren */
-const MOTOR_TYPEN = new Set(["Motor an", "Ablegen"]);
+const MOTOR_TYPEN = new Set(["Motor an"]);
 const SEGEL_TYPEN = new Set(["Segeln", "Abfahrt"]);
 
 /* Erlaubte Fahrt-Zustände pro Ereignistyp */
