@@ -184,9 +184,7 @@ const ERLAUBTE_ZUSTAENDE = {
     "Wende":         ["fahrt"],
     "Halse":         ["fahrt"],
     "Reffen":        ["fahrt"],
-    "Motor an":      ["fahrt"],
-    "Segeln":        ["fahrt"],
-    "Ruderwechsel":  ["fahrt"],
+    /* Motor an, Segeln, Ruderwechsel: kein Eintrag → immer erlaubt (LOGIK.md: "immer sichtbar") */
 };
 
 
@@ -1398,6 +1396,9 @@ function notizUndSpeichern(typ) {
 }
 
 function notizPopupZeigen(typ) {
+    /* Laufenden Timer immer zuerst löschen – verhindert akkumulierende Intervals */
+    clearInterval(_notizCountdownTimer);
+    _notizCountdownTimer = null;
     return new Promise(resolve => {
         _notizResolve = resolve;
         const overlay  = document.getElementById("notiz-popup-overlay");

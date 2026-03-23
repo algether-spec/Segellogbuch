@@ -59,9 +59,12 @@ schnellEintragSpeichern(typ)
 Bestimmt durch das **letzte** Motor- oder Segeln-Event in `aktuellerToern.events`:
 
 ```
-MOTOR_TYPEN = { "Motor an", "Ablegen" }
-SEGEL_TYPEN = { "Segeln", "Abfahrt" }
+MOTOR_TYPEN = { "Motor an" }
+SEGEL_TYPEN = { "Segeln" }
 ```
+
+"Ablegen" und "Abfahrt" sind nicht mehr in den Typen-Sets – ihr Antrieb wird
+dynamisch via `zustandErmitteln()` → UI-Buttons → Standardwert "motor" ermittelt.
 
 `zustandErmitteln()` liest Events rückwärts und gibt das letzte Motor/Segeln-Event zurück.
 `zustandAktualisieren()` setzt die Button-Klassen (`btn-zustand-aktiv`) und deaktiviert
