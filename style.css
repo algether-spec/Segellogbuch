@@ -163,6 +163,34 @@ header p {
     font-weight: 700;
 }
 
+/* --- Sidebar Settings ------------------------------------------- */
+.sidebar-settings {
+    padding: 16px 20px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.sidebar-setting-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+}
+.sidebar-setting-select {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 10px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a3a5c;
+    cursor: pointer;
+}
+.sidebar-setting-select:focus { outline: none; border-color: #1a3a5c; }
+
 /* --- Törnauswahl ------------------------------------------------ */
 
 .toern-bar {

@@ -1925,19 +1925,27 @@ function gpsAbfragen(ev) {
 let _trackTimeout = null;
 let _trackLaeuft  = false; /* GPS-Anfrage läuft gerade – verhindert Doppelstart */
 
-function mindestDistanzFuerSog(sogKn) {
-    if (sogKn < 3)  return 20;   /* < 3 kn  → 20 m  */
-    if (sogKn < 6)  return 50;   /* 3–6 kn  → 50 m  */
-    if (sogKn < 15) return 100;  /* 6–15 kn → 100 m */
-    if (sogKn < 25) return 200;  /* 15–25 kn→ 200 m */
-    return 300;                  /* > 25 kn → 300 m */
+function trackDistanzLaden() {
+    const v = parseFloat(localStorage.getItem("segel_track_distanz"));
+    return [0.25, 0.5, 1.0, 2.0].includes(v) ? v : 0.25;
+}
+
+function trackDistanzSpeichern(nm) {
+    localStorage.setItem("segel_track_distanz", String(nm));
+    trackDistanzSelectAktualisieren();
+}
+
+function trackDistanzSelectAktualisieren() {
+    const sel = document.getElementById("track-distanz-select");
+    if (sel) sel.value = String(trackDistanzLaden());
 }
 
 function trackIntervallFuerSog(sogKn) {
     if (sogKn <= 0) return 0;       /* kein Punkt, aber weiter prüfen */
-    if (sogKn < 3)  return 120000;  /* 0–3 kn → alle 2 min */
-    if (sogKn < 6)  return 60000;   /* 3–6 kn → alle 1 min */
-    return 30000;                   /* >6 kn  → alle 30 s  */
+    if (sogKn < 3)  return 120000;  /* 0–3 kn  → alle 2 min */
+    if (sogKn < 6)  return 60000;   /* 3–6 kn  → alle 1 min */
+    if (sogKn < 15) return 30000;   /* 6–15 kn → alle 30 s  */
+    return 15000;                   /* >15 kn  → alle 15 s  */
 }
 
 function trackStatusAnzeigen(aktiv) {
@@ -1967,7 +1975,7 @@ function trackPunktAufzeichnenUndPlanen() {
                 const newLon  = parseFloat(pos.coords.longitude.toFixed(5));
                 const letzter     = aktuellerToern.track.points[aktuellerToern.track.points.length - 1];
                 const distM       = letzter ? haversineKm(letzter.lat, letzter.lon, newLat, newLon) * 1000 : Infinity;
-                const minDistM    = mindestDistanzFuerSog(sogKn);
+                const minDistM    = trackDistanzLaden() * 1852;
                 const alterSek    = letzter ? (Date.now() - new Date(letzter.zeit).getTime()) / 1000 : Infinity;
                 if (distM >= minDistM || alterSek >= 180) {
                     aktuellerToern.track.points.push({
@@ -2403,6 +2411,7 @@ if (_letzterToernId && alleToernsLaden().find(t => t.tripId === _letzterToernId)
 backupBannerPruefen();
 backupStatusAktualisieren();
 pwaMigrationPruefen();
+trackDistanzSelectAktualisieren();
 
 if (_datenWiederhergestellt) {
     toernSelectAktualisieren();

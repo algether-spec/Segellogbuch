@@ -129,20 +129,22 @@ aufgezeichnet.
 | 0 kn | kein Punkt, aber in 2 min neu prüfen |
 | 0–3 kn | alle 2 min |
 | 3–6 kn | alle 1 min |
-| > 6 kn | alle 30 s |
+| 6–15 kn | alle 30 s |
+| > 15 kn | alle 15 s |
 
-### Mindestdistanz zwischen Track-Punkten
+### Track-Distanz (konfigurierbar)
 
-| SOG | Mindestdistanz |
+Einstellbar im Menü (Sidebar), gespeichert unter `localStorage["segel_track_distanz"]`.
+
+| Einstellung | Distanz |
 |---|---|
-| < 3 kn | 20 m |
-| 3–6 kn | 50 m |
-| 6–15 kn | 100 m |
-| 15–25 kn | 200 m |
-| > 25 kn | 300 m |
+| 0,25 nm (Standard) | 463 m |
+| 0,5 nm | 926 m |
+| 1,0 nm | 1852 m |
+| 2,0 nm | 3704 m |
 
-Zusätzlich: Punkt wird **immer** gespeichert wenn letzter Punkt älter als **3 Minuten**,
-unabhängig von der Distanz (Fallback gegen GPS-Drift bei hoher Geschwindigkeit).
+Punkt wird **immer** gespeichert wenn letzter Punkt älter als **3 Minuten**,
+unabhängig von der Distanz (Fallback).
 
 ### Datenspeicherung
 

@@ -38,6 +38,15 @@
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
             <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
         </nav>
+        <div class="sidebar-settings">
+            <label class="sidebar-setting-label" for="track-distanz-select">📍 Track-Abstand</label>
+            <select id="track-distanz-select" class="sidebar-setting-select" onchange="trackDistanzSpeichern(parseFloat(this.value))">
+                <option value="0.25">0,25 nm</option>
+                <option value="0.5">0,5 nm</option>
+                <option value="1.0">1,0 nm</option>
+                <option value="2.0">2,0 nm</option>
+            </select>
+        </div>
     </div>
 
     <!-- Status -->
