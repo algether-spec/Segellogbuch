@@ -1405,7 +1405,35 @@ function notizUndSpeichern(typ) {
         validierungsWarnung("Bitte zuerst Motor oder Segeln aktivieren");
         return;
     }
-    notizPopupZeigen(typ).then(() => schnellEintragSpeichern(typ));
+    notizPopupZeigen(typ).then(() => schnellEintragSpeichern(typ).then(() => notizButtonBlinken()));
+}
+
+function notizButtonBlinken() {
+    const btn = document.getElementById("btn-notiz-manoever");
+    if (!btn) return;
+    btn.classList.remove("btn-notiz-blinkt"); /* Reset falls noch aktiv */
+    void btn.offsetWidth;                     /* Reflow für Animation-Reset */
+    btn.classList.add("btn-notiz-blinkt");
+    setTimeout(() => btn.classList.remove("btn-notiz-blinkt"), 5000);
+}
+
+function notizZumLetztenManoever() {
+    if (!aktuellerToern || !(aktuellerToern.events || []).length) {
+        validierungsWarnung("Kein Manöver zum Ergänzen vorhanden.");
+        return;
+    }
+    const sorted = (aktuellerToern.events || []).slice().sort((a, b) =>
+        evZeitIso(a) < evZeitIso(b) ? -1 : 1
+    );
+    const letztes = sorted[sorted.length - 1];
+    notizPopupZeigen("Notiz: " + letztes.type).then(() => {
+        if (!_pendingNote) { _pendingNote = ""; return; }
+        letztes.note = letztes.note ? letztes.note + "\n" + _pendingNote : _pendingNote;
+        _pendingNote = "";
+        toernSpeichern(aktuellerToern);
+        zeigeLogs();
+        statusSetzen("💬 Notiz ergänzt.", "ok", 2000);
+    });
 }
 
 function notizPopupZeigen(typ) {

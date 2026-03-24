@@ -361,22 +361,49 @@ button:active { opacity: 0.75; }
 
 /* --- Detaillierter Eintrag Button ------------------------------- */
 
+.eintrag-aktionen-zeile {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
 .btn-detail-eintrag {
-    display: block;
-    width: 100%;
-    padding: 11px;
+    flex: 1;
+    padding: 11px 8px;
     border-radius: 10px;
     background: #f1f5f9;
     color: #475569;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     border: 1.5px dashed #cbd5e1;
     cursor: pointer;
     transition: background 0.15s;
-    margin-top: 4px;
 }
 
 .btn-detail-eintrag:active { background: #e2e8f0; }
+
+.btn-notiz-manoever {
+    flex: 1;
+    padding: 11px 8px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1.5px dashed #cbd5e1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-notiz-manoever:active { background: #e2e8f0; }
+
+@keyframes notiz-hinweis-blink {
+    0%, 100% { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    50%       { background: #e8841a; color: #fff;    border-color: #e8841a; }
+}
+.btn-notiz-blinkt {
+    animation: notiz-hinweis-blink 1s ease-in-out 5;
+}
 
 /* --- Log Modal -------------------------------------------------- */
 
