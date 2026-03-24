@@ -1432,7 +1432,8 @@ function notizUndSpeichern(typ) {
         validierungsWarnung("Bitte zuerst Motor oder Segeln aktivieren");
         return;
     }
-    notizPopupZeigen(typ).then(() => schnellEintragSpeichern(typ).then(() => notizButtonBlinken()));
+    _pendingNote = "";
+    schnellEintragSpeichern(typ).then(() => notizButtonBlinken());
 }
 
 function notizButtonBlinken() {
