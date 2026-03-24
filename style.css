@@ -405,6 +405,36 @@ button:active { opacity: 0.75; }
     animation: notiz-hinweis-blink 1s ease-in-out 5;
 }
 
+/* --- Log Vorschau (letzte 3 Einträge) --------------------------- */
+
+.log-vorschau {
+    margin-top: 8px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.log-vorschau-zeile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 2px;
+    font-size: 12px;
+    color: #64748b;
+}
+.log-vorschau-zeit {
+    font-variant-numeric: tabular-nums;
+    color: #94a3b8;
+    min-width: 36px;
+}
+.log-vorschau-typ {
+    flex: 1;
+}
+.log-vorschau-icon {
+    font-size: 13px;
+}
+
 /* --- Log Modal -------------------------------------------------- */
 
 .log-modal-box {

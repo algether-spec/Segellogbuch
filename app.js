@@ -748,7 +748,34 @@ function zeigeLogs() {
     toernStatistikRendern(toernStatistikBerechnen(aktuellerToern));
     toernAbschlussRendern(toernAbschlussBerechnen(aktuellerToern));
     logbuchStatusAktualisieren();
+    logVorschauAktualisieren();
     requestAnimationFrame(() => window.scrollTo(0, _scrollY));
+}
+
+function logVorschauAktualisieren() {
+    const el = document.getElementById("log-vorschau");
+    if (!el) return;
+    if (!aktuellerToern || !(aktuellerToern.events || []).length) {
+        el.hidden = true;
+        return;
+    }
+    const letzten = (aktuellerToern.events || [])
+        .slice()
+        .sort((a, b) => evZeitIso(a) > evZeitIso(b) ? -1 : evZeitIso(a) < evZeitIso(b) ? 1 : 0)
+        .slice(0, 3);
+    const KAT_ICON = { "Segeln": "⛵", "Motor": "🔧", "Anker": "⚓", "Boje": "🔵" };
+    el.innerHTML = letzten.map(ev => {
+        const zeit = evZeitIso(ev).slice(11, 16) || "—";
+        const antriebIcon = ev.antrieb === "segeln" ? "⛵"
+                          : ev.antrieb === "motor"  ? "🔧"
+                          : ev.antrieb == null ? (KAT_ICON[ev.kategorie] || "") : "";
+        return `<div class="log-vorschau-zeile">
+            <span class="log-vorschau-zeit">${zeit}</span>
+            <span class="log-vorschau-typ">${ev.type}</span>
+            ${antriebIcon ? `<span class="log-vorschau-icon">${antriebIcon}</span>` : ""}
+        </div>`;
+    }).join("");
+    el.hidden = false;
 }
 
 function logModalOeffnen() {
