@@ -44,24 +44,6 @@
     <!-- Status -->
     <div id="status-msg" class="status-msg" hidden></div>
 
-    <!-- Logbuch Sticky Bar (Rudergänger + Segeln/Motor) -->
-    <div id="logbuch-sticky" class="logbuch-sticky" hidden>
-        <div id="ruder-bar" class="ruder-bar">
-            <button type="button" id="btn-rudergaenger" class="btn-rudergaenger" onclick="ruderDropdownToggeln()">👤 —</button>
-            <div id="ruder-dropdown" class="ruder-dropdown" hidden></div>
-        </div>
-        <div id="zustand-bar" class="zustand-bar">
-            <button type="button" id="btn-zustand-segeln" class="btn-zustand" onclick="zustandSetzen('segeln')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 20h16L12 2z"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
-                Segeln
-            </button>
-            <button type="button" id="btn-zustand-motor" class="btn-zustand" onclick="zustandSetzen('motor')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/></svg>
-                Motor
-            </button>
-        </div>
-    </div>
-
     <!-- ═══ Tab 1: Törn ═══════════════════════════════════════════ -->
     <div id="tab-toern" class="tab-panel">
 
@@ -199,8 +181,25 @@
 
         <div id="tab-logbuch-inhalt" hidden>
 
+            <!-- Rudergänger + Segeln/Motor (sticky unter Tab-Nav) -->
+            <div id="logbuch-sticky" class="logbuch-sticky" hidden>
+                <div id="ruder-bar" class="ruder-bar">
+                    <button type="button" id="btn-rudergaenger" class="btn-rudergaenger" onclick="ruderDropdownToggeln()">👤 —</button>
+                    <div id="ruder-dropdown" class="ruder-dropdown" hidden></div>
+                </div>
+                <div id="zustand-bar" class="zustand-bar">
+                    <button type="button" id="btn-zustand-segeln" class="btn-zustand" onclick="zustandSetzen('segeln')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 20h16L12 2z"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+                        Segeln
+                    </button>
+                    <button type="button" id="btn-zustand-motor" class="btn-zustand" onclick="zustandSetzen('motor')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/></svg>
+                        Motor
+                    </button>
+                </div>
+            </div>
+
             <div class="card" id="log-card">
-                <h2>📘 Logbucheintrag</h2>
 
                 <!-- Fahrt-Start Buttons (wenn gestoppt) -->
                 <div id="fahrt-start-bar" class="hafenmanover-bar" hidden>
