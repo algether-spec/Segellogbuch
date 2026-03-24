@@ -1927,7 +1927,7 @@ let _trackLaeuft  = false; /* GPS-Anfrage läuft gerade – verhindert Doppelsta
 
 function trackDistanzLaden() {
     const v = parseFloat(localStorage.getItem("segel_track_distanz"));
-    return [0.25, 0.5, 1.0, 2.0].includes(v) ? v : 0.25;
+    return [0.1, 0.25, 0.5, 1.0, 2.0].includes(v) ? v : 0.25;
 }
 
 function trackDistanzSpeichern(nm) {
