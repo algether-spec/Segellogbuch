@@ -164,23 +164,53 @@ header p {
 }
 
 /* --- Sidebar Settings ------------------------------------------- */
-.sidebar-settings {
-    padding: 16px 20px;
-    border-top: 1px solid #e2e8f0;
+/* --- Einstellungs-Seite ----------------------------------------- */
+.seite-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px 0;
+}
+.btn-zurueck {
+    background: none;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a3a5c;
+    cursor: pointer;
+    padding: 6px 0;
+}
+.seite-titel {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin: 0;
+}
+.einstellungen-card {
+    margin: 12px 16px;
+}
+.einstellungen-gruppe-titel {
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.einstellung-zeile {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    padding: 4px 0;
 }
-.sidebar-setting-label {
-    font-size: 14px;
+.einstellung-label {
+    font-size: 15px;
     font-weight: 600;
-    color: #334155;
-    white-space: nowrap;
+    color: #1e293b;
 }
-.sidebar-setting-select {
-    flex: 1;
-    padding: 7px 10px;
+.einstellung-select {
+    padding: 8px 12px;
     border-radius: 10px;
     border: 1.5px solid #cbd5e1;
     background: #f8fafc;
@@ -188,8 +218,9 @@ header p {
     font-weight: 600;
     color: #1a3a5c;
     cursor: pointer;
+    min-width: 160px;
 }
-.sidebar-setting-select:focus { outline: none; border-color: #1a3a5c; }
+.einstellung-select:focus { outline: none; border-color: #1a3a5c; }
 
 /* --- Törnauswahl ------------------------------------------------ */
 

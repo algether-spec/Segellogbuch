@@ -1678,7 +1678,7 @@ function hauptTabWechseln(tabId) {
 }
 
 function seitenWechseln(seiteId) {
-    const seitenPanels = ["tab-toern", "tab-crew", "tab-statistik"];
+    const seitenPanels = ["tab-toern", "tab-crew", "tab-statistik", "tab-einstellungen"];
     const hauptBereich = document.getElementById("haupt-bereich");
 
     _aktiveSeitenId = seiteId || null;
@@ -2402,7 +2402,7 @@ btnToernLoeschen.hidden = true;
 statusMsg.hidden = true;
 
 /* Hauptbereich anzeigen, Sidebar-Panels verstecken */
-["tab-toern", "tab-crew", "tab-statistik"].forEach(id => {
+["tab-toern", "tab-crew", "tab-statistik", "tab-einstellungen"].forEach(id => {
     const p = document.getElementById(id);
     if (p) p.classList.add("tab-hidden");
 });

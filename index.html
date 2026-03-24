@@ -37,17 +37,8 @@
             <button type="button" class="sidebar-btn" data-seite="tab-crew"      onclick="seitenWechseln('tab-crew')">👥 Crew</button>
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
             <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
+            <button type="button" class="sidebar-btn" data-seite="tab-einstellungen" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
         </nav>
-        <div class="sidebar-settings">
-            <label class="sidebar-setting-label" for="track-distanz-select">📍 Track-Auflösung</label>
-            <select id="track-distanz-select" class="sidebar-setting-select" onchange="trackDistanzSpeichern(parseFloat(this.value))">
-                <option value="0.1">0,1 nm</option>
-                <option value="0.25">0,25 nm</option>
-                <option value="0.5">0,5 nm</option>
-                <option value="1.0">1,0 nm</option>
-                <option value="2.0">2,0 nm</option>
-            </select>
-        </div>
     </div>
 
     <!-- Status -->
@@ -338,6 +329,27 @@
         </div>
 
     </div><!-- /tab-statistik -->
+
+    <!-- ═══ Einstellungen ══════════════════════════════════════════ -->
+    <div id="tab-einstellungen" class="tab-panel tab-hidden">
+        <div class="seite-header">
+            <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
+            <h1 class="seite-titel">⚙️ Einstellungen</h1>
+        </div>
+        <div class="card einstellungen-card">
+            <h2 class="einstellungen-gruppe-titel">📍 Track-Aufzeichnung</h2>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="track-distanz-select">Track-Auflösung</label>
+                <select id="track-distanz-select" class="einstellung-select" onchange="trackDistanzSpeichern(parseFloat(this.value))">
+                    <option value="0.1">0,1 nm (~185 m)</option>
+                    <option value="0.25">0,25 nm (~463 m)</option>
+                    <option value="0.5">0,5 nm (~926 m)</option>
+                    <option value="1.0">1,0 nm (~1852 m)</option>
+                    <option value="2.0">2,0 nm (~3700 m)</option>
+                </select>
+            </div>
+        </div>
+    </div><!-- /tab-einstellungen -->
 
     <!-- Versionszeile -->
     <div class="version-bar">
