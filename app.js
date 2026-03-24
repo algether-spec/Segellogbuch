@@ -487,9 +487,14 @@ function statusSetzen(text, typ = "ok", ms = 3000) {
 function logLadeStatusSetzen(text, ms = 3000) {
     const el = document.getElementById("log-lade-status");
     if (!el) return;
-    el.textContent = text;
-    el.hidden = !text;
-    if (text) setTimeout(() => { el.hidden = true; }, ms);
+    /* "✅ gespeichert" und leerer Text → Spinner ausblenden, kein Toast */
+    if (!text || text.startsWith("✅")) {
+        el.hidden = true;
+        return;
+    }
+    /* "⏳ GPS…" → Spinner anzeigen (kein Text, nur CSS-Animation) */
+    el.hidden = false;
+    setTimeout(() => { el.hidden = true; }, ms);
 }
 
 function validieren() {

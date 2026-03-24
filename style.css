@@ -477,16 +477,26 @@ button:active { opacity: 0.75; }
 
 /* --- Schnellbuttons Grid ---------------------------------------- */
 
-/* --- Logbuch Lade-Status (GPS + Wind) -------------------------- */
+/* --- Logbuch Lade-Status (GPS-Spinner) ------------------------- */
 
 .log-lade-status {
-    padding: 7px 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-top: 10px;
-    background: #d1fae5;
-    color: #065f46;
+    height: 28px;
+}
+.log-lade-status::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: gps-spinner 0.75s linear infinite;
+}
+@keyframes gps-spinner {
+    to { transform: rotate(360deg); }
 }
 
 /* --- Logbuch-Statusleiste --------------------------------------- */
@@ -1857,7 +1867,7 @@ button:active { opacity: 0.75; }
     .logbuch-sticky { background: #0f172a; }
     #ls-modus { color: #7dd3fc; }
     #ls-seit  { color: #fb923c; }
-    .log-lade-status { background: #064e3b; color: #6ee7b7; }
+    .log-lade-status::after { border-color: #334155; border-top-color: #60a5fa; }
     .log-card-header { border-bottom-color: #334155; }
     .btn-rudergaenger { color: #94a3b8; border-color: #334155; }
     .btn-rudergaenger:active { background: #1e293b; color: #e2e8f0; }
