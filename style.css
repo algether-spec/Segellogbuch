@@ -1862,6 +1862,9 @@ button:active { opacity: 0.75; }
     background: #e2e8f0;
 }
 
+.btn-track-loeschen { color: #dc2626; border-color: #fca5a5; }
+.btn-track-loeschen:active { background: #fee2e2; }
+
 .karte-aktion-status {
     font-size: 13px;
     color: #64748b;

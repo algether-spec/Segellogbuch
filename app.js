@@ -2350,6 +2350,16 @@ function trackPunktLoeschen(zeit) {
     statusSetzen("🗑 Track-Punkt gelöscht.", "ok", 2000);
 }
 
+function trackLoeschen() {
+    if (!aktuellerToern) return;
+    if (!confirm("Track wirklich löschen?")) return;
+    if (!aktuellerToern.track) aktuellerToern.track = {};
+    aktuellerToern.track.points = [];
+    toernSpeichern(aktuellerToern);
+    karteTabRendern(aktuellerToern);
+    statusSetzen("🗑 Track gelöscht.", "ok", 2000);
+}
+
 function trackPunktHinzufuegen() {
     if (!aktuellerToern) { statusSetzen("Bitte zuerst einen Törn auswählen.", "error"); return; }
     const statusEl = document.getElementById("karte-aktion-status");
