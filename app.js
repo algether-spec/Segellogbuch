@@ -774,10 +774,12 @@ function logVorschauAktualisieren() {
         const antriebIcon = ev.antrieb === "segeln" ? "⛵"
                           : ev.antrieb === "motor"  ? "🔧"
                           : ev.antrieb == null ? (KAT_ICON[ev.kategorie] || "") : "";
+        const ruder = ev.rudergaenger?.name || "";
+        const wind  = windText(ev.weather);
+        const teile = [ev.type, antriebIcon, ruder, wind].filter(Boolean).join(" · ");
         return `<div class="log-vorschau-zeile">
             <span class="log-vorschau-zeit">${zeit}</span>
-            <span class="log-vorschau-typ">${ev.type}</span>
-            ${antriebIcon ? `<span class="log-vorschau-icon">${antriebIcon}</span>` : ""}
+            <span class="log-vorschau-info">${teile}</span>
         </div>`;
     }).join("");
     el.hidden = false;

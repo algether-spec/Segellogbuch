@@ -428,11 +428,11 @@ button:active { opacity: 0.75; }
     color: #94a3b8;
     min-width: 36px;
 }
-.log-vorschau-typ {
+.log-vorschau-info {
     flex: 1;
-}
-.log-vorschau-icon {
-    font-size: 13px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 /* --- Log Modal -------------------------------------------------- */
