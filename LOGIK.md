@@ -131,6 +131,19 @@ aufgezeichnet.
 | 3–6 kn | alle 1 min |
 | > 6 kn | alle 30 s |
 
+### Mindestdistanz zwischen Track-Punkten
+
+| SOG | Mindestdistanz |
+|---|---|
+| < 3 kn | 20 m |
+| 3–6 kn | 50 m |
+| 6–15 kn | 100 m |
+| 15–25 kn | 200 m |
+| > 25 kn | 300 m |
+
+Zusätzlich: Punkt wird **immer** gespeichert wenn letzter Punkt älter als **3 Minuten**,
+unabhängig von der Distanz (Fallback gegen GPS-Drift bei hoher Geschwindigkeit).
+
 ### Datenspeicherung
 
 Punkte werden in `aktuellerToern.track.points[]` gespeichert:

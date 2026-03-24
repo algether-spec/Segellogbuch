@@ -1925,6 +1925,14 @@ function gpsAbfragen(ev) {
 let _trackTimeout = null;
 let _trackLaeuft  = false; /* GPS-Anfrage läuft gerade – verhindert Doppelstart */
 
+function mindestDistanzFuerSog(sogKn) {
+    if (sogKn < 3)  return 20;   /* < 3 kn  → 20 m  */
+    if (sogKn < 6)  return 50;   /* 3–6 kn  → 50 m  */
+    if (sogKn < 15) return 100;  /* 6–15 kn → 100 m */
+    if (sogKn < 25) return 200;  /* 15–25 kn→ 200 m */
+    return 300;                  /* > 25 kn → 300 m */
+}
+
 function trackIntervallFuerSog(sogKn) {
     if (sogKn <= 0) return 0;       /* kein Punkt, aber weiter prüfen */
     if (sogKn < 3)  return 120000;  /* 0–3 kn → alle 2 min */
@@ -1957,9 +1965,11 @@ function trackPunktAufzeichnenUndPlanen() {
                 if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
                 const newLat  = parseFloat(pos.coords.latitude.toFixed(5));
                 const newLon  = parseFloat(pos.coords.longitude.toFixed(5));
-                const letzter = aktuellerToern.track.points[aktuellerToern.track.points.length - 1];
-                const distM   = letzter ? haversineKm(letzter.lat, letzter.lon, newLat, newLon) * 1000 : Infinity;
-                if (distM >= 50) {
+                const letzter     = aktuellerToern.track.points[aktuellerToern.track.points.length - 1];
+                const distM       = letzter ? haversineKm(letzter.lat, letzter.lon, newLat, newLon) * 1000 : Infinity;
+                const minDistM    = mindestDistanzFuerSog(sogKn);
+                const alterSek    = letzter ? (Date.now() - new Date(letzter.zeit).getTime()) / 1000 : Infinity;
+                if (distM >= minDistM || alterSek >= 180) {
                     aktuellerToern.track.points.push({
                         lat:  newLat,
                         lon:  newLon,
