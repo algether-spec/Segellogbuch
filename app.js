@@ -2074,7 +2074,7 @@ function trackStarten() {
 }
 
 function trackStoppen() {
-    if (_trackTimeout) { clearTimeout(_trackTimeout); _trackTimeout = null; }
+    if (_trackTimeout !== null) { clearTimeout(_trackTimeout); _trackTimeout = null; }
     _trackLaeuft = false;
     trackStatusAnzeigen(false);
 }
