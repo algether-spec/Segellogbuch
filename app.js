@@ -1199,10 +1199,10 @@ function toernLaden(tripId) {
     stoppZustandSpeichern(toern.stoppZustand || "hafen");
     hafenSperrungAktualisieren(toern.stoppZustand || "hafen");
     speichereAktivenToern(tripId);
+    /* Rudergänger zurücksetzen beim Törn-Wechsel */
+    speichereLetzteWerte((ladeLetzteWerte() || {}).wind || "", "");
     /* Logbuch + Log direkt initialisieren (kein Tab-Wechsel mehr nötig) */
     logZeitVorbefuellen();
-    const _lv = ladeLetzteWerte() || {};
-    if (_lv.rudergaenger) logRudergaenger.value = _lv.rudergaenger;
     tabInhaltToggeln();
     logbuchStatusAktualisieren();
     zeigeLogs();
