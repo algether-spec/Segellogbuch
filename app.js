@@ -1211,6 +1211,8 @@ function toernLaden(tripId) {
 function neuerToernAnlegen() {
     trackStoppen();
     aktuellerToern = neuerToern();
+    /* Rudergänger zurücksetzen – kein Vorausfüllen aus altem Törn */
+    speichereLetzteWerte((ladeLetzteWerte() || {}).wind || "", "");
     formularFuellen(aktuellerToern);
     formSection.hidden = false;
     btnToernLoeschen.hidden = true;
