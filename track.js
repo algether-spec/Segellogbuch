@@ -1,0 +1,146 @@
+/* ======================
+   TRACK.JS – GPS-Track-Aufzeichnung
+   watchPosition-basiert (v2.5.x)
+====================== */
+
+/* --- Zustands-Variablen ------------------------------------------ */
+
+let _watchId     = null;   /* watchPosition-Handle (null = nicht aktiv) */
+let _letzterPkt  = null;   /* letzter gespeicherter Track-Punkt         */
+let _highAcc     = false;  /* aktuell verwendete enableHighAccuracy-Mode */
+
+/* --- Haversine-Distanz (km) -------------------------------------- */
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2
+            + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
+            * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/* --- Track-Distanz (konfigurierbar) ------------------------------ */
+
+function trackDistanzLaden() {
+    const v = parseFloat(localStorage.getItem("segel_track_distanz"));
+    return [0.1, 0.25, 0.5, 1.0, 2.0].includes(v) ? v : 0.25;
+}
+
+function trackDistanzSpeichern(nm) {
+    localStorage.setItem("segel_track_distanz", String(nm));
+    trackDistanzSelectAktualisieren();
+}
+
+function trackDistanzSelectAktualisieren() {
+    const sel = document.getElementById("track-distanz-select");
+    if (sel) sel.value = String(trackDistanzLaden());
+}
+
+/* --- Track-Status anzeigen --------------------------------------- */
+
+function trackStatusAnzeigen(aktiv) {
+    const el = document.getElementById("ls-track");
+    if (el) el.textContent = aktiv ? "🟢 Track" : "🔴 Track aus";
+}
+
+/* --- Internen Punkt speichern ------------------------------------ */
+
+function _trackPunktSpeichern(lat, lon, sog, zeitIso) {
+    if (!aktuellerToern) return;
+    if (!aktuellerToern.track)        aktuellerToern.track = {};
+    if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
+    const pkt = { lat, lon, sog, zeit: zeitIso };
+    aktuellerToern.track.points.push(pkt);
+    aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
+    _letzterPkt = pkt;
+    toernSpeichern(aktuellerToern);
+}
+
+/* --- trackManöverPunkt: immer speichern (kein Distanz-Check) ----- */
+/* Wird von schnellEintragSpeichern() aufgerufen                     */
+
+function trackManöverPunkt(lat, lon, sog, zeitIso) {
+    if (!aktuellerToern) return;
+    _trackPunktSpeichern(
+        parseFloat(lat.toFixed(5)),
+        parseFloat(lon.toFixed(5)),
+        sog,
+        zeitIso
+    );
+}
+
+/* --- watchPosition-Callback -------------------------------------- */
+
+function _trackWatchCallback(pos) {
+    if (!aktuellerToern || stoppZustandLaden() !== "fahrt") {
+        trackStoppen();
+        return;
+    }
+
+    const sogMs = pos.coords.speed;
+    const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : 0;
+
+    /* enableHighAccuracy dynamisch anpassen: Neustart bei SOG-Schwelle */
+    const neueHighAcc = sogKn > 3;
+    if (neueHighAcc !== _highAcc) {
+        _highAcc = neueHighAcc;
+        navigator.geolocation.clearWatch(_watchId);
+        _watchId = null;
+        trackStarten();
+        return;
+    }
+
+    const newLat   = parseFloat(pos.coords.latitude.toFixed(5));
+    const newLon   = parseFloat(pos.coords.longitude.toFixed(5));
+    const minDistM = trackDistanzLaden() * 1852;
+    const distM    = _letzterPkt
+        ? haversineKm(_letzterPkt.lat, _letzterPkt.lon, newLat, newLon) * 1000
+        : Infinity;
+    const alterSek = _letzterPkt
+        ? (Date.now() - new Date(_letzterPkt.zeit).getTime()) / 1000
+        : Infinity;
+
+    /* SOG = 0: nur Fallback speichern */
+    if (sogKn <= 0 && alterSek < 180) {
+        trackStatusAnzeigen(true);
+        return;
+    }
+
+    if (distM >= minDistM || alterSek >= 180) {
+        _trackPunktSpeichern(newLat, newLon, sogKn, new Date().toISOString().slice(0, 19));
+    }
+    trackStatusAnzeigen(true);
+}
+
+/* --- trackStarten ----------------------------------------------- */
+
+function trackStarten() {
+    if (_watchId !== null) return;  /* Idempotent */
+    if (!aktuellerToern || stoppZustandLaden() !== "fahrt") return;
+    if (!navigator.geolocation) return;
+
+    /* _letzterPkt aus vorhandenen Punkten initialisieren */
+    const pts = aktuellerToern?.track?.points || [];
+    if (!_letzterPkt && pts.length) _letzterPkt = pts[pts.length - 1];
+
+    _watchId = navigator.geolocation.watchPosition(
+        _trackWatchCallback,
+        () => { trackStatusAnzeigen(false); },  /* GPS-Fehler: Status ausblenden */
+        { maximumAge: 30000, timeout: 10000, enableHighAccuracy: _highAcc }
+    );
+    trackStatusAnzeigen(false);  /* initial bis erste Position */
+}
+
+/* --- trackStoppen ----------------------------------------------- */
+
+function trackStoppen() {
+    if (_watchId !== null) {
+        navigator.geolocation.clearWatch(_watchId);
+        _watchId = null;
+    }
+    _letzterPkt = null;
+    _highAcc    = false;
+    trackStatusAnzeigen(false);
+}

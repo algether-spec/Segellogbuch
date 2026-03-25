@@ -1620,13 +1620,8 @@ async function schnellEintragSpeichern(typ) {
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
 
-    /* GPS-Position des Events auch als Track-Punkt speichern, chronologisch einsortieren */
-    if (ev.pos) {
-        if (!aktuellerToern.track)        aktuellerToern.track = {};
-        if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
-        aktuellerToern.track.points.push({ lat: ev.pos.lat, lon: ev.pos.lon, sog: ev.pos.sog, zeit: new Date().toISOString().slice(0, 19) });
-        aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
-    }
+    /* GPS-Position des Events als Manöver-Punkt in track.js speichern */
+    if (ev.pos) trackManöverPunkt(ev.pos.lat, ev.pos.lon, ev.pos.sog, zeitIso);
 
     /* Stopp-Zustand VOR zeigeLogs speichern – sonst liest UI alten Zustand */
     if (STOPP_EREIGNISSE[typ])      stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
@@ -1983,101 +1978,7 @@ function gpsAbfragen(ev) {
 }
 
 
-/* --- Autotracking ----------------------------------------------- */
-
-let _trackTimeout = null;
-let _trackLaeuft  = false; /* GPS-Anfrage läuft gerade – verhindert Doppelstart */
-
-function trackDistanzLaden() {
-    const v = parseFloat(localStorage.getItem("segel_track_distanz"));
-    return [0.1, 0.25, 0.5, 1.0, 2.0].includes(v) ? v : 0.25;
-}
-
-function trackDistanzSpeichern(nm) {
-    localStorage.setItem("segel_track_distanz", String(nm));
-    trackDistanzSelectAktualisieren();
-}
-
-function trackDistanzSelectAktualisieren() {
-    const sel = document.getElementById("track-distanz-select");
-    if (sel) sel.value = String(trackDistanzLaden());
-}
-
-function trackIntervallFuerSog(sogKn) {
-    if (sogKn <= 0) return 0;       /* kein Punkt, aber weiter prüfen */
-    if (sogKn < 3)  return 120000;  /* 0–3 kn  → alle 2 min */
-    if (sogKn < 6)  return 60000;   /* 3–6 kn  → alle 1 min */
-    if (sogKn < 15) return 30000;   /* 6–15 kn → alle 30 s  */
-    return 15000;                   /* >15 kn  → alle 15 s  */
-}
-
-function trackStatusAnzeigen(aktiv) {
-    const el = document.getElementById("ls-track");
-    if (el) el.textContent = aktiv ? "🟢 Track" : "🔴 Track aus";
-}
-
-function trackPunktAufzeichnenUndPlanen() {
-    _trackLaeuft = true;
-    _trackTimeout = null;
-    if (!aktuellerToern || stoppZustandLaden() !== "fahrt") {
-        trackStoppen();
-        return;
-    }
-    if (!navigator.geolocation) { _trackLaeuft = false; return; }
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            _trackLaeuft = false;
-            if (!aktuellerToern) return;
-            const sogMs = pos.coords.speed;
-            const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : 0;
-            const intervall = trackIntervallFuerSog(sogKn);
-            if (intervall > 0) {
-                if (!aktuellerToern.track)        aktuellerToern.track = {};
-                if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
-                const newLat  = parseFloat(pos.coords.latitude.toFixed(5));
-                const newLon  = parseFloat(pos.coords.longitude.toFixed(5));
-                const letzter     = aktuellerToern.track.points[aktuellerToern.track.points.length - 1];
-                const distM       = letzter ? haversineKm(letzter.lat, letzter.lon, newLat, newLon) * 1000 : Infinity;
-                const minDistM    = trackDistanzLaden() * 1852;
-                const alterSek    = letzter ? (Date.now() - new Date(letzter.zeit).getTime()) / 1000 : Infinity;
-                if (distM >= minDistM || alterSek >= 180) {
-                    aktuellerToern.track.points.push({
-                        lat:  newLat,
-                        lon:  newLon,
-                        sog:  sogKn,
-                        zeit: new Date().toISOString().slice(0, 19)
-                    });
-                    toernSpeichern(aktuellerToern);
-                }
-                trackStatusAnzeigen(true);
-            } else {
-                trackStatusAnzeigen(false);
-            }
-            /* Nächsten Punkt planen – bei SOG=0 in 2 min neu prüfen */
-            _trackTimeout = setTimeout(trackPunktAufzeichnenUndPlanen, intervall > 0 ? intervall : 120000);
-        },
-        () => {
-            /* GPS-Fehler: in 60 s nochmal versuchen */
-            _trackLaeuft = false;
-            _trackTimeout = setTimeout(trackPunktAufzeichnenUndPlanen, 60000);
-        },
-        { maximumAge: 10000, timeout: 10000, enableHighAccuracy: true }
-    );
-}
-
-function trackStarten() {
-    /* Idempotent: läuft bereits → nicht neu starten (sonst wird Timer bei jedem Event-Save zurückgesetzt) */
-    if (_trackTimeout !== null || _trackLaeuft) return;
-    if (!aktuellerToern || stoppZustandLaden() !== "fahrt") return;
-    if (!navigator.geolocation) return;
-    trackPunktAufzeichnenUndPlanen();
-}
-
-function trackStoppen() {
-    if (_trackTimeout !== null) { clearTimeout(_trackTimeout); _trackTimeout = null; }
-    _trackLaeuft = false;
-    trackStatusAnzeigen(false);
-}
+/* Autotracking → track.js */
 
 
 /* --- Törn abschließen ------------------------------------------- */
@@ -2214,15 +2115,7 @@ function pwaMigrationPruefen() {
 let _trackMap  = null;
 let _hauptKarte = null;
 
-function haversineKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2
-            + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
-            * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+/* haversineKm() → track.js */
 
 function trackDistanzNm(pts) {
     let km = 0;

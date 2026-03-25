@@ -11,8 +11,6 @@ falsche Zustände oder defektes Tracking verursachen.
 | `hafenSperrungAktualisieren()` | app.js | FAHRT/STOPP-Zustand auf UI anwenden |
 | `stoppZustandSpeichern()` | app.js | Fahrt-Zustand in localStorage + Törn schreiben |
 | `schnellEintragSpeichern()` | app.js | Schnellbutton → GPS → Event → Speichern |
-| `trackPunktAufzeichnenUndPlanen()` | app.js | GPS-Punkt aufzeichnen + nächsten Timer planen |
-| `trackIntervallFuerSog()` | app.js | Aufzeichnungsintervall nach Geschwindigkeit |
 | `gpsAbfragen()` | app.js | GPS-Position asynchron holen und in Event schreiben |
 | `stoppZustandLaden()` | app.js | Fahrt-Zustand aus localStorage lesen |
 
@@ -164,11 +162,15 @@ let _notizSpeechRecog    = null;
 
 ## TRACK LOGIK
 
-### Zustands-Flags
+Track-Aufzeichnung ist in **`track.js`** ausgelagert (ab v2.5.0).
+`app.js` ruft nur `trackStarten()`, `trackStoppen()` und `trackManöverPunkt()` auf.
+
+### Zustands-Variablen (track.js)
 
 ```js
-let _trackTimeout = null;   // gesetzter setTimeout-Handle (null = nicht geplant)
-let _trackLaeuft  = false;  // GPS-Anfrage läuft gerade (verhindert Doppelstart)
+let _watchId    = null;   /* watchPosition-Handle (null = nicht aktiv)  */
+let _letzterPkt = null;   /* letzter gespeicherter Punkt (für Distanz/Zeit-Check) */
+let _highAcc    = false;  /* aktuell verwendete enableHighAccuracy-Einstellung */
 ```
 
 ### Ablauf
@@ -177,48 +179,30 @@ let _trackLaeuft  = false;  // GPS-Anfrage läuft gerade (verhindert Doppelstart
 FAHRT beginnt
   → hafenSperrungAktualisieren("fahrt")
     → trackStarten()
-      → Prüfung: _trackTimeout !== null ODER _trackLaeuft → return (idempotent!)
-      → trackPunktAufzeichnenUndPlanen()
-        → _trackLaeuft = true, _trackTimeout = null
-        → getCurrentPosition()
-          → Erfolg:
-              _trackLaeuft = false
-              SOG berechnen → intervall bestimmen
-              wenn intervall > 0 UND (distM >= minDistM ODER alterSek >= 180):
-                  Punkt in track.points speichern
-              _trackTimeout = setTimeout(trackPunktAufzeichnenUndPlanen, intervall)
-          → Fehler:
-              _trackLaeuft = false
-              _trackTimeout = setTimeout(trackPunktAufzeichnenUndPlanen, 60000)
+      → Prüfung: _watchId !== null → return (idempotent!)
+      → _letzterPkt aus bestehenden track.points initialisieren
+      → navigator.geolocation.watchPosition(_trackWatchCallback, ...)
+
+  _trackWatchCallback(pos) bei jeder neuen GPS-Position:
+    → Zustand prüfen: nicht "fahrt" → trackStoppen()
+    → sogKn berechnen
+    → enableHighAccuracy-Modus prüfen (> 3 kn → true):
+        bei Wechsel: clearWatch, _watchId = null, trackStarten() (Neustart)
+    → SOG = 0 und alterSek < 180 → kein Punkt, return
+    → distM >= minDistM ODER alterSek >= 180 → _trackPunktSpeichern()
 
 STOPP / Törn wechsel
   → trackStoppen()
-    → if (_trackTimeout !== null): clearTimeout(_trackTimeout), _trackTimeout = null
-    → _trackLaeuft = false
+    → clearWatch(_watchId), _watchId = null
+    → _letzterPkt = null, _highAcc = false
 ```
-
-**Bekannte Einschränkung:** `getCurrentPosition()` ist nicht abbrechbar. Wenn
-`trackStoppen()` während einer laufenden GPS-Anfrage aufgerufen wird, feuert der
-Callback danach noch und setzt `_trackTimeout`. Die nächste Ausführung von
-`trackPunktAufzeichnenUndPlanen()` prüft `stoppZustandLaden() !== "fahrt"` und
-stoppt dann sauber.
 
 ### Warum idempotent?
 
 `hafenSperrungAktualisieren()` wird bei **jedem** Event-Save aufgerufen
-(via `logbuchStatusAktualisieren`). Ohne Idempotenzschutz würde jede Wende,
-jedes Reffen usw. den laufenden Timer zurücksetzen → Punkte würden nie
-aufgezeichnet.
-
-### Track-Intervalle
-
-| SOG | Intervall |
-|---|---|
-| 0 kn | kein Punkt, aber in 2 min neu prüfen |
-| 0–3 kn | alle 2 min (120 s) |
-| 3–6 kn | alle 1 min (60 s) |
-| 6–15 kn | alle 30 s |
-| > 15 kn | alle 15 s |
+(via `logbuchStatusAktualisieren`). Der Guard `if (_watchId !== null) return`
+verhindert, dass eine laufende watchPosition bei jeder Wende/Reffen neu gestartet
+und damit zurückgesetzt wird.
 
 ### Track-Distanz (konfigurierbar)
 
@@ -236,25 +220,35 @@ Abstand zum letzten Punkt: `haversineKm(...) * 1000` (km → Meter)
 | 1,0 nm | ~1852 m |
 | 2,0 nm | ~3704 m |
 
-Punkt wird **immer** gespeichert wenn letzter Punkt älter als **3 Minuten**
+Punkt wird **immer** gespeichert wenn letzter Punkt älter als **180 Sekunden**
 (`alterSek >= 180`), unabhängig von der Distanz (Fallback).
 
-### Manöverpunkte in track.points
-
-Bei jedem Event-Save fügt `schnellEintragSpeichern()` die GPS-Position des Events
-**zusätzlich** als Track-Punkt ein (wenn GPS verfügbar):
+### watchPosition-Optionen
 
 ```js
-aktuellerToern.track.points.push({ lat, lon, sog, zeit });
-aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : ...);
+{ maximumAge: 30000, timeout: 10000, enableHighAccuracy: _highAcc }
 ```
 
-Das sorgt für chronologisch korrekte Track-Punkte auch wenn Manöver und
-automatische Track-Punkte gemischt vorliegen.
+`enableHighAccuracy` wird dynamisch angepasst:
+- SOG ≤ 3 kn → `false` (Akku sparen)
+- SOG > 3 kn → `true` (Genauigkeit erhöhen)
+
+Bei Wechsel wird `clearWatch()` + `trackStarten()` aufgerufen.
+
+### Manöverpunkte: trackManöverPunkt()
+
+Bei jedem Event-Save ruft `schnellEintragSpeichern()` `trackManöverPunkt()` auf
+(wenn GPS verfügbar). Manöverpunkte werden **immer** gespeichert – kein
+Distanz-Check. Danach chronologische Sortierung aller track.points.
+
+```js
+// schnellEintragSpeichern (app.js):
+if (ev.pos) trackManöverPunkt(ev.pos.lat, ev.pos.lon, ev.pos.sog, zeitIso);
+```
 
 ### Datenspeicherung
 
-Automatische Track-Punkte in `aktuellerToern.track.points[]`:
+Alle Track-Punkte in `aktuellerToern.track.points[]`:
 
 ```js
 {

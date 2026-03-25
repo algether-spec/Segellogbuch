@@ -3,7 +3,7 @@
 ## ⛔ Pflicht vor jeder Änderung
 
 1. **LOGIK.md lesen** bevor UI oder Logik angefasst wird
-2. **Geschützte Funktionen** aus LOGIK.md **NIE verändern** (zustandAktualisieren, hafenSperrungAktualisieren, stoppZustandSpeichern, schnellEintragSpeichern, trackPunktAufzeichnenUndPlanen, trackIntervallFuerSog, gpsAbfragen, stoppZustandLaden)
+2. **Geschützte Funktionen** aus LOGIK.md **NIE verändern** (zustandAktualisieren, hafenSperrungAktualisieren, stoppZustandSpeichern, schnellEintragSpeichern, gpsAbfragen, stoppZustandLaden)
 3. **Nach jeder Änderung**: Logik-Check — prüfen ob Aufrufkette intakt ist
 
 ## Arbeitsweise
@@ -17,6 +17,7 @@
 - `style.css` – nur Layout
 - `app.js` – nur Logik
 - `storage.js` – nur Laden und Speichern
+- `track.js` – GPS-Track-Aufzeichnung (watchPosition, haversineKm, trackDistanz*)
 
 ## Datenmodell
 - Strikt an das definierte Datenmodell halten
