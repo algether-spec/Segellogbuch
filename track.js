@@ -43,7 +43,9 @@ function trackDistanzSelectAktualisieren() {
 
 function trackStatusAnzeigen(aktiv) {
     const el = document.getElementById("ls-track");
-    if (el) el.textContent = aktiv ? "🟢 Track" : "🔴 Track aus";
+    if (!el) return;
+    if (!aktiv) { el.textContent = "🔴 Track aus"; return; }
+    el.textContent = _wakeLock !== null ? "🟢 Track · 🔆" : "🟢 Track · ⚠️";
 }
 
 /* --- Internen Punkt speichern ------------------------------------ */
@@ -139,18 +141,16 @@ function trackStarten() {
 
 async function _wakeLockAnfordern() {
     if (!("wakeLock" in navigator)) {
-        const el = document.getElementById("ls-track");
-        if (el) el.title = "Bildschirm manuell aktiv halten";
+        trackStatusAnzeigen(_watchId !== null);
         return;
     }
     try {
         _wakeLock = await navigator.wakeLock.request("screen");
-        _wakeLock.addEventListener("release", () => { _wakeLock = null; });
-        const el = document.getElementById("ls-track");
-        if (el) el.title = "🔆 Wake Lock aktiv";
+        _wakeLock.addEventListener("release", () => { _wakeLock = null; trackStatusAnzeigen(_watchId !== null); });
     } catch (_) {
         _wakeLock = null;
     }
+    trackStatusAnzeigen(_watchId !== null);
 }
 
 function _wakeLockFreigeben() {
@@ -158,8 +158,6 @@ function _wakeLockFreigeben() {
         _wakeLock.release().catch(() => {});
         _wakeLock = null;
     }
-    const el = document.getElementById("ls-track");
-    if (el) el.title = "";
 }
 
 /* visibilitychange: Wake Lock bei App-Rückkehr neu anfordern */
