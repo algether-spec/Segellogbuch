@@ -1,6 +1,6 @@
 /* ======================
-   TRACK.JS – GPS-Track-Aufzeichnung
-   watchPosition-basiert (v2.5.x)
+   TRACK.JS – GPS-Track-Aufzeichnung + Wake Lock
+   watchPosition-basiert (v2.5.3)
 ====================== */
 
 /* --- Zustands-Variablen ------------------------------------------ */
@@ -8,6 +8,7 @@
 let _watchId     = null;   /* watchPosition-Handle (null = nicht aktiv) */
 let _letzterPkt  = null;   /* letzter gespeicherter Track-Punkt         */
 let _highAcc     = false;  /* aktuell verwendete enableHighAccuracy-Mode */
+let _wakeLock    = null;   /* WakeLock-Sentinel (null = nicht aktiv)    */
 
 /* --- Haversine-Distanz (km) -------------------------------------- */
 
@@ -130,8 +131,43 @@ function trackStarten() {
         () => { trackStatusAnzeigen(false); },  /* GPS-Fehler: Status ausblenden */
         { maximumAge: 30000, timeout: 10000, enableHighAccuracy: _highAcc }
     );
+    _wakeLockAnfordern();
     trackStatusAnzeigen(false);  /* initial bis erste Position */
 }
+
+/* --- Wake Lock --------------------------------------------------- */
+
+async function _wakeLockAnfordern() {
+    if (!("wakeLock" in navigator)) {
+        const el = document.getElementById("ls-track");
+        if (el) el.title = "Bildschirm manuell aktiv halten";
+        return;
+    }
+    try {
+        _wakeLock = await navigator.wakeLock.request("screen");
+        _wakeLock.addEventListener("release", () => { _wakeLock = null; });
+        const el = document.getElementById("ls-track");
+        if (el) el.title = "🔆 Wake Lock aktiv";
+    } catch (_) {
+        _wakeLock = null;
+    }
+}
+
+function _wakeLockFreigeben() {
+    if (_wakeLock !== null) {
+        _wakeLock.release().catch(() => {});
+        _wakeLock = null;
+    }
+    const el = document.getElementById("ls-track");
+    if (el) el.title = "";
+}
+
+/* visibilitychange: Wake Lock bei App-Rückkehr neu anfordern */
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && _watchId !== null && _wakeLock === null) {
+        _wakeLockAnfordern();
+    }
+});
 
 /* --- trackStoppen ----------------------------------------------- */
 
@@ -142,5 +178,6 @@ function trackStoppen() {
     }
     _letzterPkt = null;
     _highAcc    = false;
+    _wakeLockFreigeben();
     trackStatusAnzeigen(false);
 }
