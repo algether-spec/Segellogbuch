@@ -2349,6 +2349,24 @@ function trackPunktHinzufuegen() {
     );
 }
 
+/* --- Fahrt-Sicherheitsprüfung beim App-Start -------------------- */
+/* Wenn stoppZustand = "fahrt" UND letzter Track-Punkt älter als 2h */
+/* → Zustand auf "hafen" zurücksetzen, kein trackStarten()           */
+
+function _fahrtSicherheitsPruefen() {
+    if (stoppZustandLaden() !== "fahrt") return;
+    if (!aktuellerToern) return;
+    const pts = (aktuellerToern.track && aktuellerToern.track.points) || [];
+    if (!pts.length) return;
+    const letzter = pts[pts.length - 1];
+    const alterMs = Date.now() - new Date(letzter.zeit).getTime();
+    if (alterMs > 2 * 60 * 60 * 1000) {
+        stoppZustandSpeichern("hafen");
+        hafenSperrungAktualisieren("hafen");
+        startButtonsSperren("hafen");
+    }
+}
+
 /* --- Start ------------------------------------------------------ */
 
 /* Permanentes Backup prüfen – automatisch wiederherstellen wenn Daten fehlen */
@@ -2370,6 +2388,7 @@ document.getElementById("haupt-bereich").hidden = false;
 const _letzterToernId = ladeAktivenToernId();
 if (_letzterToernId && alleToernsLaden().find(t => t.tripId === _letzterToernId)) {
     toernLaden(_letzterToernId);
+    _fahrtSicherheitsPruefen();
     tabInhaltToggeln();
 } else {
     tabInhaltToggeln();
