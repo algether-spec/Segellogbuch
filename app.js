@@ -202,7 +202,8 @@ const KATEGORIE_MAP = {
     "Ruderwechsel": "Allgemein", "Sichtung": "Allgemein",
     "MOB": "Allgemein", "Notfall": "Allgemein",
     "Sicherheitseinweisung": "Sicherheit",
-    "Tageskontrolle": "Kontrolle"
+    "Tageskontrolle": "Kontrolle",
+    "Notiz": "Notiz"
 };
 
 function kategorieFuerTyp(typ) {

@@ -98,6 +98,7 @@ wenn kein Segeln-Zustand aktiv.
 "Halse":         ["fahrt"]
 "Reffen":        ["fahrt"]
 Motor an, Segeln, Ruderwechsel: kein Eintrag → immer erlaubt
+"Notiz" (📝): Kategorie "Notiz", kein Eintrag in ERLAUBTE_ZUSTAENDE → immer erlaubt
 ```
 
 **ANTRIEB_PFLICHT_TYPEN** – Antrieb muss aktiv sein:
