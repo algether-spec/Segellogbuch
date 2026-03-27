@@ -1947,10 +1947,10 @@ function mobButtonInit() {
     if (!btn) return;
     let _mobTimer = null;
     let _mobInterval = null;
-    let _mobCountdown = 3;
+    let _mobCountdown = 2;
 
     function mobStart() {
-        _mobCountdown = 3;
+        _mobCountdown = 2;
         btn.style.transform = "scale(0.95)";
         _mobInterval = setInterval(() => {
             _mobCountdown--;
