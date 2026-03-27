@@ -1459,7 +1459,20 @@ function notizButtonBlinken() {
     setTimeout(() => btn.classList.remove("btn-notiz-blinkt"), 5000);
 }
 
-function notizZumLetztenManoever() {
+function notizZumLetztenManoever(typ) {
+    if (typ === "Notiz") {
+        if (!aktuellerToern) {
+            validierungsWarnung("Bitte zuerst einen Törn auswählen.");
+            return;
+        }
+        notizPopupZeigen("📝 Notiz").then(() => {
+            if (!_pendingNote) return;
+            schnellEintragSpeichern("Notiz");
+        });
+        return;
+    }
+
+    // Bisherige Logik: letztes Event bearbeiten
     if (!aktuellerToern || !(aktuellerToern.events || []).length) {
         validierungsWarnung("Kein Manöver zum Ergänzen vorhanden.");
         return;
