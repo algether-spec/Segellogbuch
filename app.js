@@ -1825,8 +1825,49 @@ btnNeuerLog.onclick = () => {
 };
 
 /* --- Floating Buttons ------------------------------------------- */
-const _btnMob = document.getElementById("btn-mob");
-if (_btnMob) _btnMob.addEventListener("click", () => schnellEintragSpeichern("MOB"));
+
+function mobAusloesen() {
+    schnellEintragSpeichern("MOB");
+}
+
+function mobButtonInit() {
+    const btn = document.getElementById("btn-mob");
+    if (!btn) return;
+    let _mobTimer = null;
+    let _mobInterval = null;
+    let _mobCountdown = 3;
+
+    function mobStart() {
+        _mobCountdown = 3;
+        btn.style.transform = "scale(0.95)";
+        _mobInterval = setInterval(() => {
+            _mobCountdown--;
+            btn.querySelector("span").textContent = _mobCountdown > 0 ? _mobCountdown + "s" : "MOB";
+            if (_mobCountdown <= 0) {
+                clearInterval(_mobInterval);
+                mobAusloesen();
+            }
+        }, 1000);
+        _mobTimer = setTimeout(() => {}, 3000);
+    }
+
+    function mobAbbrechen() {
+        clearTimeout(_mobTimer);
+        clearInterval(_mobInterval);
+        _mobTimer = null;
+        _mobInterval = null;
+        _mobCountdown = 3;
+        btn.querySelector("span").textContent = "MOB";
+        btn.style.transform = "";
+    }
+
+    btn.addEventListener("pointerdown", mobStart);
+    btn.addEventListener("pointerup", mobAbbrechen);
+    btn.addEventListener("pointerleave", mobAbbrechen);
+    btn.addEventListener("pointercancel", mobAbbrechen);
+}
+
+mobButtonInit();
 
 /* --- Modal Event-Listener --------------------------------------- */
 const _modalOverlay = document.getElementById("log-modal-overlay");
