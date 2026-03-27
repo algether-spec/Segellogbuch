@@ -1497,7 +1497,8 @@ function notizPopupZeigen(typ) {
         const textarea = document.getElementById("notiz-text");
         const micBtn   = document.getElementById("btn-notiz-mic");
 
-        if (typLabel) typLabel.textContent = typ;
+        const anzeigeTyp = typ === "Notiz" ? "📒 Log-Buch" : typ;
+        if (typLabel) typLabel.textContent = anzeigeTyp;
         if (textarea) { textarea.value = ""; textarea.oninput = null; }
 
         /* Mikrofon nur anzeigen wenn SpeechRecognition verfügbar */
