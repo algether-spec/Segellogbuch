@@ -36,6 +36,7 @@
             <button type="button" class="sidebar-btn" data-seite="tab-toern"     onclick="seitenWechseln('tab-toern')">📋 Törn</button>
             <button type="button" class="sidebar-btn" data-seite="tab-crew"      onclick="seitenWechseln('tab-crew')">👥 Crew</button>
             <button type="button" class="sidebar-btn" data-seite="tab-sicherheit" onclick="seitenWechseln('tab-sicherheit')">🛟 Sicherheit</button>
+            <button type="button" class="sidebar-btn" data-seite="tab-kontrolle" onclick="seitenWechseln('tab-kontrolle')">✅ Tageskontrolle</button>
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
             <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
             <button type="button" class="sidebar-btn" data-seite="tab-einstellungen" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
@@ -221,6 +222,59 @@
             </div>
         </div>
     </div><!-- /tab-sicherheit -->
+
+    <div id="tab-kontrolle" class="tab-panel tab-hidden">
+        <div class="seite-header">
+            <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
+            <h1 class="seite-titel">✅ Tageskontrolle</h1>
+        </div>
+        <div id="kontrolle-leer" class="tab-leer">
+            <p>⬆ Bitte zuerst einen Törn auswählen.</p>
+        </div>
+        <div id="kontrolle-inhalt" hidden>
+            <div class="card">
+                <p id="kontrolle-datum" class="sicherheit-datum"></p>
+
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="1"> 1. Bilge – Wasser, Bilgepumpe manuell + elektrisch, Wasseranstieg</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="2"> 2. Motor – Ölstand, Kühlwasser, Keilriemen, Geräusche</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="3"> 3. Batterie / Strom – Ladestand, Landstrom, Navigation + Funk</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="4"> 4. Seeventile – Stellung, Dichtigkeit, WC / Küche / Motor</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="5"> 5. Gas-Anlage – Hahn geschlossen, kein Geruch, Schlauch in Ordnung</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="6"> 6. Deck / Takelage – Leinen, Fallen, Schoten, Splinte, Segel, nichts lose</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="7"> 7. Navigation / Sicherheit – GPS, Funk, Lichter, Rettungsmittel griffbereit</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="8"> 8. Wettercheck – Lage, Windentwicklung, Tagesentscheidung</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="9"> 9. Wasser / Vorräte – Trinkwasser, Treibstoff, Proviant</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="kontr-check" data-punkt="10"> 10. Allgemeiner Zustand – Ordnung, nichts lose, Crew über Tagesplan informiert</label>
+                </div>
+
+                <div class="field" style="margin-top:1rem">
+                    <label for="kontrolle-notiz">Auffälligkeiten / Bemerkungen</label>
+                    <textarea id="kontrolle-notiz" rows="3" placeholder="z.B. leicht Wasser in Bilge, Pumpe aktiviert…"></textarea>
+                </div>
+
+                <button type="button" class="btn-primary" style="margin-top:1rem;width:100%" onclick="kontrolleAbschliessen()">✅ Kontrolle abschließen &amp; ins Logbuch</button>
+            </div>
+        </div>
+    </div><!-- /tab-kontrolle -->
 
     <!-- ═══ Hauptbereich: Logbuch + Log + Karte ══════════════════ -->
     <div id="haupt-bereich">

@@ -201,7 +201,8 @@ const KATEGORIE_MAP = {
     "An Boje": "Boje", "Von Boje": "Boje",
     "Ruderwechsel": "Allgemein", "Sichtung": "Allgemein",
     "MOB": "Allgemein", "Notfall": "Allgemein",
-    "Sicherheitseinweisung": "Sicherheit"
+    "Sicherheitseinweisung": "Sicherheit",
+    "Tageskontrolle": "Kontrolle"
 };
 
 function kategorieFuerTyp(typ) {
@@ -1208,6 +1209,7 @@ function toernLaden(tripId) {
     logbuchStatusAktualisieren();
     zeigeLogs();
     sicherheitSeiteAktualisieren();
+    kontrolleSeiteAktualisieren();
 }
 
 function neuerToernAnlegen() {
@@ -1740,7 +1742,7 @@ function hauptTabWechseln(tabId) {
 }
 
 function seitenWechseln(seiteId) {
-    const seitenPanels = ["tab-toern", "tab-crew", "tab-sicherheit", "tab-statistik", "tab-einstellungen"];
+    const seitenPanels = ["tab-toern", "tab-crew", "tab-sicherheit", "tab-kontrolle", "tab-statistik", "tab-einstellungen"];
     const hauptBereich = document.getElementById("haupt-bereich");
 
     _aktiveSeitenId = seiteId || null;
@@ -1764,6 +1766,9 @@ function seitenWechseln(seiteId) {
         }
         if (seiteId === "tab-sicherheit") {
             sicherheitSeiteAktualisieren();
+        }
+        if (seiteId === "tab-kontrolle") {
+            kontrolleSeiteAktualisieren();
         }
     }
 
@@ -1875,6 +1880,38 @@ function sicherheitAbschliessen() {
     _pendingNote = noteText;
     schnellEintragSpeichern("Sicherheitseinweisung");
     statusSetzen("✅ Sicherheitseinweisung ins Logbuch eingetragen.", "ok");
+    seitenWechseln(null);
+}
+
+/* --- Tageskontrolle --------------------------------------------- */
+
+function kontrolleSeiteAktualisieren() {
+    const hatToern = !!aktuellerToern;
+    document.getElementById("kontrolle-leer").hidden = hatToern;
+    document.getElementById("kontrolle-inhalt").hidden = !hatToern;
+    if (!hatToern) return;
+
+    const now = new Date();
+    document.getElementById("kontrolle-datum").textContent =
+        "Datum: " + now.toLocaleDateString("de-AT") + " · " + now.toLocaleTimeString("de-AT", {hour:"2-digit", minute:"2-digit"});
+
+    document.querySelectorAll(".kontr-check").forEach(cb => cb.checked = false);
+    document.getElementById("kontrolle-notiz").value = "";
+}
+
+function kontrolleAbschliessen() {
+    const checks = document.querySelectorAll(".kontr-check");
+    const alle = Array.from(checks).every(cb => cb.checked);
+    if (!alle) {
+        statusSetzen("⚠️ Bitte alle Punkte abhaken.", "error");
+        return;
+    }
+    const notiz = document.getElementById("kontrolle-notiz").value.trim();
+    const noteText = notiz || "Alle 10 Punkte kontrolliert – keine Auffälligkeiten";
+
+    _pendingNote = noteText;
+    schnellEintragSpeichern("Tageskontrolle");
+    statusSetzen("✅ Tageskontrolle ins Logbuch eingetragen.", "ok");
     seitenWechseln(null);
 }
 
