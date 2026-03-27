@@ -112,7 +112,7 @@ function _trackWatchCallback(pos) {
         : Infinity;
 
     /* SOG = 0: nur Fallback speichern */
-    if (sogKn <= 0.3 && alterSek < 180) {
+    if (sogKn <= 0.1 && alterSek < 180) {
         trackStatusAnzeigen(true);
         return;
     }

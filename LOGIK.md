@@ -194,7 +194,7 @@ FAHRT beginnt
     → sogKn berechnen
     → enableHighAccuracy-Modus prüfen (> 3 kn → true):
         bei Wechsel: clearWatch, _watchId = null, trackStarten() (Neustart)
-    → SOG ≤ 0.3 kn und alterSek < 180 → kein Punkt, return (GPS-Jitter-Filter)
+    → SOG ≤ 0.1 kn und alterSek < 180 → kein Punkt, return (GPS-Jitter-Filter)
     → distM >= minDistM ODER alterSek >= 180 → _trackPunktSpeichern()
 
 STOPP / Törn wechsel
