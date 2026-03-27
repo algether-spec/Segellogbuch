@@ -46,10 +46,11 @@ header h1 {
 }
 
 header p {
-    font-size: 12px;
-    opacity: 0.85;
+    font-size: 0.95rem;
+    opacity: 1;
     margin-top: 3px;
     font-weight: 500;
+    color: white;
 }
 
 .btn-hamburger {
