@@ -377,7 +377,7 @@ button:active { opacity: 0.75; }
     border-radius: 10px;
     background: #f1f5f9;
     color: #475569;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     border: 1.5px dashed #cbd5e1;
     cursor: pointer;
@@ -392,7 +392,7 @@ button:active { opacity: 0.75; }
     border-radius: 10px;
     background: #f1f5f9;
     color: #475569;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     border: 1.5px dashed #cbd5e1;
     cursor: pointer;
