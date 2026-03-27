@@ -1463,7 +1463,7 @@ function notizZumLetztenManoever(typ) {
             validierungsWarnung("Bitte zuerst einen Törn auswählen.");
             return;
         }
-        notizPopupZeigen("📝 Notiz").then(() => {
+        notizPopupZeigen("Notiz").then(() => {
             if (!_pendingNote) return;
             schnellEintragSpeichern("Notiz");
         });
