@@ -253,6 +253,15 @@ Distanz-Check. Danach chronologische Sortierung aller track.points.
 if (ev.pos) trackManöverPunkt(ev.pos.lat, ev.pos.lon, ev.pos.sog, zeitIso);
 ```
 
+### Debounce-Speicherung
+
+`_trackPunktSpeichern()` ruft `toernSpeichern()` nicht sofort auf, sondern
+verzögert via `_speicherTimer` (5 Sekunden). Kommen mehrere Punkte in kurzer
+Zeit (z.B. bei Neustart nach HighAcc-Wechsel), wird nur einmal gespeichert.
+
+Bei `trackStoppen()` wird ein laufender Timer sofort abgebrochen und
+`toernSpeichern()` direkt aufgerufen → kein Datenverlust beim Stopp.
+
 ### Datenspeicherung
 
 Alle Track-Punkte in `aktuellerToern.track.points[]`:

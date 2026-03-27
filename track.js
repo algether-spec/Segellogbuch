@@ -9,6 +9,7 @@ let _watchId     = null;   /* watchPosition-Handle (null = nicht aktiv) */
 let _letzterPkt  = null;   /* letzter gespeicherter Track-Punkt         */
 let _highAcc     = false;  /* aktuell verwendete enableHighAccuracy-Mode */
 let _wakeLock    = null;   /* WakeLock-Sentinel (null = nicht aktiv)    */
+let _speicherTimer = null; /* Debounce-Timer für toernSpeichern()       */
 
 /* --- Haversine-Distanz (km) -------------------------------------- */
 
@@ -59,7 +60,11 @@ function _trackPunktSpeichern(lat, lon, sog, zeitIso) {
     aktuellerToern.track.points.push(pkt);
     aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
     _letzterPkt = pkt;
-    toernSpeichern(aktuellerToern);
+    if (_speicherTimer) clearTimeout(_speicherTimer);
+    _speicherTimer = setTimeout(() => {
+        toernSpeichern(aktuellerToern);
+        _speicherTimer = null;
+    }, 5000);
 }
 
 /* --- trackManöverPunkt: immer speichern (kein Distanz-Check) ----- */
@@ -178,5 +183,10 @@ function trackStoppen() {
     _letzterPkt = null;
     _highAcc    = false;
     _wakeLockFreigeben();
+    if (_speicherTimer) {
+        clearTimeout(_speicherTimer);
+        _speicherTimer = null;
+        toernSpeichern(aktuellerToern);
+    }
     trackStatusAnzeigen(false);
 }
