@@ -1847,9 +1847,15 @@ function sicherheitSeiteAktualisieren() {
     document.getElementById("sicherheit-datum").textContent =
         "Datum: " + now.toLocaleDateString("de-AT") + " · " + now.toLocaleTimeString("de-AT", {hour:"2-digit", minute:"2-digit"});
 
-    // Checkboxen zurücksetzen
-    document.querySelectorAll(".sich-check").forEach(cb => cb.checked = false);
-    document.getElementById("sicherheit-notiz").value = "";
+    // Checkboxen aus Törn-Daten laden (alte Listener entfernen via cloneNode)
+    const gespeichert = aktuellerToern.sicherheitseinweisung || {};
+    document.querySelectorAll(".sich-check").forEach(cb => {
+        const fresh = cb.cloneNode(true);
+        cb.parentNode.replaceChild(fresh, cb);
+        fresh.checked = !!gespeichert[fresh.dataset.punkt];
+        fresh.addEventListener("change", sicherheitCheckSpeichern);
+    });
+    document.getElementById("sicherheit-notiz").value = gespeichert.notiz || "";
 
     // Crew-Bestätigung aufbauen
     const crew = aktuellerToern.crew || [];
@@ -1858,9 +1864,31 @@ function sicherheitSeiteAktualisieren() {
     crew.forEach(m => {
         const div = document.createElement("div");
         div.className = "sicherheit-crew-item";
-        div.innerHTML = `<label><input type="checkbox" class="sich-crew-check" data-name="${m.name}"> ${m.name} (${m.rolle}) – Einweisung erhalten</label>`;
+        div.innerHTML = `<label><input type="checkbox" class="sich-crew-check" data-name="${m.name}" ${gespeichert["crew_" + m.name] ? "checked" : ""}> ${m.name} (${m.rolle}) – Einweisung erhalten</label>`;
+        div.querySelector("input").addEventListener("change", sicherheitCheckSpeichern);
         liste.appendChild(div);
     });
+
+    // Notiz-Feld bei Änderung speichern
+    const notizFeld = document.getElementById("sicherheit-notiz");
+    const notizFresh = notizFeld.cloneNode(true);
+    notizFeld.parentNode.replaceChild(notizFresh, notizFeld);
+    notizFresh.value = gespeichert.notiz || "";
+    notizFresh.addEventListener("input", sicherheitCheckSpeichern);
+}
+
+function sicherheitCheckSpeichern() {
+    if (!aktuellerToern) return;
+    if (!aktuellerToern.sicherheitseinweisung) aktuellerToern.sicherheitseinweisung = {};
+    document.querySelectorAll(".sich-check").forEach(cb => {
+        aktuellerToern.sicherheitseinweisung[cb.dataset.punkt] = cb.checked;
+    });
+    document.querySelectorAll(".sich-crew-check").forEach(cb => {
+        aktuellerToern.sicherheitseinweisung["crew_" + cb.dataset.name] = cb.checked;
+    });
+    aktuellerToern.sicherheitseinweisung.notiz =
+        document.getElementById("sicherheit-notiz").value.trim();
+    toernSpeichern(aktuellerToern);
 }
 
 function sicherheitAbschliessen() {
