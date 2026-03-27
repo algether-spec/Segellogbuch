@@ -129,22 +129,21 @@ Fehlt der Antrieb → `validierungsWarnung("Bitte zuerst Motor oder Segeln aktiv
 
 ## NOTIZ-POPUP
 
-Das Notiz-Popup öffnet sich **ausschließlich** über den „💬 Notiz zum Manöver"-Button.
+Das Notiz-Popup öffnet sich über „💬 Manöver" (letztes Event bearbeiten) oder „📝 Notiz" (neuen Notiz-Event anlegen).
 Event-Buttons speichern direkt ohne Popup (`_pendingNote = ""`).
 
 **Ablauf:**
 
 ```
-notizZumLetztenManoever()
-  → notizPopupZeigen(typ)          – gibt Promise zurück
-      → clearInterval(_notizCountdownTimer)  – verhindert akkumulierende Intervals
+notizZumLetztenManoever(typ?)
+  → typ === "Notiz": notizPopupZeigen("📝 Notiz")
       → Overlay anzeigen, Textarea leeren, Fokus setzen
-      → Countdown 5s starten (setInterval)
-      → Bei Texteingabe: Countdown-UI einfrieren (Timer läuft weiter bis 0)
-      → Bei 0s ODER Speichern-Button: notizPopupSpeichern()
+      → Speichern-Button: notizPopupSpeichern()
           → _pendingNote = textarea.value.trim()
           → Promise resolven
-  → letztes Event direkt aktualisieren (note-Feld), toernSpeichern()
+      → Schließen-Button: notizPopupSchliessen()
+          → _pendingNote = "", Promise mit "" resolven
+  → kein typ: letztes Event direkt aktualisieren (note-Feld), toernSpeichern()
 ```
 
 **Spracheingabe (Web Speech API):**
@@ -157,8 +156,6 @@ notizZumLetztenManoever()
 
 ```js
 let _pendingNote = ""; // Inhalt für nächsten Event-Save
-let _notizCountdownTimer = null; // setInterval-Handle
-let _notizCountdownWert = 5; // Sekunden bis Auto-Speichern
 let _notizResolve = null; // Promise-Resolver
 let _notizSpeechRunning = false;
 let _notizSpeechRecog = null;

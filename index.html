@@ -511,12 +511,12 @@
     <div class="notiz-popup-box">
         <div class="notiz-popup-header">
             <span id="notiz-popup-typ" class="notiz-popup-typ-label"></span>
-            <span id="notiz-countdown" class="notiz-countdown">5</span>
         </div>
         <textarea id="notiz-text" class="notiz-text" placeholder="Notiz (optional)…" rows="3"></textarea>
         <div class="notiz-btn-zeile">
             <button type="button" id="btn-notiz-mic" class="btn-notiz-aktion" onclick="notizMikrofonKlick()">🎤</button>
             <button type="button" class="btn-notiz-aktion" onclick="notizTextLeeren()">🗑</button>
+            <button type="button" class="btn-secondary" onclick="notizPopupSchliessen()">✕ Schließen</button>
             <button type="button" class="btn-notiz-speichern" onclick="notizPopupSpeichern()">💾 Speichern</button>
         </div>
     </div>

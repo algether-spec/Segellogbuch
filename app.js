@@ -1435,8 +1435,6 @@ function validierungsWarnung(meldung) {
 /* --- Notiz-Popup ------------------------------------------------- */
 
 let _pendingNote        = "";
-let _notizCountdownTimer = null;
-let _notizCountdownWert  = 5;
 let _notizResolve        = null;
 let _notizSpeechRunning  = false;
 let _notizSpeechRecog    = null;
@@ -1492,9 +1490,6 @@ function notizZumLetztenManoever(typ) {
 }
 
 function notizPopupZeigen(typ) {
-    /* Laufenden Timer immer zuerst löschen – verhindert akkumulierende Intervals */
-    clearInterval(_notizCountdownTimer);
-    _notizCountdownTimer = null;
     return new Promise(resolve => {
         _notizResolve = resolve;
         const overlay  = document.getElementById("notiz-popup-overlay");
@@ -1503,7 +1498,7 @@ function notizPopupZeigen(typ) {
         const micBtn   = document.getElementById("btn-notiz-mic");
 
         if (typLabel) typLabel.textContent = typ;
-        if (textarea) { textarea.value = ""; textarea.oninput = () => { if (_notizCountdownTimer) _notizCountdownStoppUiAktualisieren(); }; }
+        if (textarea) { textarea.value = ""; textarea.oninput = null; }
 
         /* Mikrofon nur anzeigen wenn SpeechRecognition verfügbar */
         const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1511,34 +1506,22 @@ function notizPopupZeigen(typ) {
 
         if (overlay) overlay.style.display = "flex";
         if (textarea) textarea.focus();
-
-        _notizCountdownWert = 5;
-        _notizCountdownAnzeigen();
-        _notizCountdownTimer = setInterval(_notizCountdownTick, 1000);
     });
 }
 
-function _notizCountdownAnzeigen() {
-    const el = document.getElementById("notiz-countdown");
-    if (el) el.textContent = _notizCountdownWert;
-}
 
-function _notizCountdownTick() {
-    _notizCountdownWert--;
-    _notizCountdownAnzeigen();
-    if (_notizCountdownWert <= 0) notizPopupSpeichern();
-}
-
-function _notizCountdownStoppUiAktualisieren() {
-    clearInterval(_notizCountdownTimer);
-    _notizCountdownTimer = null;
-    const el = document.getElementById("notiz-countdown");
-    if (el) el.textContent = "—";
+function notizPopupSchliessen() {
+    _pendingNote = "";
+    if (_notizResolve) _notizResolve("");
+    _notizResolve = null;
+    if (_notizSpeechRunning && _notizSpeechRecog) {
+        _notizSpeechRecog.stop();
+        _notizSpeechRunning = false;
+    }
+    document.getElementById("notiz-popup-overlay").style.display = "none";
 }
 
 function notizPopupSpeichern() {
-    clearInterval(_notizCountdownTimer);
-    _notizCountdownTimer = null;
     if (_notizSpeechRecog) { try { _notizSpeechRecog.abort(); } catch (_) {} _notizSpeechRecog = null; }
     _notizSpeechRunning = false;
     const micBtn = document.getElementById("btn-notiz-mic");
@@ -1587,10 +1570,6 @@ function notizMikrofonKlick() {
         _notizSpeechRunning = false;
         _notizSpeechRecog   = null;
         if (micBtn) micBtn.textContent = "🎤";
-        /* Countdown neu starten */
-        _notizCountdownWert = 5;
-        _notizCountdownAnzeigen();
-        _notizCountdownTimer = setInterval(_notizCountdownTick, 1000);
     };
 
     recog.onend   = _nachAufnahme;
