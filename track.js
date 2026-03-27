@@ -10,6 +10,7 @@ let _letzterPkt  = null;   /* letzter gespeicherter Track-Punkt         */
 let _highAcc     = false;  /* aktuell verwendete enableHighAccuracy-Mode */
 let _wakeLock    = null;   /* WakeLock-Sentinel (null = nicht aktiv)    */
 let _speicherTimer = null; /* Debounce-Timer für toernSpeichern()       */
+let _sogSchwelle   = 0.1; /* SOG-Jitter-Filter-Schwelle in Knoten      */
 
 /* --- Haversine-Distanz (km) -------------------------------------- */
 
@@ -39,6 +40,21 @@ function trackDistanzSpeichern(nm) {
 function trackDistanzSelectAktualisieren() {
     const sel = document.getElementById("track-distanz-select");
     if (sel) sel.value = String(trackDistanzLaden());
+}
+
+function sogSchwelleLaden() {
+    const v = parseFloat(localStorage.getItem("segel_sog_schwelle"));
+    return [0.05, 0.1, 0.2, 0.3, 0.4, 0.5].includes(v) ? v : 0.1;
+}
+
+function sogSchwelleSpeichern(kn) {
+    localStorage.setItem("segel_sog_schwelle", String(kn));
+    sogSchwelleSelectAktualisieren();
+}
+
+function sogSchwelleSelectAktualisieren() {
+    const sel = document.getElementById("sog-schwelle-select");
+    if (sel) sel.value = String(sogSchwelleLaden());
 }
 
 /* --- Track-Status anzeigen --------------------------------------- */
@@ -112,7 +128,7 @@ function _trackWatchCallback(pos) {
         : Infinity;
 
     /* SOG = 0: nur Fallback speichern */
-    if (sogKn <= 0.1 && alterSek < 180) {
+    if (sogKn <= sogSchwelleLaden() && alterSek < 180) {
         trackStatusAnzeigen(true);
         return;
     }

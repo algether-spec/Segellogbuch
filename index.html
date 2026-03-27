@@ -353,6 +353,17 @@
                     <option value="2.0">2,0 nm (~3700 m)</option>
                 </select>
             </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="sog-schwelle-select">GPS-Jitter-Filter (SOG)</label>
+                <select id="sog-schwelle-select" class="einstellung-select" onchange="sogSchwelleSpeichern(parseFloat(this.value))">
+                    <option value="0.05">0,05 kn</option>
+                    <option value="0.1">0,1 kn (Standard)</option>
+                    <option value="0.2">0,2 kn</option>
+                    <option value="0.3">0,3 kn</option>
+                    <option value="0.4">0,4 kn</option>
+                    <option value="0.5">0,5 kn</option>
+                </select>
+            </div>
         </div>
     </div><!-- /tab-einstellungen -->
 

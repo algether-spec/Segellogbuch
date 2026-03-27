@@ -194,7 +194,7 @@ FAHRT beginnt
     → sogKn berechnen
     → enableHighAccuracy-Modus prüfen (> 3 kn → true):
         bei Wechsel: clearWatch, _watchId = null, trackStarten() (Neustart)
-    → SOG ≤ 0.1 kn und alterSek < 180 → kein Punkt, return (GPS-Jitter-Filter)
+    → SOG ≤ sogSchwelleLaden() kn und alterSek < 180 → kein Punkt, return (GPS-Jitter-Filter)
     → distM >= minDistM ODER alterSek >= 180 → _trackPunktSpeichern()
 
 STOPP / Törn wechsel
@@ -214,6 +214,12 @@ und damit zurückgesetzt wird.
 
 Einstellbar in ⚙️ Einstellungen, gespeichert unter `localStorage["segel_track_distanz"]`.
 Gültige Werte: `[0.1, 0.25, 0.5, 1.0, 2.0]`, Standard: `0.25` nm.
+
+### GPS-Jitter-Filter SOG-Schwelle (konfigurierbar)
+
+Einstellbar in ⚙️ Einstellungen, gespeichert unter `localStorage["segel_sog_schwelle"]`.
+Gültige Werte: `[0.05, 0.1, 0.2, 0.3, 0.4, 0.5]` kn, Standard: `0.1` kn.
+Punkte mit SOG ≤ Schwelle werden nicht gespeichert (außer Fallback nach 180 s).
 
 Berechnung: `minDistM = trackDistanzLaden() * 1852` (nm → Meter)
 Abstand zum letzten Punkt: `haversineKm(...) * 1000` (km → Meter)
@@ -317,3 +323,4 @@ auf 19 Zeichen normalisiert (`:00` wird angehängt).
 | `segel_logbuch_autobackup`       | automatisches Backup                         |
 | `segel_logbuch_backup_permanent` | permanentes Backup                           |
 | `segel_track_distanz`            | Track-Auflösung in nm (0.1/0.25/0.5/1.0/2.0) |
+| `segel_sog_schwelle`             | SOG-Schwelle für GPS-Jitter-Filter (kn)       |
