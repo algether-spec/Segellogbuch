@@ -31,6 +31,7 @@ function trackDistanzLaden() {
 
 function trackDistanzSpeichern(nm) {
     localStorage.setItem("segel_track_distanz", String(nm));
+    _letzterPkt = null;
     trackDistanzSelectAktualisieren();
 }
 
@@ -102,11 +103,11 @@ function _trackWatchCallback(pos) {
         ? haversineKm(_letzterPkt.lat, _letzterPkt.lon, newLat, newLon) * 1000
         : Infinity;
     const alterSek = _letzterPkt
-        ? (Date.now() - new Date(_letzterPkt.zeit).getTime()) / 1000
+        ? (Date.now() - new Date(_letzterPkt.zeit + "Z").getTime()) / 1000
         : Infinity;
 
     /* SOG = 0: nur Fallback speichern */
-    if (sogKn <= 0 && alterSek < 180) {
+    if (sogKn <= 0.3 && alterSek < 180) {
         trackStatusAnzeigen(true);
         return;
     }
