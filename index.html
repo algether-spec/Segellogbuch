@@ -35,6 +35,7 @@
         <nav class="sidebar-nav">
             <button type="button" class="sidebar-btn" data-seite="tab-toern"     onclick="seitenWechseln('tab-toern')">📋 Törn</button>
             <button type="button" class="sidebar-btn" data-seite="tab-crew"      onclick="seitenWechseln('tab-crew')">👥 Crew</button>
+            <button type="button" class="sidebar-btn" data-seite="tab-sicherheit" onclick="seitenWechseln('tab-sicherheit')">🛟 Sicherheit</button>
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
             <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
             <button type="button" class="sidebar-btn" data-seite="tab-einstellungen" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
@@ -162,6 +163,64 @@
         </div>
 
     </div><!-- /tab-crew -->
+
+    <div id="tab-sicherheit" class="tab-panel tab-hidden">
+        <div class="seite-header">
+            <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
+            <h1 class="seite-titel">🛟 Sicherheitseinweisung</h1>
+        </div>
+        <div id="sicherheit-leer" class="tab-leer">
+            <p>⬆ Bitte zuerst einen Törn auswählen.</p>
+        </div>
+        <div id="sicherheit-inhalt" hidden>
+            <div class="card">
+                <p id="sicherheit-datum" class="sicherheit-datum"></p>
+
+                <!-- 10 Punkte -->
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="1"> 1. Rettungswesten – Standort, Anlegen, Tragepflicht, Lifebelt</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="2"> 2. Mann über Bord – Rufen, Sichtkontakt, Ring, Finger, MOB-Knopf</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="3"> 3. Feuerlöscher – Standort, Löschdecke, Gas-Haupthahn</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="4"> 4. Seeventile – Standort, Schließen bei Wassereinbruch</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="5"> 5. Notruf – Funk Kanal 16, Mayday, Position, Personen an Bord</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="6"> 6. Erste Hilfe – Verbandskasten, Medikamente, med. Kenntnisse</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="7"> 7. Bedienung – Motor, Autopilot, Segel bergen, Anker, Funk, GPS</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="8"> 8. Verhalten an Deck – Hand fürs Schiff, kein Griff vor den Baum</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="9"> 9. Toilette – Was nicht ins WC, Seeventil öffnen/schließen</label>
+                </div>
+                <div class="sicherheit-punkt">
+                    <label><input type="checkbox" class="sich-check" data-punkt="10"> 10. Dokumente – Schiffspapiere, Versicherung, Crew-Liste</label>
+                </div>
+
+                <!-- Freitext -->
+                <div class="field" style="margin-top:1rem">
+                    <label for="sicherheit-notiz">Bemerkungen</label>
+                    <textarea id="sicherheit-notiz" rows="3" placeholder="Besonderheiten, Ausrüstung, Hinweise…"></textarea>
+                </div>
+
+                <!-- Crew-Bestätigung -->
+                <div id="sicherheit-crew-liste" class="sicherheit-crew-liste"></div>
+
+                <button type="button" class="btn-primary" style="margin-top:1rem;width:100%" onclick="sicherheitAbschliessen()">✅ Einweisung abschließen &amp; ins Logbuch</button>
+            </div>
+        </div>
+    </div><!-- /tab-sicherheit -->
 
     <!-- ═══ Hauptbereich: Logbuch + Log + Karte ══════════════════ -->
     <div id="haupt-bereich">

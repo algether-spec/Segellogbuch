@@ -2112,3 +2112,12 @@ button:active { opacity: 0.75; }
     .btn-notiz-aktion:active { background: #1e3a5f; }
     .event-note-text    { color: #94a3b8; }
 }
+
+/* ── Sicherheitseinweisung ──────────────────────────────────────── */
+.sicherheit-punkt { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+.sicherheit-punkt label { display:flex; gap:0.75rem; align-items:flex-start; cursor:pointer; font-size:0.95rem; }
+.sicherheit-punkt input[type=checkbox] { margin-top:0.2rem; width:1.2rem; height:1.2rem; flex-shrink:0; }
+.sicherheit-crew-liste { margin-top:0.5rem; }
+.sicherheit-crew-item { padding:0.5rem 0; border-bottom:1px solid var(--border); }
+.sicherheit-crew-item label { display:flex; gap:0.75rem; align-items:center; cursor:pointer; }
+.sicherheit-datum { color: var(--text-secondary); font-size:0.85rem; margin-bottom:0.5rem; }

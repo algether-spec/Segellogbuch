@@ -200,7 +200,8 @@ const KATEGORIE_MAP = {
     "Ankern": "Anker", "Anker lichten": "Anker",
     "An Boje": "Boje", "Von Boje": "Boje",
     "Ruderwechsel": "Allgemein", "Sichtung": "Allgemein",
-    "MOB": "Allgemein", "Notfall": "Allgemein"
+    "MOB": "Allgemein", "Notfall": "Allgemein",
+    "Sicherheitseinweisung": "Sicherheit"
 };
 
 function kategorieFuerTyp(typ) {
@@ -1206,6 +1207,7 @@ function toernLaden(tripId) {
     tabInhaltToggeln();
     logbuchStatusAktualisieren();
     zeigeLogs();
+    sicherheitSeiteAktualisieren();
 }
 
 function neuerToernAnlegen() {
@@ -1738,7 +1740,7 @@ function hauptTabWechseln(tabId) {
 }
 
 function seitenWechseln(seiteId) {
-    const seitenPanels = ["tab-toern", "tab-crew", "tab-statistik", "tab-einstellungen"];
+    const seitenPanels = ["tab-toern", "tab-crew", "tab-sicherheit", "tab-statistik", "tab-einstellungen"];
     const hauptBereich = document.getElementById("haupt-bereich");
 
     _aktiveSeitenId = seiteId || null;
@@ -1759,6 +1761,9 @@ function seitenWechseln(seiteId) {
         });
         if (seiteId === "tab-statistik" && aktuellerToern) {
             trackKarteRendern(aktuellerToern);
+        }
+        if (seiteId === "tab-sicherheit") {
+            sicherheitSeiteAktualisieren();
         }
     }
 
@@ -1823,6 +1828,55 @@ btnNeuerLog.onclick = () => {
     formWetterVorbelegen();
     logZeit.focus();
 };
+
+/* --- Sicherheitseinweisung -------------------------------------- */
+
+function sicherheitSeiteAktualisieren() {
+    const hatToern = !!aktuellerToern;
+    document.getElementById("sicherheit-leer").hidden = hatToern;
+    document.getElementById("sicherheit-inhalt").hidden = !hatToern;
+    if (!hatToern) return;
+
+    // Datum
+    const now = new Date();
+    document.getElementById("sicherheit-datum").textContent =
+        "Datum: " + now.toLocaleDateString("de-AT") + " · " + now.toLocaleTimeString("de-AT", {hour:"2-digit", minute:"2-digit"});
+
+    // Checkboxen zurücksetzen
+    document.querySelectorAll(".sich-check").forEach(cb => cb.checked = false);
+    document.getElementById("sicherheit-notiz").value = "";
+
+    // Crew-Bestätigung aufbauen
+    const crew = aktuellerToern.crew || [];
+    const liste = document.getElementById("sicherheit-crew-liste");
+    liste.innerHTML = crew.length ? "<h3 style='margin-top:1rem'>Bestätigung Crew</h3>" : "";
+    crew.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "sicherheit-crew-item";
+        div.innerHTML = `<label><input type="checkbox" class="sich-crew-check" data-name="${m.name}"> ${m.name} (${m.rolle}) – Einweisung erhalten</label>`;
+        liste.appendChild(div);
+    });
+}
+
+function sicherheitAbschliessen() {
+    const checks = document.querySelectorAll(".sich-check");
+    const alle = Array.from(checks).every(cb => cb.checked);
+    if (!alle) {
+        statusSetzen("⚠️ Bitte alle Punkte abhaken.", "error");
+        return;
+    }
+    const notiz = document.getElementById("sicherheit-notiz").value.trim();
+    const crewChecks = Array.from(document.querySelectorAll(".sich-crew-check"))
+        .filter(cb => cb.checked)
+        .map(cb => cb.dataset.name);
+    const crewText = crewChecks.length ? " · Crew: " + crewChecks.join(", ") : "";
+    const noteText = (notiz ? notiz + " · " : "") + "Alle 10 Sicherheitspunkte eingewiesen" + crewText;
+
+    _pendingNote = noteText;
+    schnellEintragSpeichern("Sicherheitseinweisung");
+    statusSetzen("✅ Sicherheitseinweisung ins Logbuch eingetragen.", "ok");
+    seitenWechseln(null);
+}
 
 /* --- Floating Buttons ------------------------------------------- */
 
