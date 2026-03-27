@@ -5,14 +5,14 @@
 Diese Funktionen bilden die Kernlogik. Jede Änderung kann Datenverlust,
 falsche Zustände oder defektes Tracking verursachen.
 
-| Funktion | Datei | Zweck |
-|---|---|---|
-| `zustandAktualisieren()` | app.js | Segeln/Motor-Buttons visuell aktualisieren |
-| `hafenSperrungAktualisieren()` | app.js | FAHRT/STOPP-Zustand auf UI anwenden |
-| `stoppZustandSpeichern()` | app.js | Fahrt-Zustand in localStorage + Törn schreiben |
-| `schnellEintragSpeichern()` | app.js | Schnellbutton → GPS → Event → Speichern |
-| `gpsAbfragen()` | app.js | GPS-Position asynchron holen und in Event schreiben |
-| `stoppZustandLaden()` | app.js | Fahrt-Zustand aus localStorage lesen |
+| Funktion                       | Datei  | Zweck                                               |
+| ------------------------------ | ------ | --------------------------------------------------- |
+| `zustandAktualisieren()`       | app.js | Segeln/Motor-Buttons visuell aktualisieren          |
+| `hafenSperrungAktualisieren()` | app.js | FAHRT/STOPP-Zustand auf UI anwenden                 |
+| `stoppZustandSpeichern()`      | app.js | Fahrt-Zustand in localStorage + Törn schreiben      |
+| `schnellEintragSpeichern()`    | app.js | Schnellbutton → GPS → Event → Speichern             |
+| `gpsAbfragen()`                | app.js | GPS-Position asynchron holen und in Event schreiben |
+| `stoppZustandLaden()`          | app.js | Fahrt-Zustand aus localStorage lesen                |
 
 ---
 
@@ -42,6 +42,7 @@ An Boje        → "boje"     (STOPP_EREIGNISSE)
 ```
 
 **Aufrufkette nach jedem Event-Save:**
+
 ```
 schnellEintragSpeichern(typ)
   → stoppZustandSpeichern(neuerZustand)
@@ -109,18 +110,19 @@ Antrieb gilt als aktiv wenn `zustandErmitteln() !== null` ODER `antriebAusUI() !
 Fehlt der Antrieb → `validierungsWarnung("Bitte zuerst Motor oder Segeln aktivieren")`.
 
 **eventErlaubt(typ, zustand):**
+
 1. Kein Eintrag in ERLAUBTE_ZUSTAENDE → immer erlaubt
 2. Zustand nicht in der erlaubten Liste → verboten
 3. Typ in ANTRIEB_PFLICHT_TYPEN und kein Antrieb aktiv → verboten
 
 ### UI-Sperren bei STOPP
 
-| Element | Bei STOPP |
-|---|---|
+| Element                                  | Bei STOPP                         |
+| ---------------------------------------- | --------------------------------- |
 | Fahrt-Stopp-Bar (Anlegen/Ankern/An Boje) | ausgeblendet → Start-Bar sichtbar |
-| Manöver-Grid (Wende/Halse/Reffen) | ausgeblendet |
-| Rudergänger-Button | immer sichtbar |
-| Segeln/Motor-Buttons | immer sichtbar |
+| Manöver-Grid (Wende/Halse/Reffen)        | ausgeblendet                      |
+| Rudergänger-Button                       | immer sichtbar                    |
+| Segeln/Motor-Buttons                     | immer sichtbar                    |
 
 ---
 
@@ -130,6 +132,7 @@ Das Notiz-Popup öffnet sich **ausschließlich** über den „💬 Notiz zum Man
 Event-Buttons speichern direkt ohne Popup (`_pendingNote = ""`).
 
 **Ablauf:**
+
 ```
 notizZumLetztenManoever()
   → notizPopupZeigen(typ)          – gibt Promise zurück
@@ -144,18 +147,20 @@ notizZumLetztenManoever()
 ```
 
 **Spracheingabe (Web Speech API):**
+
 - Nur sichtbar wenn `window.SpeechRecognition` oder `window.webkitSpeechRecognition` verfügbar
 - `_notizSpeechRecog` / `_notizSpeechRunning` verwalten laufende Erkennung
 - Bei Popup-Schließen wird laufende Erkennung abgebrochen
 
 **Globale Variablen:**
+
 ```js
-let _pendingNote         = "";     // Inhalt für nächsten Event-Save
-let _notizCountdownTimer = null;   // setInterval-Handle
-let _notizCountdownWert  = 5;      // Sekunden bis Auto-Speichern
-let _notizResolve        = null;   // Promise-Resolver
-let _notizSpeechRunning  = false;
-let _notizSpeechRecog    = null;
+let _pendingNote = ""; // Inhalt für nächsten Event-Save
+let _notizCountdownTimer = null; // setInterval-Handle
+let _notizCountdownWert = 5; // Sekunden bis Auto-Speichern
+let _notizResolve = null; // Promise-Resolver
+let _notizSpeechRunning = false;
+let _notizSpeechRecog = null;
 ```
 
 ---
@@ -168,9 +173,10 @@ Track-Aufzeichnung ist in **`track.js`** ausgelagert (ab v2.5.0).
 ### Zustands-Variablen (track.js)
 
 ```js
-let _watchId    = null;   /* watchPosition-Handle (null = nicht aktiv)  */
-let _letzterPkt = null;   /* letzter gespeicherter Punkt (für Distanz/Zeit-Check) */
-let _highAcc    = false;  /* aktuell verwendete enableHighAccuracy-Einstellung */
+let _watchId = null; /* watchPosition-Handle (null = nicht aktiv)  */
+let _letzterPkt =
+  null; /* letzter gespeicherter Punkt (für Distanz/Zeit-Check) */
+let _highAcc = false; /* aktuell verwendete enableHighAccuracy-Einstellung */
 ```
 
 ### Ablauf
@@ -212,13 +218,13 @@ Gültige Werte: `[0.1, 0.25, 0.5, 1.0, 2.0]`, Standard: `0.25` nm.
 Berechnung: `minDistM = trackDistanzLaden() * 1852` (nm → Meter)
 Abstand zum letzten Punkt: `haversineKm(...) * 1000` (km → Meter)
 
-| Einstellung | Distanz |
-|---|---|
-| 0,1 nm | ~185 m |
-| 0,25 nm (Standard) | ~463 m |
-| 0,5 nm | ~926 m |
-| 1,0 nm | ~1852 m |
-| 2,0 nm | ~3704 m |
+| Einstellung        | Distanz |
+| ------------------ | ------- |
+| 0,1 nm             | ~185 m  |
+| 0,25 nm (Standard) | ~463 m  |
+| 0,5 nm             | ~926 m  |
+| 1,0 nm             | ~1852 m |
+| 2,0 nm             | ~3704 m |
 
 Punkt wird **immer** gespeichert wenn letzter Punkt älter als **180 Sekunden**
 (`alterSek >= 180`), unabhängig von der Distanz (Fallback).
@@ -230,6 +236,7 @@ Punkt wird **immer** gespeichert wenn letzter Punkt älter als **180 Sekunden**
 ```
 
 `enableHighAccuracy` wird dynamisch angepasst:
+
 - SOG ≤ 3 kn → `false` (Akku sparen)
 - SOG > 3 kn → `true` (Genauigkeit erhöhen)
 
@@ -262,7 +269,7 @@ Alle Track-Punkte in `aktuellerToern.track.points[]`:
 GPS-Position in Events (Manöver) wird unter `ev.pos` gespeichert:
 
 ```js
-ev.pos = { lat, lon, sog }   // NICHT ev.lat/ev.lon!
+ev.pos = { lat, lon, sog }; // NICHT ev.lat/ev.lon!
 ```
 
 ---
@@ -292,12 +299,12 @@ auf 19 Zeichen normalisiert (`:00` wird angehängt).
 
 ## LOCALSTORAGE KEYS
 
-| Key | Inhalt |
-|---|---|
-| `segel_logbuch_trips` | Array aller Törns |
-| `segel_logbuch_stopp` | aktueller Fahrt-Zustand ("hafen"/"fahrt"/…) |
-| `segel_logbuch_aktiver_toern` | tripId des aktiven Törns |
-| `last_values` | letzter Rudergänger + Wind |
-| `segel_logbuch_autobackup` | automatisches Backup |
-| `segel_logbuch_backup_permanent` | permanentes Backup |
-| `segel_track_distanz` | Track-Auflösung in nm (0.1/0.25/0.5/1.0/2.0) |
+| Key                              | Inhalt                                       |
+| -------------------------------- | -------------------------------------------- |
+| `segel_logbuch_trips`            | Array aller Törns                            |
+| `segel_logbuch_stopp`            | aktueller Fahrt-Zustand ("hafen"/"fahrt"/…)  |
+| `segel_logbuch_aktiver_toern`    | tripId des aktiven Törns                     |
+| `last_values`                    | letzter Rudergänger + Wind                   |
+| `segel_logbuch_autobackup`       | automatisches Backup                         |
+| `segel_logbuch_backup_permanent` | permanentes Backup                           |
+| `segel_track_distanz`            | Track-Auflösung in nm (0.1/0.25/0.5/1.0/2.0) |

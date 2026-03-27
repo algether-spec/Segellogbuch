@@ -27,6 +27,9 @@ header {
     padding: 18px 20px 14px;
     margin-bottom: 16px;
     box-shadow: 0 4px 16px rgba(26,58,92,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 60;
 }
 
 .header-content {
@@ -631,7 +634,7 @@ button:active { opacity: 0.75; }
 
 .logbuch-sticky {
     position: sticky;
-    top: 0;
+    top: 126px;
     z-index: 40;
     background: #f4f6f9;
     padding-bottom: 8px;
@@ -1481,6 +1484,9 @@ button:active { opacity: 0.75; }
     border-radius: 14px;
     padding: 5px;
     box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    position: sticky;
+    top: 76px;
+    z-index: 55;
 }
 
 .haupt-tab-btn {
