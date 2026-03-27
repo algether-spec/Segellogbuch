@@ -28,7 +28,7 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 
 function trackDistanzLaden() {
     const v = parseFloat(localStorage.getItem("segel_track_distanz"));
-    return [0.1, 0.25, 0.5, 1.0, 2.0].includes(v) ? v : 0.25;
+    return [0.05, 0.1, 0.2, 0.3, 0.4, 0.5].includes(v) ? v : 0.1;
 }
 
 function trackDistanzSpeichern(nm) {

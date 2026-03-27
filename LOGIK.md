@@ -213,7 +213,7 @@ und damit zurückgesetzt wird.
 ### Track-Distanz (konfigurierbar)
 
 Einstellbar in ⚙️ Einstellungen, gespeichert unter `localStorage["segel_track_distanz"]`.
-Gültige Werte: `[0.1, 0.25, 0.5, 1.0, 2.0]`, Standard: `0.25` nm.
+Gültige Werte: `[0.05, 0.1, 0.2, 0.3, 0.4, 0.5]`, Standard: `0.1` nm.
 
 ### GPS-Jitter-Filter SOG-Schwelle (konfigurierbar)
 
@@ -226,11 +226,12 @@ Abstand zum letzten Punkt: `haversineKm(...) * 1000` (km → Meter)
 
 | Einstellung        | Distanz |
 | ------------------ | ------- |
-| 0,1 nm             | ~185 m  |
-| 0,25 nm (Standard) | ~463 m  |
+| 0,05 nm            | ~93 m   |
+| 0,1 nm (Standard)  | ~185 m  |
+| 0,2 nm             | ~370 m  |
+| 0,3 nm             | ~556 m  |
+| 0,4 nm             | ~741 m  |
 | 0,5 nm             | ~926 m  |
-| 1,0 nm             | ~1852 m |
-| 2,0 nm             | ~3704 m |
 
 Punkt wird **immer** gespeichert wenn letzter Punkt älter als **180 Sekunden**
 (`alterSek >= 180`), unabhängig von der Distanz (Fallback).
@@ -322,5 +323,5 @@ auf 19 Zeichen normalisiert (`:00` wird angehängt).
 | `last_values`                    | letzter Rudergänger + Wind                   |
 | `segel_logbuch_autobackup`       | automatisches Backup                         |
 | `segel_logbuch_backup_permanent` | permanentes Backup                           |
-| `segel_track_distanz`            | Track-Auflösung in nm (0.1/0.25/0.5/1.0/2.0) |
+| `segel_track_distanz`            | Track-Auflösung in nm (0.05/0.1/0.2/0.3/0.4/0.5) |
 | `segel_sog_schwelle`             | SOG-Schwelle für GPS-Jitter-Filter (kn)       |
