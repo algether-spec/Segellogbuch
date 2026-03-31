@@ -1732,6 +1732,8 @@ function hauptTabWechseln(tabId) {
     /* Logbuch-Sticky nur beim Logbuch-Tab anzeigen */
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(!!aktuellerToern && !_aktiveSeitenId && tabId === "tab-logbuch");
+    /* Klick-Modus abbrechen wenn Karte verlassen */
+    if (tabId !== "tab-karte" && _karteKlickModus) trackPunktHinzufuegen();
     /* Karte rendern wenn Tab gewechselt */
     if (tabId === "tab-karte" && aktuellerToern) karteTabRendern(aktuellerToern);
 }
@@ -2273,6 +2275,7 @@ let _trackMap  = null;
 let _hauptKarte = null;
 let _liveMarker = null;
 let _liveCircle = null;
+let _karteKlickModus = false;
 
 /* haversineKm() → track.js */
 
@@ -2520,33 +2523,52 @@ function trackLoeschen() {
 
 function trackPunktHinzufuegen() {
     if (!aktuellerToern) { statusSetzen("Bitte zuerst einen Törn auswählen.", "error"); return; }
+
+    if (_karteKlickModus) {
+        // Klick-Modus beenden
+        _karteKlickModus = false;
+        _hauptKarte.off("click", _karteKlickHandler);
+        _hauptKarte.getContainer().style.cursor = "";
+        const statusEl = document.getElementById("karte-aktion-status");
+        if (statusEl) statusEl.hidden = true;
+        document.getElementById("btn-track-punkt").textContent = "📍 Track-Punkt hinzufügen";
+        return;
+    }
+
+    // Klick-Modus starten
+    _karteKlickModus = true;
+    _hauptKarte.getContainer().style.cursor = "crosshair";
     const statusEl = document.getElementById("karte-aktion-status");
-    if (statusEl) { statusEl.textContent = "⏳ GPS…"; statusEl.hidden = false; }
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            const pt = {
-                lat:  parseFloat(pos.coords.latitude.toFixed(5)),
-                lon:  parseFloat(pos.coords.longitude.toFixed(5)),
-                sog:  0,
-                zeit: new Date().toISOString().slice(0, 19)
-            };
-            if (!aktuellerToern.track)        aktuellerToern.track = {};
-            if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
-            aktuellerToern.track.points.push(pt);
-            aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
-            toernSpeichern(aktuellerToern);
-            autoBackupSpeichern();
-            backupStatusAktualisieren();
-            if (statusEl) statusEl.hidden = true;
-            karteTabRendern(aktuellerToern);
-            statusSetzen("📍 Track-Punkt hinzugefügt.", "ok", 2000);
-        },
-        () => {
-            if (statusEl) statusEl.hidden = true;
-            statusSetzen("❌ GPS nicht verfügbar.", "error", 3000);
-        },
-        { maximumAge: 10000, timeout: 8000, enableHighAccuracy: true }
-    );
+    if (statusEl) { statusEl.textContent = "👆 Auf Karte tippen um Punkt zu setzen"; statusEl.hidden = false; }
+    document.getElementById("btn-track-punkt").textContent = "✕ Abbrechen";
+    _hauptKarte.on("click", _karteKlickHandler);
+}
+
+function _karteKlickHandler(e) {
+    const pt = {
+        lat:  parseFloat(e.latlng.lat.toFixed(5)),
+        lon:  parseFloat(e.latlng.lng.toFixed(5)),
+        sog:  0,
+        zeit: new Date().toISOString().slice(0, 19)
+    };
+    if (!aktuellerToern.track)        aktuellerToern.track = {};
+    if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
+    aktuellerToern.track.points.push(pt);
+    aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    backupStatusAktualisieren();
+
+    // Klick-Modus beenden
+    _karteKlickModus = false;
+    _hauptKarte.off("click", _karteKlickHandler);
+    _hauptKarte.getContainer().style.cursor = "";
+    const statusEl = document.getElementById("karte-aktion-status");
+    if (statusEl) statusEl.hidden = true;
+    document.getElementById("btn-track-punkt").textContent = "📍 Track-Punkt hinzufügen";
+
+    karteTabRendern(aktuellerToern);
+    statusSetzen("📍 Track-Punkt gesetzt.", "ok", 2000);
 }
 
 /* --- Fahrt-Sicherheitsprüfung beim App-Start -------------------- */
