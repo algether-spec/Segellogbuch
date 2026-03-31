@@ -1734,6 +1734,11 @@ function hauptTabWechseln(tabId) {
     if (sticky) sticky.hidden = !(!!aktuellerToern && !_aktiveSeitenId && tabId === "tab-logbuch");
     /* Klick-Modus abbrechen wenn Karte verlassen */
     if (tabId !== "tab-karte" && _karteKlickModus) trackPunktHinzufuegen();
+    /* Popup und Sidebar schließen wenn Karte verlassen */
+    if (tabId !== "tab-karte" && _hauptKarte) {
+        _hauptKarte.closePopup();
+        sidebarSchliessen();
+    }
     /* Karte rendern wenn Tab gewechselt */
     if (tabId === "tab-karte" && aktuellerToern) karteTabRendern(aktuellerToern);
 }
