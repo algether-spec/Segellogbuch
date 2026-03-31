@@ -2121,3 +2121,16 @@ button:active { opacity: 0.75; }
 .sicherheit-crew-item { padding:0.5rem 0; border-bottom:1px solid var(--border); }
 .sicherheit-crew-item label { display:flex; gap:0.75rem; align-items:center; cursor:pointer; }
 .sicherheit-datum { color: var(--text-secondary); font-size:0.85rem; margin-bottom:0.5rem; }
+
+/* ── Live-Position Tooltip ─────────────────────────────────────── */
+.live-sog-tooltip {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.live-sog-tooltip::before { display: none; }

@@ -152,6 +152,9 @@ function _trackWatchCallback(pos) {
         _trackPunktSpeichern(newLat, newLon, sogKn, new Date().toISOString().slice(0, 19));
     }
     trackStatusAnzeigen(true);
+    if (typeof livePositionAktualisieren === "function") {
+        livePositionAktualisieren(newLat, newLon, sogKn);
+    }
 }
 
 /* --- trackStarten ----------------------------------------------- */

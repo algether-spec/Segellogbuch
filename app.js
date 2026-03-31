@@ -333,7 +333,7 @@ function hafenSperrungAktualisieren(stopp) {
     /* Wende/Halse/Reffen-Zustand immer aktualisieren, Track je nach Status */
     zustandAktualisieren();
     if (!istStopp) trackStarten();
-    else trackStoppen();
+    else { trackStoppen(); liveMarkerEntfernen(); }
 
     /* Statusleiste: Modus-Text überschreiben wenn gestoppt */
     const modus = document.getElementById("ls-modus");
@@ -1180,6 +1180,7 @@ function toernUebersichtRendern() {
 
 function toernLaden(tripId) {
     trackStoppen();
+    liveMarkerEntfernen();
     const alle = alleToernsLaden();
     const toern = alle.find(t => t.tripId === tripId);
     if (!toern) return;
@@ -2270,6 +2271,8 @@ function pwaMigrationPruefen() {
 
 let _trackMap  = null;
 let _hauptKarte = null;
+let _liveMarker = null;
+let _liveCircle = null;
 
 /* haversineKm() → track.js */
 
@@ -2278,6 +2281,49 @@ function trackDistanzNm(pts) {
     for (let i = 1; i < pts.length; i++)
         km += haversineKm(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon);
     return (km * 0.539957).toFixed(1);
+}
+
+function liveMarkerEntfernen() {
+    if (_liveMarker) { _liveMarker.remove(); _liveMarker = null; }
+    if (_liveCircle) { _liveCircle.remove(); _liveCircle = null; }
+}
+
+function livePositionAktualisieren(lat, lon, sogKn) {
+    if (!_hauptKarte) return;
+
+    if (!_liveMarker) {
+        _liveMarker = L.circleMarker([lat, lon], {
+            radius: 10,
+            color: "#0ea5e9",
+            fillColor: "#0ea5e9",
+            fillOpacity: 0.9,
+            weight: 3
+        }).addTo(_hauptKarte);
+        _liveCircle = L.circleMarker([lat, lon], {
+            radius: 20,
+            color: "#0ea5e9",
+            fillColor: "#0ea5e9",
+            fillOpacity: 0.15,
+            weight: 1
+        }).addTo(_hauptKarte);
+    } else {
+        _liveMarker.setLatLng([lat, lon]);
+        _liveCircle.setLatLng([lat, lon]);
+    }
+
+    _liveMarker.bindTooltip(sogKn + " kn", {
+        permanent: true,
+        direction: "top",
+        offset: [0, -12],
+        className: "live-sog-tooltip"
+    }).openTooltip();
+
+    const karteTab = document.getElementById("tab-karte");
+    const karteAktiv = karteTab && !karteTab.classList.contains("tab-hidden");
+    if (karteAktiv) {
+        _hauptKarte.panTo([lat, lon], { animate: true, duration: 0.5 });
+        if (aktuellerToern) trackKarteRendern(aktuellerToern);
+    }
 }
 
 function trackKarteRendern(toern) {

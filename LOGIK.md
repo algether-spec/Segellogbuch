@@ -312,6 +312,18 @@ auf 19 Zeichen normalisiert (`:00` wird angehängt).
 
 ---
 
+## LIVE-POSITION
+
+`livePositionAktualisieren(lat, lon, sogKn)` wird von `_trackWatchCallback()` bei
+jeder GPS-Position aufgerufen (Hook via `typeof`-Guard).
+
+- Erstellt `_liveMarker` (blauer Kreis) und `_liveCircle` (Halo) auf `_hauptKarte`
+- Aktualisiert Tooltip mit aktuellem SOG
+- Zentriert Karte + zeichnet Track neu (`trackKarteRendern`) nur wenn Karte-Tab aktiv
+- `liveMarkerEntfernen()` entfernt Marker bei Törn-Wechsel und Track-Stopp
+
+---
+
 ## LOCALSTORAGE KEYS
 
 | Key                              | Inhalt                                       |
