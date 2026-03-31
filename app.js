@@ -2565,7 +2565,8 @@ function _karteKlickHandler(e) {
     const hhmm = now.toTimeString().slice(0, 5);
     const datumText = now.toLocaleDateString("de-AT");
     document.getElementById("trackpunkt-zeit-input").value = hhmm;
-    document.getElementById("trackpunkt-datum-anzeige").textContent = datumText;
+    const datumIso = now.toISOString().slice(0, 10);
+    document.getElementById("trackpunkt-datum-input").value = datumIso;
     document.getElementById("trackpunkt-zeit-overlay").style.display = "flex";
 }
 
@@ -2575,7 +2576,8 @@ function trackpunktZeitBestaetigen() {
     if (!_trackpunktPendingLatLng) return;
 
     const now = new Date();
-    const datumIso = now.toISOString().slice(0, 10);
+    const datumIso = document.getElementById("trackpunkt-datum-input").value
+        || now.toISOString().slice(0, 10);
     const zeitIso = datumIso + "T" + (zeitVal || now.toTimeString().slice(0, 5)) + ":00";
 
     const pt = {

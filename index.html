@@ -612,9 +612,10 @@ setInterval(autoUpdatePruefen, 30000);
             <label for="trackpunkt-zeit-input">Uhrzeit</label>
             <input type="time" id="trackpunkt-zeit-input" style="font-size:1.4rem;text-align:center;width:100%">
         </div>
-        <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem">
-            Datum: <span id="trackpunkt-datum-anzeige"></span>
-        </p>
+        <div class="field" style="margin-top:0.75rem">
+            <label for="trackpunkt-datum-input">Datum</label>
+            <input type="date" id="trackpunkt-datum-input" style="font-size:1.1rem;text-align:center;width:100%">
+        </div>
         <div class="log-modal-btns" style="margin-top:1rem">
             <button type="button" class="btn-primary" onclick="trackpunktZeitBestaetigen()">✅ Setzen</button>
             <button type="button" class="btn-secondary" onclick="trackpunktZeitAbbrechen()">Abbrechen</button>
