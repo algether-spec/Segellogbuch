@@ -2545,11 +2545,30 @@ function trackPunktHinzufuegen() {
 }
 
 function _karteKlickHandler(e) {
+    // Klick-Modus sofort beenden
+    _karteKlickModus = false;
+    _hauptKarte.off("click", _karteKlickHandler);
+    _hauptKarte.getContainer().style.cursor = "";
+    document.getElementById("btn-track-punkt").textContent = "📍 Track-Punkt hinzufügen";
+    const statusEl = document.getElementById("karte-aktion-status");
+    if (statusEl) statusEl.hidden = true;
+
+    // Zeit-Auswahl Popup
+    const now = new Date();
+    const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString().slice(0, 16);
+    const zeitInput = prompt("📍 Track-Punkt Zeit:\n(leer lassen = jetzt)", localIso);
+    if (zeitInput === null) return; // Abbrechen
+
+    const zeitIso = zeitInput.trim()
+        ? zeitInput.trim().slice(0, 16) + ":00"
+        : new Date().toISOString().slice(0, 19);
+
     const pt = {
         lat:  parseFloat(e.latlng.lat.toFixed(5)),
         lon:  parseFloat(e.latlng.lng.toFixed(5)),
         sog:  0,
-        zeit: new Date().toISOString().slice(0, 19)
+        zeit: zeitIso
     };
     if (!aktuellerToern.track)        aktuellerToern.track = {};
     if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
@@ -2558,17 +2577,8 @@ function _karteKlickHandler(e) {
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
-
-    // Klick-Modus beenden
-    _karteKlickModus = false;
-    _hauptKarte.off("click", _karteKlickHandler);
-    _hauptKarte.getContainer().style.cursor = "";
-    const statusEl = document.getElementById("karte-aktion-status");
-    if (statusEl) statusEl.hidden = true;
-    document.getElementById("btn-track-punkt").textContent = "📍 Track-Punkt hinzufügen";
-
     karteTabRendern(aktuellerToern);
-    statusSetzen("📍 Track-Punkt gesetzt.", "ok", 2000);
+    statusSetzen("📍 Track-Punkt gesetzt: " + zeitIso.slice(11, 16), "ok", 2000);
 }
 
 /* --- Fahrt-Sicherheitsprüfung beim App-Start -------------------- */
