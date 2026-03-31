@@ -479,6 +479,17 @@
                     <option value="0.5">0,5 kn</option>
                 </select>
             </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="track-intervall-select">Fallback-Intervall</label>
+                <select id="track-intervall-select" class="einstellung-select" onchange="trackIntervallSpeichern(parseFloat(this.value))">
+                    <option value="30">0,5 min (30s)</option>
+                    <option value="60">1 min (60s)</option>
+                    <option value="90">1,5 min (90s)</option>
+                    <option value="120">2 min (120s) Standard</option>
+                    <option value="150">2,5 min (150s)</option>
+                    <option value="180">3 min (180s)</option>
+                </select>
+            </div>
         </div>
     </div><!-- /tab-einstellungen -->
 

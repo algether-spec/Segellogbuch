@@ -57,6 +57,21 @@ function sogSchwelleSelectAktualisieren() {
     if (sel) sel.value = String(sogSchwelleLaden());
 }
 
+function trackIntervallLaden() {
+    const v = parseFloat(localStorage.getItem("segel_track_intervall"));
+    return [30, 60, 90, 120, 150, 180].includes(v) ? v : 120;
+}
+
+function trackIntervallSpeichern(sek) {
+    localStorage.setItem("segel_track_intervall", String(sek));
+    trackIntervallSelectAktualisieren();
+}
+
+function trackIntervallSelectAktualisieren() {
+    const sel = document.getElementById("track-intervall-select");
+    if (sel) sel.value = String(trackIntervallLaden());
+}
+
 /* --- Track-Status anzeigen --------------------------------------- */
 
 function trackStatusAnzeigen(aktiv) {
@@ -128,12 +143,12 @@ function _trackWatchCallback(pos) {
         : Infinity;
 
     /* SOG = 0: nur Fallback speichern */
-    if (sogKn <= sogSchwelleLaden() && alterSek < 180) {
+    if (sogKn <= sogSchwelleLaden() && alterSek < trackIntervallLaden()) {
         trackStatusAnzeigen(true);
         return;
     }
 
-    if (distM >= minDistM || alterSek >= 180) {
+    if (distM >= minDistM || alterSek >= trackIntervallLaden()) {
         _trackPunktSpeichern(newLat, newLon, sogKn, new Date().toISOString().slice(0, 19));
     }
     trackStatusAnzeigen(true);

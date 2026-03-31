@@ -193,7 +193,7 @@ FAHRT beginnt
     → enableHighAccuracy-Modus prüfen (> 3 kn → true):
         bei Wechsel: clearWatch, _watchId = null, trackStarten() (Neustart)
     → SOG ≤ sogSchwelleLaden() kn und alterSek < 180 → kein Punkt, return (GPS-Jitter-Filter)
-    → distM >= minDistM ODER alterSek >= 180 → _trackPunktSpeichern()
+    → distM >= minDistM ODER alterSek >= trackIntervallLaden() → _trackPunktSpeichern()
 
 STOPP / Törn wechsel
   → trackStoppen()
@@ -231,8 +231,9 @@ Abstand zum letzten Punkt: `haversineKm(...) * 1000` (km → Meter)
 | 0,4 nm             | ~741 m  |
 | 0,5 nm             | ~926 m  |
 
-Punkt wird **immer** gespeichert wenn letzter Punkt älter als **180 Sekunden**
-(`alterSek >= 180`), unabhängig von der Distanz (Fallback).
+Punkt wird **immer** gespeichert wenn letzter Punkt älter als das **Fallback-Intervall**
+(`alterSek >= trackIntervallLaden()`), unabhängig von der Distanz.
+Gültige Werte: `[30, 60, 90, 120, 150, 180]` s, Standard: `120` s.
 
 ### watchPosition-Optionen
 
@@ -323,3 +324,4 @@ auf 19 Zeichen normalisiert (`:00` wird angehängt).
 | `segel_logbuch_backup_permanent` | permanentes Backup                           |
 | `segel_track_distanz`            | Track-Auflösung in nm (0.05/0.1/0.2/0.3/0.4/0.5) |
 | `segel_sog_schwelle`             | SOG-Schwelle für GPS-Jitter-Filter (kn)       |
+| `segel_track_intervall`          | Fallback-Intervall in Sekunden (30–180)       |
