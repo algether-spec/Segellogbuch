@@ -11,6 +11,8 @@ let _highAcc     = false;  /* aktuell verwendete enableHighAccuracy-Mode */
 let _wakeLock    = null;   /* WakeLock-Sentinel (null = nicht aktiv)    */
 let _speicherTimer = null; /* Debounce-Timer für toernSpeichern()       */
 let _sogSchwelle   = 0.1; /* SOG-Jitter-Filter-Schwelle in Knoten      */
+let _startBoost    = false;   /* true = erste 60s nach Fahrtstart       */
+let _startBoostTimer = null;
 
 /* --- Haversine-Distanz (km) -------------------------------------- */
 
@@ -134,7 +136,8 @@ function _trackWatchCallback(pos) {
 
     const newLat   = parseFloat(pos.coords.latitude.toFixed(5));
     const newLon   = parseFloat(pos.coords.longitude.toFixed(5));
-    const minDistM = trackDistanzLaden() * 1852;
+    const intervall = _startBoost ? 10 : trackIntervallLaden();
+    const minDistM  = _startBoost ? 0 : trackDistanzLaden() * 1852;
     const distM    = _letzterPkt
         ? haversineKm(_letzterPkt.lat, _letzterPkt.lon, newLat, newLon) * 1000
         : Infinity;
@@ -143,12 +146,12 @@ function _trackWatchCallback(pos) {
         : Infinity;
 
     /* SOG = 0: nur Fallback speichern */
-    if (sogKn <= sogSchwelleLaden() && alterSek < trackIntervallLaden()) {
+    if (sogKn <= sogSchwelleLaden() && alterSek < intervall) {
         trackStatusAnzeigen(true);
         return;
     }
 
-    if (distM >= minDistM || alterSek >= trackIntervallLaden()) {
+    if (distM >= minDistM || alterSek >= intervall) {
         _trackPunktSpeichern(newLat, newLon, sogKn, new Date().toISOString().slice(0, 19));
     }
     trackStatusAnzeigen(true);
@@ -173,6 +176,12 @@ function trackStarten() {
         () => { trackStatusAnzeigen(false); },  /* GPS-Fehler: Status ausblenden */
         { maximumAge: 30000, timeout: 10000, enableHighAccuracy: _highAcc }
     );
+    _startBoost = true;
+    if (_startBoostTimer) clearTimeout(_startBoostTimer);
+    _startBoostTimer = setTimeout(() => {
+        _startBoost = false;
+        _startBoostTimer = null;
+    }, 60000);  /* 60 Sekunden Boost */
     _wakeLockAnfordern();
     trackStatusAnzeigen(false);  /* initial bis erste Position */
 }
@@ -216,6 +225,8 @@ function trackStoppen() {
     }
     _letzterPkt = null;
     _highAcc    = false;
+    if (_startBoostTimer) { clearTimeout(_startBoostTimer); _startBoostTimer = null; }
+    _startBoost = false;
     _wakeLockFreigeben();
     if (_speicherTimer) {
         clearTimeout(_speicherTimer);

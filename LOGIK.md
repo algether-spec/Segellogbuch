@@ -259,6 +259,16 @@ Distanz-Check. Danach chronologische Sortierung aller track.points.
 if (ev.pos) trackManöverPunkt(ev.pos.lat, ev.pos.lon, ev.pos.sog, zeitIso);
 ```
 
+### Start-Boost
+
+60 Sekunden nach `trackStarten()` wird `_startBoost = true` gesetzt.
+In dieser Phase gilt: Intervall = 10 s, Mindestdistanz = 0 m (jeder Punkt wird
+gespeichert der älter als 10 s ist, unabhängig von Distanz/Intervall-Einstellung).
+Nach 60 s setzt `_startBoostTimer` beide Werte zurück auf die Nutzereinstellungen.
+
+`trackStoppen()` bricht den Timer ab und setzt `_startBoost = false`.
+Zustandsvariablen: `_startBoost`, `_startBoostTimer`.
+
 ### Debounce-Speicherung
 
 `_trackPunktSpeichern()` ruft `toernSpeichern()` nicht sofort auf, sondern
