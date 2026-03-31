@@ -2281,6 +2281,7 @@ let _hauptKarte = null;
 let _liveMarker = null;
 let _liveCircle = null;
 let _karteKlickModus = false;
+let _trackpunktPendingLatLng = null;
 
 /* haversineKm() → track.js */
 
@@ -2558,23 +2559,33 @@ function _karteKlickHandler(e) {
     const statusEl = document.getElementById("karte-aktion-status");
     if (statusEl) statusEl.hidden = true;
 
-    // Zeit-Auswahl Popup
+    // Zeit-Modal öffnen
+    _trackpunktPendingLatLng = e.latlng;
     const now = new Date();
-    const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-        .toISOString().slice(0, 16);
-    const zeitInput = prompt("📍 Track-Punkt Zeit:\n(leer lassen = jetzt)", localIso);
-    if (zeitInput === null) return; // Abbrechen
+    const hhmm = now.toTimeString().slice(0, 5);
+    const datumText = now.toLocaleDateString("de-AT");
+    document.getElementById("trackpunkt-zeit-input").value = hhmm;
+    document.getElementById("trackpunkt-datum-anzeige").textContent = datumText;
+    document.getElementById("trackpunkt-zeit-overlay").style.display = "flex";
+}
 
-    const zeitIso = zeitInput.trim()
-        ? zeitInput.trim().slice(0, 16) + ":00"
-        : new Date().toISOString().slice(0, 19);
+function trackpunktZeitBestaetigen() {
+    const zeitVal = document.getElementById("trackpunkt-zeit-input").value;
+    document.getElementById("trackpunkt-zeit-overlay").style.display = "none";
+    if (!_trackpunktPendingLatLng) return;
+
+    const now = new Date();
+    const datumIso = now.toISOString().slice(0, 10);
+    const zeitIso = datumIso + "T" + (zeitVal || now.toTimeString().slice(0, 5)) + ":00";
 
     const pt = {
-        lat:  parseFloat(e.latlng.lat.toFixed(5)),
-        lon:  parseFloat(e.latlng.lng.toFixed(5)),
+        lat:  parseFloat(_trackpunktPendingLatLng.lat.toFixed(5)),
+        lon:  parseFloat(_trackpunktPendingLatLng.lng.toFixed(5)),
         sog:  0,
         zeit: zeitIso
     };
+    _trackpunktPendingLatLng = null;
+
     if (!aktuellerToern.track)        aktuellerToern.track = {};
     if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
     aktuellerToern.track.points.push(pt);
@@ -2583,7 +2594,12 @@ function _karteKlickHandler(e) {
     autoBackupSpeichern();
     backupStatusAktualisieren();
     karteTabRendern(aktuellerToern);
-    statusSetzen("📍 Track-Punkt gesetzt: " + zeitIso.slice(11, 16), "ok", 2000);
+    statusSetzen("📍 Track-Punkt gesetzt: " + zeitVal, "ok", 2000);
+}
+
+function trackpunktZeitAbbrechen() {
+    document.getElementById("trackpunkt-zeit-overlay").style.display = "none";
+    _trackpunktPendingLatLng = null;
 }
 
 /* --- Fahrt-Sicherheitsprüfung beim App-Start -------------------- */

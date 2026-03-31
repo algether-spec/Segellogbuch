@@ -605,5 +605,22 @@ autoUpdatePruefen();
 setInterval(autoUpdatePruefen, 30000);
 </script>
 
+<div id="trackpunkt-zeit-overlay" class="modal-overlay" style="display:none">
+    <div class="modal-box" style="max-width:320px">
+        <h2>📍 Track-Punkt Zeit</h2>
+        <div class="field" style="margin-top:1rem">
+            <label for="trackpunkt-zeit-input">Uhrzeit</label>
+            <input type="time" id="trackpunkt-zeit-input" style="font-size:1.4rem;text-align:center;width:100%">
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem">
+            Datum: <span id="trackpunkt-datum-anzeige"></span>
+        </p>
+        <div class="log-modal-btns" style="margin-top:1rem">
+            <button type="button" class="btn-primary" onclick="trackpunktZeitBestaetigen()">✅ Setzen</button>
+            <button type="button" class="btn-secondary" onclick="trackpunktZeitAbbrechen()">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
