@@ -1775,6 +1775,14 @@ button:active { opacity: 0.75; }
         gap: 6mm;
     }
 
+    .adp-notizen {
+        font-size: 10pt;
+        margin-top: 3mm;
+        padding: 2mm 3mm;
+        border-left: 2mm solid #ccc;
+        white-space: pre-wrap;
+    }
+
     .adp-tabelle {
         width: 100%;
         border-collapse: collapse;

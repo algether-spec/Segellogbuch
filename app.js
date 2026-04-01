@@ -1004,6 +1004,7 @@ function toernAbschlussBerechnen(toern) {
         skipper:   toern.skipper   || "—",
         shipData:  toern.shipData  || {},
         crew:      toern.crew      || [],
+        notes:     toern.notes     || "",
         events:    (toern.events || []).slice().sort((a, b) =>
             evZeitIso(a) < evZeitIso(b) ? -1 : evZeitIso(a) > evZeitIso(b) ? 1 : 0
         ),
@@ -1098,7 +1099,7 @@ function abschlussdrucken() {
     const ab = toernAbschlussBerechnen(aktuellerToern);
     const sd = ab.shipData;
 
-    const schiffMeta = [sd.name, sd.type, sd.registration].filter(Boolean).join(" · ");
+    const schiffMeta = [sd.name, sd.type, sd.registration, sd.engine ? "Motor: " + sd.engine : ""].filter(Boolean).join(" · ");
     const crewText   = ab.crew.map(p => p.name + (p.role ? " (" + p.role + ")" : "")).join(", ") || "—";
 
     const zeiten = [
@@ -1109,6 +1110,11 @@ function abschlussdrucken() {
     ].filter(([, m]) => m > 0)
      .map(([l, m]) => `<span>${l}: <strong>${zeitFormatieren(m)}</strong></span>`)
      .join("&nbsp;&nbsp;·&nbsp;&nbsp;");
+
+    const nmRuderText = Object.entries(ab.stat.nmRuder || {})
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, nm]) => `<span>${name}: <strong>${nm} nm</strong></span>`)
+        .join("&nbsp;&nbsp;·&nbsp;&nbsp;");
 
     const eventZeilen = ab.events.map(ev => {
         const w   = ev.weather;
@@ -1125,6 +1131,7 @@ function abschlussdrucken() {
             <td>${w ? w.description  || "" : ""}</td>
             <td>${ev.note || ""}</td>
             <td>${pos}</td>
+            <td>${ev.pos != null ? (ev.pos.sog ?? "") : ""}</td>
         </tr>`;
     }).join("") || `<tr><td colspan="11" style="text-align:center;color:#666;font-style:italic;padding:6mm">Keine Ereignisse</td></tr>`;
 
@@ -1138,6 +1145,8 @@ function abschlussdrucken() {
             </div>
             <div class="adp-meta-row">Crew: ${crewText}</div>
             ${zeiten ? `<div class="adp-zeiten">${zeiten}</div>` : ""}
+            ${nmRuderText ? `<div class="adp-zeiten">Seemeilen pro Rudergänger: ${nmRuderText}</div>` : ""}
+            ${ab.notes ? `<div class="adp-notizen"><strong>Notizen:</strong> ${ab.notes}</div>` : ""}
         </div>
         <table class="adp-tabelle">
             <thead><tr>
