@@ -2148,3 +2148,115 @@ button:active { opacity: 0.75; }
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 .live-sog-tooltip::before { display: none; }
+
+
+/* === Sonnenmodus ================================================= */
+
+.btn-sonnenmodus {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #e2e8f0;
+    color: #334155;
+    border: none;
+    cursor: pointer;
+}
+
+body.sonnenmodus {
+    background: #0d1b2e;
+    color: #ffffff;
+}
+
+body.sonnenmodus header {
+    background: linear-gradient(135deg, #0a1628 0%, #0d2444 100%);
+    border-bottom: 2px solid #1e90ff;
+}
+
+body.sonnenmodus header h1 { color: #ffffff; font-size: 1.3rem; }
+body.sonnenmodus header p  { color: #93c5fd; font-size: 0.95rem; }
+
+body.sonnenmodus .card {
+    background: #132036;
+    border: 1px solid #1e3a5f;
+}
+
+body.sonnenmodus input,
+body.sonnenmodus select,
+body.sonnenmodus textarea {
+    background: #0d1b2e;
+    color: #ffffff;
+    border-color: #1e3a5f;
+}
+
+body.sonnenmodus .tab-nav { background: #132036; }
+body.sonnenmodus .tab-btn { color: #93c5fd; font-size: 1rem; font-weight: 700; }
+body.sonnenmodus .tab-btn.tab-aktiv { background: #1e4976; color: #fff; }
+
+body.sonnenmodus .btn-primary { background: linear-gradient(135deg, #1e4976, #0369a1); color: #fff; }
+body.sonnenmodus .btn-secondary { background: #1e3a5f; color: #e2e8f0; }
+body.sonnenmodus .btn-export { background: #1e3a5f; color: #e2e8f0; }
+
+/* Logbuch-Status-Zeile – große lesbare Werte */
+body.sonnenmodus .logbuch-sticky { background: #0a1628; border-top: 2px solid #1e3a5f; }
+body.sonnenmodus .logbuch-status {
+    background: #132036;
+    border-color: #1e3a5f;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+}
+body.sonnenmodus #ls-modus { color: #60d4f8; font-size: 1.05rem; }
+body.sonnenmodus #ls-seit  { color: #fbbf24; font-size: 1.05rem; }
+body.sonnenmodus .ls-sep   { color: #1e3a5f; }
+
+/* Schnell-Buttons – größere Schrift, höherer Kontrast */
+body.sonnenmodus .btn-schnell-card {
+    background: #1e3a5f;
+    color: #93c5fd;
+    border-color: #2563eb;
+    font-size: 1rem;
+    font-weight: 800;
+    min-height: 60px;
+}
+body.sonnenmodus .btn-schnell-card:disabled { background: #0d1b2e; color: #334155; }
+body.sonnenmodus .btn-schnell-sm {
+    background: #1e3a5f;
+    color: #cbd5e1;
+    border-color: #2563eb;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+body.sonnenmodus .btn-weitere-card { background: #132036; color: #94a3b8; }
+body.sonnenmodus .schnell-weitere  { background: #0d1b2e; }
+body.sonnenmodus .weitere-label    { color: #475569; }
+
+/* Züstand-Buttons (Segeln / Motor) */
+body.sonnenmodus .btn-zustand { background: #132036; color: #93c5fd; border-color: #1e3a5f; font-size: 1rem; font-weight: 800; min-height: 54px; }
+body.sonnenmodus .btn-zustand-aktiv { background: linear-gradient(135deg, #14532d, #16a34a); color: #fff; }
+body.sonnenmodus .btn-zustand[id="btn-zustand-motor"].btn-zustand-aktiv { background: linear-gradient(135deg, #7c2d12, #ea580c); color: #fff; }
+
+/* Stopzustand-Buttons (Anlegen / Ankern / An Boje) */
+body.sonnenmodus .btn-anlegen { background: #059669; }
+body.sonnenmodus .btn-ankern  { background: #334155; }
+body.sonnenmodus .btn-an-boje { background: #4338ca; }
+
+/* Log-Einträge */
+body.sonnenmodus .event-item        { background: #132036; }
+body.sonnenmodus .event-time-label  { color: #93c5fd; font-size: 0.95rem; font-weight: 700; }
+body.sonnenmodus .event-note-text   { color: #64748b; }
+
+/* Sidebar */
+body.sonnenmodus .sidebar     { background: #0d1b2e; }
+body.sonnenmodus .sidebar-btn { color: #cbd5e1; font-size: 1rem; font-weight: 700; }
+body.sonnenmodus .sidebar-btn.sidebar-aktiv { color: #60d4f8; background: #0a1628; border-left-color: #60d4f8; }
+
+/* Versionszeile */
+body.sonnenmodus #version-label { color: #475569; }
+body.sonnenmodus .backup-status { color: #475569; }
+body.sonnenmodus .btn-sonnenmodus { background: #fbbf24; color: #0d1b2e; }
+
+/* Übersicht / Listen */
+body.sonnenmodus .tu-main { background: #132036; color: #e2e8f0; }
+body.sonnenmodus .tu-item { border-color: #1e3a5f; }
+body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border-color: #1e3a5f; }

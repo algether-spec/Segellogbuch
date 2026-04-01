@@ -1902,6 +1902,23 @@ function tabInhaltToggeln() {
 }
 
 
+/* --- Sonnenmodus ------------------------------------------------ */
+
+function sonnenmodusToggle() {
+    const aktiv = document.body.classList.toggle("sonnenmodus");
+    localStorage.setItem("segel_sonnenmodus", aktiv ? "1" : "0");
+    const btn = document.getElementById("btn-sonnenmodus");
+    if (btn) btn.textContent = aktiv ? "🌙" : "☀️";
+}
+
+(function () {
+    if (localStorage.getItem("segel_sonnenmodus") === "1") {
+        document.body.classList.add("sonnenmodus");
+        const btn = document.getElementById("btn-sonnenmodus");
+        if (btn) btn.textContent = "🌙";
+    }
+})();
+
 /* --- Event Listener --------------------------------------------- */
 
 btnNeuerToern.onclick    = neuerToernAnlegen;
