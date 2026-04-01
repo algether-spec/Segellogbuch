@@ -38,6 +38,7 @@
             <button type="button" class="sidebar-btn" data-seite="tab-sicherheit" onclick="seitenWechseln('tab-sicherheit')">🛟 Sicherheit</button>
             <button type="button" class="sidebar-btn" data-seite="tab-kontrolle" onclick="seitenWechseln('tab-kontrolle')">✅ Tageskontrolle</button>
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
+            <button type="button" class="sidebar-btn" data-seite="tab-trackliste" onclick="seitenWechseln('tab-trackliste')">📍 Trackliste</button>
             <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
             <button type="button" class="sidebar-btn" data-seite="tab-einstellungen" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
         </nav>
@@ -448,6 +449,30 @@
         </div>
 
     </div><!-- /tab-statistik -->
+
+    <!-- ═══ Trackliste ════════════════════════════════════════════ -->
+    <div id="tab-trackliste" class="tab-panel tab-hidden">
+        <div class="seite-header">
+            <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
+            <h1 class="seite-titel">📍 Trackliste</h1>
+        </div>
+        <div id="trackliste-leer" class="tab-leer">
+            <p>⬆ Bitte zuerst einen Törn auswählen.</p>
+        </div>
+        <div id="trackliste-inhalt" hidden>
+            <div class="card">
+                <div id="trackliste-info" class="trackliste-info"></div>
+                <div class="ab-tabelle-wrap">
+                    <table class="ab-tabelle">
+                        <thead><tr>
+                            <th>#</th><th>Zeit</th><th>Lat</th><th>Lon</th><th>SOG kn</th>
+                        </tr></thead>
+                        <tbody id="trackliste-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div><!-- /tab-trackliste -->
 
     <!-- ═══ Einstellungen ══════════════════════════════════════════ -->
     <div id="tab-einstellungen" class="tab-panel tab-hidden">

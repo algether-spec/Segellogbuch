@@ -994,6 +994,40 @@ function toernStatistikRendern(stat) {
 }
 
 
+/* --- Trackliste ------------------------------------------------- */
+
+function tracklisteRendern(toern) {
+    const leer   = document.getElementById("trackliste-leer");
+    const inhalt = document.getElementById("trackliste-inhalt");
+    const body   = document.getElementById("trackliste-body");
+    const info   = document.getElementById("trackliste-info");
+
+    if (!toern) {
+        leer.hidden = false; inhalt.hidden = true; return;
+    }
+    leer.hidden = true; inhalt.hidden = false;
+
+    const pts = (toern.track?.points || []).slice().sort((a, b) => a.zeit < b.zeit ? -1 : 1);
+    const nmGesamt = trackDistanzNm(pts);
+
+    info.textContent = pts.length + " Punkte · " + nmGesamt + " nm gesamt";
+
+    if (!pts.length) {
+        body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;padding:1rem">Keine Track-Punkte vorhanden</td></tr>';
+        return;
+    }
+
+    body.innerHTML = pts.map((p, i) =>
+        `<tr>
+            <td>${i + 1}</td>
+            <td>${p.zeit ? p.zeit.slice(11, 16) : "—"}</td>
+            <td>${p.lat != null ? p.lat.toFixed(4) : "—"}</td>
+            <td>${p.lon != null ? p.lon.toFixed(4) : "—"}</td>
+            <td>${p.sog != null ? p.sog : "—"}</td>
+        </tr>`
+    ).join("");
+}
+
 /* --- Törnabschluss ---------------------------------------------- */
 
 function toernAbschlussBerechnen(toern) {
@@ -1794,7 +1828,7 @@ function hauptTabWechseln(tabId) {
 }
 
 function seitenWechseln(seiteId) {
-    const seitenPanels = ["tab-toern", "tab-crew", "tab-sicherheit", "tab-kontrolle", "tab-statistik", "tab-einstellungen"];
+    const seitenPanels = ["tab-toern", "tab-crew", "tab-sicherheit", "tab-kontrolle", "tab-statistik", "tab-trackliste", "tab-einstellungen"];
     const hauptBereich = document.getElementById("haupt-bereich");
 
     _aktiveSeitenId = seiteId || null;
@@ -1815,6 +1849,9 @@ function seitenWechseln(seiteId) {
         });
         if (seiteId === "tab-statistik" && aktuellerToern) {
             trackKarteRendern(aktuellerToern);
+        }
+        if (seiteId === "tab-trackliste" && aktuellerToern) {
+            tracklisteRendern(aktuellerToern);
         }
         if (seiteId === "tab-sicherheit") {
             sicherheitSeiteAktualisieren();
@@ -1845,7 +1882,7 @@ function tabWechseln(tabId) { seitenWechseln(tabId); }
 
 function tabInhaltToggeln() {
     const aktiv = !!aktuellerToern;
-    ["crew", "logbuch", "log", "karte", "statistik"].forEach(t => {
+    ["crew", "logbuch", "log", "karte", "statistik", "trackliste"].forEach(t => {
         const leer   = document.getElementById("tab-" + t + "-leer");
         const inhalt = document.getElementById("tab-" + t + "-inhalt");
         if (leer)   leer.hidden   = aktiv;

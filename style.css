@@ -1447,6 +1447,12 @@ button:active { opacity: 0.75; }
 
 /* --- Track-Karte ------------------------------------------------ */
 
+.trackliste-info {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
 .track-stat-mini {
     display: flex;
     gap: 16px;
