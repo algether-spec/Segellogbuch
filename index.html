@@ -600,6 +600,10 @@ if ("serviceWorker" in navigator) {
         window.location.reload();
     });
 }
+/* Cache-Busting-Parameter nach Update-Reload entfernen */
+if (window.location.search.startsWith("?v=")) {
+    history.replaceState(null, "", window.location.pathname);
+}
 updateButtonInit();
 autoUpdatePruefen();
 setInterval(autoUpdatePruefen, 30000);

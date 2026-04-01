@@ -3,7 +3,7 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "2.5.38";
+const APP_VERSION = "2.5.39";
 
 function updateButtonInit() {
     const btn = document.getElementById("btn-update");
@@ -54,6 +54,6 @@ async function updateErzwingen() {
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(r => r.unregister()));
     }
-    /* 3. Neu laden – alle Dateien kommen frisch vom Server */
-    location.reload(true);
+    /* 3. Neu laden mit Cache-Busting-URL – erzwingt Netzwerk-Fetch auf iOS/Android */
+    window.location.replace(window.location.pathname + "?v=" + Date.now());
 }
