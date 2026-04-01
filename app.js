@@ -887,6 +887,30 @@ function minutenAusPaaren(events, startTyp, endTyp) {
     return Math.round(minuten);
 }
 
+function nmProRudergaenger(toern) {
+    const pts = (toern.track?.points || []).slice().sort((a, b) => a.zeit < b.zeit ? -1 : 1);
+    const events = (toern.events || [])
+        .filter(e => e.rudergaenger?.name && evZeitIso(e))
+        .sort((a, b) => evZeitIso(a) < evZeitIso(b) ? -1 : 1);
+    if (!pts.length || !events.length) return {};
+    const kmMap = {};
+    for (let i = 1; i < pts.length; i++) {
+        const p = pts[i - 1];
+        let aktRuder = null;
+        for (const ev of events) {
+            if (evZeitIso(ev) <= p.zeit) aktRuder = ev.rudergaenger.name;
+            else break;
+        }
+        if (!aktRuder) continue;
+        kmMap[aktRuder] = (kmMap[aktRuder] || 0) + haversineKm(p.lat, p.lon, pts[i].lat, pts[i].lon);
+    }
+    const nmMap = {};
+    for (const [name, km] of Object.entries(kmMap)) {
+        nmMap[name] = parseFloat((km * 0.539957).toFixed(1));
+    }
+    return nmMap;
+}
+
 function toernStatistikBerechnen(toern) {
     const events = toern.events || [];
 
@@ -903,7 +927,8 @@ function toernStatistikBerechnen(toern) {
         unterSegel: segelMin,
         mitMotor:   motorMin,
         anker:      minutenAusPaaren(events, "Ankersetzen", "Anker auf"),
-        hafen:      minutenAusPaaren(events, "Ankunft",    "Abfahrt")
+        hafen:      minutenAusPaaren(events, "Ankunft",    "Abfahrt"),
+        nmRuder:    nmProRudergaenger(toern)
     };
 }
 
@@ -938,6 +963,13 @@ function toernStatistikRendern(stat) {
           ).join("")
         : "";
 
+    const nmRuderEintraege = Object.entries(stat.nmRuder || {})
+        .sort((a, b) => b[1] - a[1]);
+    const nmRuderZeilen = nmRuderEintraege
+        .map(([name, nm]) =>
+            `<li><span class="stat-typ">${name}</span><span class="stat-anz">${nm} nm</span></li>`)
+        .join("");
+
     toernStatistik.innerHTML = `
         <div class="card stat-card">
             <h2>📊 Statistik</h2>
@@ -951,6 +983,11 @@ function toernStatistikRendern(stat) {
                 <div class="stat-block">
                     <div class="stat-block-title">Zeiten</div>
                     <ul class="stat-liste">${zeitZeilen}</ul>
+                </div>` : ""}
+                ${nmRuderZeilen ? `
+                <div class="stat-block">
+                    <div class="stat-block-title">Seemeilen pro Rudergänger</div>
+                    <ul class="stat-liste">${nmRuderZeilen}</ul>
                 </div>` : ""}
             </div>
         </div>`;
