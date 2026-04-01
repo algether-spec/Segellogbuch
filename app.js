@@ -1847,9 +1847,6 @@ function seitenWechseln(seiteId) {
             const p = document.getElementById(id);
             if (p) p.classList.toggle("tab-hidden", id !== seiteId);
         });
-        if (seiteId === "tab-statistik" && aktuellerToern) {
-            trackKarteRendern(aktuellerToern);
-        }
         if (seiteId === "tab-trackliste" && aktuellerToern) {
             tracklisteRendern(aktuellerToern);
         }
