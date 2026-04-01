@@ -1238,6 +1238,7 @@ function toernSpeichernAktion() {
     autoBackupSpeichern();
     backupStatusAktualisieren();
     toernSelectAktualisieren();
+    tabInhaltToggeln();
     btnToernLoeschen.hidden = false;
     statusSetzen("Törn gespeichert.", "ok");
 }
@@ -1650,6 +1651,9 @@ function hamburgerKlick() {
     if (_aktiveSeitenId) {
         seitenWechseln(null);
     } else {
+        if (_aktiverHauptTab === "tab-karte") {
+            hauptTabWechseln("tab-logbuch");
+        }
         sidebarOeffnen();
     }
 }
