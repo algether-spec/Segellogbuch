@@ -347,3 +347,4 @@ jeder GPS-Position aufgerufen (Hook via `typeof`-Guard).
 | `segel_track_distanz`            | Track-Auflösung in nm (0.05/0.1/0.2/0.3/0.4/0.5) |
 | `segel_sog_schwelle`             | SOG-Schwelle für GPS-Jitter-Filter (kn)       |
 | `segel_track_intervall`          | Fallback-Intervall in Sekunden (30–180)       |
+| `segel_track_accuracy`           | Max. GPS-Ungenauigkeit in Metern (25/50/100/200) |

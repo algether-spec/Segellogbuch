@@ -486,6 +486,15 @@
                 </select>
             </div>
             <div class="einstellung-zeile">
+                <label class="einstellung-label" for="track-accuracy-select">Max. GPS Ungenauigkeit</label>
+                <select id="track-accuracy-select" class="einstellung-select" onchange="trackAccuracySpeichern(parseFloat(this.value))">
+                    <option value="25">25 m (sehr genau)</option>
+                    <option value="50">50 m (genau)</option>
+                    <option value="100">100 m (Standard)</option>
+                    <option value="200">200 m (tolerant)</option>
+                </select>
+            </div>
+            <div class="einstellung-zeile">
                 <label class="einstellung-label" for="sog-schwelle-select">GPS-Jitter-Filter (SOG)</label>
                 <select id="sog-schwelle-select" class="einstellung-select" onchange="sogSchwelleSpeichern(parseFloat(this.value))">
                     <option value="0.05">0,05 kn</option>

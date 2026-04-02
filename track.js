@@ -64,6 +64,21 @@ function trackIntervallLaden() {
     return [30, 60, 90, 120, 150, 180].includes(v) ? v : 120;
 }
 
+function trackAccuracyLaden() {
+    const v = parseFloat(localStorage.getItem("segel_track_accuracy"));
+    return [25, 50, 100, 200].includes(v) ? v : 100;
+}
+
+function trackAccuracySpeichern(m) {
+    localStorage.setItem("segel_track_accuracy", String(m));
+    trackAccuracySelectAktualisieren();
+}
+
+function trackAccuracySelectAktualisieren() {
+    const sel = document.getElementById("track-accuracy-select");
+    if (sel) sel.value = String(trackAccuracyLaden());
+}
+
 function trackIntervallSpeichern(sek) {
     localStorage.setItem("segel_track_intervall", String(sek));
     trackIntervallSelectAktualisieren();
@@ -120,6 +135,9 @@ function _trackWatchCallback(pos) {
         trackStoppen();
         return;
     }
+
+    /* GPS-Accuracy-Filter: Position zu ungenau → ignorieren */
+    if (pos.coords.accuracy > trackAccuracyLaden()) return;
 
     const sogMs = pos.coords.speed;
     const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : null;
