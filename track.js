@@ -223,10 +223,6 @@ async function _wakeLockAnfordern() {
         _wakeLock.addEventListener("release", () => {
             _wakeLock = null;
             trackStatusAnzeigen(_watchId !== null);
-            /* iOS gibt Wake Lock manchmal frei – sofort neu anfordern wenn noch aktiv */
-            if (_watchId !== null && document.visibilityState === "visible") {
-                setTimeout(() => _wakeLockAnfordern(), 500);
-            }
         });
     } catch (_) {
         _wakeLock = null;
@@ -247,6 +243,13 @@ document.addEventListener("visibilitychange", () => {
         _wakeLockAnfordern();
     }
 });
+
+/* Periodischer Check: Wake Lock alle 30s neu anfordern falls verloren (iOS-Schutz) */
+setInterval(() => {
+    if (_watchId !== null && _wakeLock === null && document.visibilityState === "visible") {
+        _wakeLockAnfordern();
+    }
+}, 30000);
 
 /* --- trackStoppen ----------------------------------------------- */
 
