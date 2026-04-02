@@ -220,7 +220,14 @@ async function _wakeLockAnfordern() {
     }
     try {
         _wakeLock = await navigator.wakeLock.request("screen");
-        _wakeLock.addEventListener("release", () => { _wakeLock = null; trackStatusAnzeigen(_watchId !== null); });
+        _wakeLock.addEventListener("release", () => {
+            _wakeLock = null;
+            trackStatusAnzeigen(_watchId !== null);
+            /* iOS gibt Wake Lock manchmal frei – sofort neu anfordern wenn noch aktiv */
+            if (_watchId !== null && document.visibilityState === "visible") {
+                setTimeout(() => _wakeLockAnfordern(), 500);
+            }
+        });
     } catch (_) {
         _wakeLock = null;
     }
