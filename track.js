@@ -146,8 +146,10 @@ function _trackWatchCallback(pos) {
         ? (Date.now() - new Date(_letzterPkt.zeit + "Z").getTime()) / 1000
         : Infinity;
 
-    /* SOG bekannt und unter Schwelle → keine Bewegung, Punkt überspringen */
-    if (sogVerfuegbar && sogKn <= sogSchwelleLaden()) {
+    /* Bewegungslos: SOG bekannt+niedrig UND kaum Distanz UND innerhalb Intervall */
+    const steht = sogVerfuegbar && sogKn <= sogSchwelleLaden()
+                  && distM < 20 && alterSek < intervall;
+    if (steht) {
         trackStatusAnzeigen(true);
         if (typeof livePositionAktualisieren === "function") {
             livePositionAktualisieren(newLat, newLon, sogKn);
@@ -155,7 +157,6 @@ function _trackWatchCallback(pos) {
         return;
     }
 
-    /* SOG nicht verfügbar: Distanz-/Intervall-Fallback */
     if (distM >= minDistM || alterSek >= intervall) {
         _trackPunktSpeichern(newLat, newLon, sogKn, lokalZeitIso());
     }
