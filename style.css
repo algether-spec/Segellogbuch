@@ -522,6 +522,26 @@ button:active { opacity: 0.75; }
     box-shadow: 0 1px 6px rgba(0,0,0,0.06);
 }
 
+.letzte-trackpunkte {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 8px 14px;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+.ltp-zeile {
+    font-family: monospace;
+    letter-spacing: 0.02em;
+}
+
 .ls-sep {
     color: #cbd5e1;
     font-weight: 400;
@@ -1894,6 +1914,7 @@ button:active { opacity: 0.75; }
     .btn-rudergaenger:active { background: #1e293b; color: #e2e8f0; }
 
     .logbuch-status { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    .letzte-trackpunkte { background: #1e293b; border-color: #334155; color: #64748b; }
     .ls-sep         { color: #334155; }
     .ls-ruder-select { color: #64748b; text-decoration-color: #334155; }
 
@@ -2206,6 +2227,7 @@ body.sonnenmodus .logbuch-status {
     font-size: 1rem;
     font-weight: 700;
 }
+body.sonnenmodus .letzte-trackpunkte { background: #132036; border-color: #1e3a5f; color: #64748b; }
 body.sonnenmodus #ls-modus { color: #60d4f8; font-size: 1.05rem; }
 body.sonnenmodus #ls-seit  { color: #fbbf24; font-size: 1.05rem; }
 body.sonnenmodus .ls-sep   { color: #1e3a5f; }

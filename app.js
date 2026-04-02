@@ -757,7 +757,26 @@ function zeigeLogs() {
     toernAbschlussRendern(toernAbschlussBerechnen(aktuellerToern));
     logbuchStatusAktualisieren();
     logVorschauAktualisieren();
+    letzteTrackPunkteZeigen();
     requestAnimationFrame(() => window.scrollTo(0, _scrollY));
+}
+
+function letzteTrackPunkteZeigen() {
+    const el = document.getElementById("letzte-trackpunkte");
+    if (!el) return;
+    const pts = (aktuellerToern?.track?.points || [])
+        .slice()
+        .sort((a, b) => a.zeit < b.zeit ? -1 : 1)
+        .slice(-5)
+        .reverse();
+    if (!pts.length) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = pts.map(p => {
+        const zeit = p.zeit ? p.zeit.slice(11, 19) : "—";
+        const sog  = p.sog != null ? p.sog + " kn" : "— kn";
+        const acc  = p.accuracy != null ? "±" + Math.round(p.accuracy) + " m" : "—";
+        return `<span class="ltp-zeile">${zeit} · ${sog} · ${acc}</span>`;
+    }).join("");
 }
 
 function logVorschauAktualisieren() {

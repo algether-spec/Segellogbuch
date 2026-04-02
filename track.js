@@ -100,11 +100,12 @@ function trackStatusAnzeigen(aktiv) {
 
 /* --- Internen Punkt speichern ------------------------------------ */
 
-function _trackPunktSpeichern(lat, lon, sog, zeitIso) {
+function _trackPunktSpeichern(lat, lon, sog, zeitIso, accuracy = null) {
     if (!aktuellerToern) return;
     if (!aktuellerToern.track)        aktuellerToern.track = {};
     if (!aktuellerToern.track.points) aktuellerToern.track.points = [];
     const pkt = { lat, lon, sog, zeit: zeitIso };
+    if (accuracy != null) pkt.accuracy = Math.round(accuracy);
     aktuellerToern.track.points.push(pkt);
     aktuellerToern.track.points.sort((a, b) => a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0);
     _letzterPkt = pkt;
@@ -176,7 +177,7 @@ function _trackWatchCallback(pos) {
     }
 
     if (distM >= minDistM || alterSek >= intervall) {
-        _trackPunktSpeichern(newLat, newLon, sogKn, lokalZeitIso());
+        _trackPunktSpeichern(newLat, newLon, sogKn, lokalZeitIso(), pos.coords.accuracy ?? null);
     }
     trackStatusAnzeigen(true);
     if (typeof livePositionAktualisieren === "function") {
