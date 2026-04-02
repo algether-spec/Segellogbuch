@@ -441,7 +441,7 @@ function logbuchStatusAktualisieren() {
     const sogEl    = document.getElementById("ls-sog");
     if (sogWrap && sogEl) {
         if (mitSog) {
-            sogEl.textContent = "🚀 " + (mitSog.pos.sog ?? 0) + " kn SOG";
+            sogEl.textContent = "🚀 " + (mitSog.pos.sog != null ? mitSog.pos.sog : "—") + " kn SOG";
             sogWrap.hidden = false;
         } else {
             sogWrap.hidden = true;
@@ -2426,7 +2426,7 @@ function livePositionAktualisieren(lat, lon, sogKn) {
         _liveCircle.setLatLng([lat, lon]);
     }
 
-    _liveMarker.bindTooltip(sogKn + " kn", {
+    _liveMarker.bindTooltip((sogKn != null ? sogKn : "—") + " kn", {
         permanent: true,
         direction: "top",
         offset: [0, -12],

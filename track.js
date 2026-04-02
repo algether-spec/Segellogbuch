@@ -122,11 +122,11 @@ function _trackWatchCallback(pos) {
     }
 
     const sogMs = pos.coords.speed;
-    const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : 0;
+    const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : null;
     const sogVerfuegbar = sogMs != null;
 
     /* enableHighAccuracy dynamisch anpassen: Neustart bei SOG-Schwelle */
-    const neueHighAcc = sogKn > 3;
+    const neueHighAcc = (sogKn ?? 0) > 3;
     if (neueHighAcc !== _highAcc) {
         _highAcc = neueHighAcc;
         navigator.geolocation.clearWatch(_watchId);
