@@ -1518,22 +1518,23 @@ button:active { opacity: 0.75; }
 
 .haupt-tab-btn {
     flex: 1;
-    padding: 8px 4px;
-    border: none;
-    background: transparent;
-    color: #64748b;
+    padding: 12px 8px;
+    border: 2px solid #a8c8ee;
+    background: #deeaf8;
+    color: #1a6fc4;
     font-size: 13px;
     font-weight: 600;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
     min-height: 40px;
 }
 
 .haupt-tab-btn.haupt-tab-aktiv {
-    background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 100%);
-    color: #fff;
-    box-shadow: 0 2px 6px rgba(26,58,92,0.3);
+    background: #1a6fc4;
+    border-color: #1a6fc4;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(26,111,196,0.3);
 }
 
 .haupt-karte {
@@ -1591,7 +1592,8 @@ button:active { opacity: 0.75; }
     .track-karte      { border-color: #334155; }
     .haupt-karte      { border-color: #334155; }
     .haupt-tab-nav    { background: #1e293b; }
-    .haupt-tab-btn    { color: #94a3b8; }
+    .haupt-tab-btn    { background: #1e3a5f; border-color: #2d5a8e; color: #7db8e8; }
+    .haupt-tab-btn.haupt-tab-aktiv { background: #1a6fc4; border-color: #1a6fc4; color: #fff; }
     .track-tabelle th { background: #1e293b; border-color: #334155; color: #94a3b8; }
     .track-tabelle td { border-color: #334155; color: #cbd5e1; }
     .track-tabelle tbody tr:nth-child(even) td { background: #0f172a; }
