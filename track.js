@@ -123,6 +123,7 @@ function _trackWatchCallback(pos) {
 
     const sogMs = pos.coords.speed;
     const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : 0;
+    const sogVerfuegbar = sogMs != null;
 
     /* enableHighAccuracy dynamisch anpassen: Neustart bei SOG-Schwelle */
     const neueHighAcc = sogKn > 3;
@@ -145,14 +146,18 @@ function _trackWatchCallback(pos) {
         ? (Date.now() - new Date(_letzterPkt.zeit + "Z").getTime()) / 1000
         : Infinity;
 
-    /* SOG = 0: nur Fallback speichern */
-    if (sogKn <= sogSchwelleLaden() && alterSek < intervall) {
+    /* SOG bekannt und unter Schwelle → keine Bewegung, Punkt überspringen */
+    if (sogVerfuegbar && sogKn <= sogSchwelleLaden()) {
         trackStatusAnzeigen(true);
+        if (typeof livePositionAktualisieren === "function") {
+            livePositionAktualisieren(newLat, newLon, sogKn);
+        }
         return;
     }
 
+    /* SOG nicht verfügbar: Distanz-/Intervall-Fallback */
     if (distM >= minDistM || alterSek >= intervall) {
-        _trackPunktSpeichern(newLat, newLon, sogKn, new Date().toISOString().slice(0, 19));
+        _trackPunktSpeichern(newLat, newLon, sogKn, lokalZeitIso());
     }
     trackStatusAnzeigen(true);
     if (typeof livePositionAktualisieren === "function") {
