@@ -697,15 +697,20 @@ button:active { opacity: 0.75; }
 .btn-rudergaenger {
     width: 100%;
     min-height: 44px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    background: transparent;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #fff;
     color: #64748b;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 500;
     border: 1px solid #cbd5e1;
     cursor: pointer;
-    text-align: left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     transition: background 0.15s, color 0.15s;
     white-space: nowrap;
 }

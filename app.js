@@ -401,7 +401,7 @@ function logbuchStatusAktualisieren() {
     const mitRuder  = [...events].reverse().find(e => e.rudergaenger?.name);
     const aktRuder  = mitRuder ? mitRuder.rudergaenger.name : "";
     const btnRuder  = document.getElementById("btn-rudergaenger");
-    if (btnRuder) btnRuder.textContent = aktRuder ? "👤 " + aktRuder : "👤 —";
+    if (btnRuder) btnRuder.textContent = aktRuder ? "👤 Rudergänger: " + aktRuder : "👤 Rudergänger: —";
 
     /* Wind aus letztem Eintrag mit Winddaten – Fallback auf last_values */
     const mitWind   = [...events].reverse().find(e =>
