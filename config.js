@@ -3,7 +3,7 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "2.5.50";
+const APP_VERSION = "2.5.51";
 
 function updateButtonInit() {
     const btn = document.getElementById("btn-update");
@@ -54,14 +54,6 @@ async function updateErzwingen() {
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(r => r.unregister()));
     }
-    /* 3. HTTP-Cache aller kritischen Dateien erzwingen (iOS Safari Fix) */
-    await Promise.allSettled([
-        fetch("config.js",   { cache: "reload" }),
-        fetch("app.js",      { cache: "reload" }),
-        fetch("storage.js",  { cache: "reload" }),
-        fetch("track.js",    { cache: "reload" }),
-        fetch("index.html",  { cache: "reload" }),
-    ]);
-    /* 4. Neu laden mit Cache-Busting-URL */
+    /* 3. Neu laden mit Cache-Busting-URL – erzwingt Netzwerk-Fetch auf iOS/Android */
     window.location.replace(window.location.pathname + "?v=" + Date.now());
 }
