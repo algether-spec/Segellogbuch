@@ -244,12 +244,12 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-/* Periodischer Check: Wake Lock alle 30s neu anfordern falls verloren (iOS-Schutz) */
+/* Periodischer Check: Wake Lock alle 5s neu anfordern falls verloren (iOS-Schutz) */
 setInterval(() => {
     if (_watchId !== null && _wakeLock === null && document.visibilityState === "visible") {
         _wakeLockAnfordern();
     }
-}, 30000);
+}, 5000);
 
 /* --- trackStoppen ----------------------------------------------- */
 
