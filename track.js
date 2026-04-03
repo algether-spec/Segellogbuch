@@ -188,7 +188,7 @@ function trackStarten() {
     _watchId = navigator.geolocation.watchPosition(
         _trackWatchCallback,
         () => { trackStatusAnzeigen(false); },  /* GPS-Fehler: Status ausblenden */
-        { maximumAge: 30000, timeout: 10000, enableHighAccuracy: true }
+        { maximumAge: 0, timeout: 15000, enableHighAccuracy: true }
     );
     _startBoost = true;
     if (_startBoostTimer) clearTimeout(_startBoostTimer);

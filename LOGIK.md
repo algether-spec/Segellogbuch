@@ -234,10 +234,12 @@ Gültige Werte: `[30, 60, 90, 120, 150, 180]` s, Standard: `120` s.
 ### watchPosition-Optionen
 
 ```js
-{ maximumAge: 30000, timeout: 10000, enableHighAccuracy: true }
+{ maximumAge: 0, timeout: 15000, enableHighAccuracy: true }
 ```
 
 `enableHighAccuracy` ist fix auf `true` gesetzt.
+`maximumAge: 0` erzwingt immer einen frischen GPS-Fix.
+`timeout: 15000` gibt Android genug Zeit für einen neuen Fix.
 
 ### Manöverpunkte: trackManöverPunkt()
 
