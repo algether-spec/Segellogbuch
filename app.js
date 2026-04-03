@@ -2649,6 +2649,7 @@ function trackLoeschen() {
     aktuellerToern.track.points = [];
     toernSpeichern(aktuellerToern);
     karteTabRendern(aktuellerToern);
+    letzteTrackPunkteZeigen();
     statusSetzen("🗑 Track gelöscht.", "ok", 2000);
 }
 
