@@ -39,6 +39,7 @@
             <button type="button" class="sidebar-btn" data-seite="tab-kontrolle" onclick="seitenWechseln('tab-kontrolle')">✅ Tageskontrolle</button>
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
             <button type="button" class="sidebar-btn" data-seite="tab-trackliste" onclick="seitenWechseln('tab-trackliste')">📍 Trackliste</button>
+            <button type="button" class="sidebar-btn" onclick="trackCsvExportieren(); sidebarSchliessen()">📥 Track als CSV exportieren</button>
             <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
             <button type="button" class="sidebar-btn" data-seite="tab-einstellungen" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
         </nav>
@@ -439,6 +440,7 @@
 <div id="toern-abschluss"></div>
             <button type="button" id="btn-csv-export"      class="btn-export">⬇ Export CSV</button>
             <button type="button" id="btn-json-export"     class="btn-export">💾 Backup JSON</button>
+            <button type="button" id="btn-track-csv-export" class="btn-export">📥 Track als CSV exportieren</button>
             <button type="button" id="btn-drucken"         class="btn-export">🖨 Drucken / PDF</button>
             <button type="button" id="btn-abschluss-druck" class="btn-export">📋 Törnabschluss / PDF</button>
         </div>
@@ -618,10 +620,10 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="storage.js?v=2.5.60"></script>
-<script src="config.js?v=2.5.60"></script>
-<script src="track.js?v=2.5.60"></script>
-<script src="app.js?v=2.5.60"></script>
+<script src="storage.js?v=2.5.61"></script>
+<script src="config.js?v=2.5.61"></script>
+<script src="track.js?v=2.5.61"></script>
+<script src="app.js?v=2.5.61"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");

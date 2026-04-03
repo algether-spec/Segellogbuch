@@ -1478,6 +1478,27 @@ function csvExportieren() {
 }
 
 
+function trackCsvExportieren() {
+    if (!aktuellerToern) return;
+    const pts = (aktuellerToern.track?.points || []).slice().sort((a, b) => a.zeit < b.zeit ? -1 : 1);
+    if (!pts.length) { statusSetzen("Keine Track-Punkte vorhanden.", "error", 3000); return; }
+    const kopfzeile = "zeit,lat,lon,sog_kn,accuracy_m";
+    const zeilen = pts.map(p =>
+        [p.zeit, p.lat, p.lon, p.sog ?? "", p.accuracy ?? ""].join(",")
+    );
+    const inhalt = "\uFEFF" + [kopfzeile, ...zeilen].join("\r\n");
+    const blob = new Blob([inhalt], { type: "text/csv;charset=utf-8;" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    const datum = new Date().toISOString().slice(0, 10);
+    const name  = (aktuellerToern.tripName || "Toern").replace(/[^a-zA-Z0-9äöüÄÖÜß_-]/g, "_");
+    a.href     = url;
+    a.download = "track_" + name + "_" + datum + ".csv";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+
 /* --- Schnellbuttons --------------------------------------------- */
 
 function gpsUndWetterHolen(timeoutMs) {
@@ -1947,10 +1968,11 @@ btnCrewAdd.onclick        = crewHinzufuegen;
 btnLogSpeichern.onclick   = logEintragSpeichern;
 const _btnAbs = document.getElementById("btn-abschliessen");
 if (_btnAbs) _btnAbs.onclick = toernAbschliessenAktion;
-document.getElementById("btn-csv-export").onclick      = csvExportieren;
-document.getElementById("btn-json-export").onclick     = exportJSON;
-document.getElementById("btn-drucken").onclick         = druckenVorbereiten;
-document.getElementById("btn-abschluss-druck").onclick = abschlussdrucken;
+document.getElementById("btn-csv-export").onclick       = csvExportieren;
+document.getElementById("btn-json-export").onclick      = exportJSON;
+document.getElementById("btn-track-csv-export").onclick = trackCsvExportieren;
+document.getElementById("btn-drucken").onclick          = druckenVorbereiten;
+document.getElementById("btn-abschluss-druck").onclick  = abschlussdrucken;
 
 btnNeuerLog.onclick = () => {
     logZeitVorbefuellen();
