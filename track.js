@@ -7,7 +7,6 @@
 
 let _watchId     = null;   /* watchPosition-Handle (null = nicht aktiv) */
 let _letzterPkt  = null;   /* letzter gespeicherter Track-Punkt         */
-let _highAcc     = false;  /* aktuell verwendete enableHighAccuracy-Mode */
 let _wakeLock    = null;   /* WakeLock-Sentinel (null = nicht aktiv)    */
 let _speicherTimer = null; /* Debounce-Timer für toernSpeichern()       */
 let _sogSchwelle   = 0.1; /* SOG-Jitter-Filter-Schwelle in Knoten      */
@@ -144,16 +143,6 @@ function _trackWatchCallback(pos) {
     const sogKn = sogMs != null ? parseFloat((sogMs * 1.94384).toFixed(1)) : null;
     const sogVerfuegbar = sogMs != null;
 
-    /* enableHighAccuracy dynamisch anpassen: Neustart bei SOG-Schwelle */
-    const neueHighAcc = (sogKn ?? 0) > 3;
-    if (neueHighAcc !== _highAcc) {
-        _highAcc = neueHighAcc;
-        navigator.geolocation.clearWatch(_watchId);
-        _watchId = null;
-        trackStarten();
-        return;
-    }
-
     const newLat   = parseFloat(pos.coords.latitude.toFixed(5));
     const newLon   = parseFloat(pos.coords.longitude.toFixed(5));
     const intervall = _startBoost ? 10 : trackIntervallLaden();
@@ -199,7 +188,7 @@ function trackStarten() {
     _watchId = navigator.geolocation.watchPosition(
         _trackWatchCallback,
         () => { trackStatusAnzeigen(false); },  /* GPS-Fehler: Status ausblenden */
-        { maximumAge: 30000, timeout: 10000, enableHighAccuracy: _highAcc }
+        { maximumAge: 30000, timeout: 10000, enableHighAccuracy: true }
     );
     _startBoost = true;
     if (_startBoostTimer) clearTimeout(_startBoostTimer);
@@ -259,7 +248,6 @@ function trackStoppen() {
         _watchId = null;
     }
     _letzterPkt = null;
-    _highAcc    = false;
     if (_startBoostTimer) { clearTimeout(_startBoostTimer); _startBoostTimer = null; }
     _startBoost = false;
     _wakeLockFreigeben();

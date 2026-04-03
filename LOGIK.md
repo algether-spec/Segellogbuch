@@ -171,10 +171,8 @@ Track-Aufzeichnung ist in **`track.js`** ausgelagert (ab v2.5.0).
 ### Zustands-Variablen (track.js)
 
 ```js
-let _watchId = null; /* watchPosition-Handle (null = nicht aktiv)  */
-let _letzterPkt =
-  null; /* letzter gespeicherter Punkt (für Distanz/Zeit-Check) */
-let _highAcc = false; /* aktuell verwendete enableHighAccuracy-Einstellung */
+let _watchId    = null; /* watchPosition-Handle (null = nicht aktiv)  */
+let _letzterPkt = null; /* letzter gespeicherter Punkt (für Distanz/Zeit-Check) */
 ```
 
 ### Ablauf
@@ -190,8 +188,6 @@ FAHRT beginnt
   _trackWatchCallback(pos) bei jeder neuen GPS-Position:
     → Zustand prüfen: nicht "fahrt" → trackStoppen()
     → sogKn berechnen
-    → enableHighAccuracy-Modus prüfen (> 3 kn → true):
-        bei Wechsel: clearWatch, _watchId = null, trackStarten() (Neustart)
     → SOG ≤ sogSchwelleLaden() kn und alterSek < 180 → kein Punkt, return (GPS-Jitter-Filter)
     → distM >= minDistM ODER alterSek >= trackIntervallLaden() → _trackPunktSpeichern()
 
@@ -238,15 +234,10 @@ Gültige Werte: `[30, 60, 90, 120, 150, 180]` s, Standard: `120` s.
 ### watchPosition-Optionen
 
 ```js
-{ maximumAge: 30000, timeout: 10000, enableHighAccuracy: _highAcc }
+{ maximumAge: 30000, timeout: 10000, enableHighAccuracy: true }
 ```
 
-`enableHighAccuracy` wird dynamisch angepasst:
-
-- SOG ≤ 3 kn → `false` (Akku sparen)
-- SOG > 3 kn → `true` (Genauigkeit erhöhen)
-
-Bei Wechsel wird `clearWatch()` + `trackStarten()` aufgerufen.
+`enableHighAccuracy` ist fix auf `true` gesetzt.
 
 ### Manöverpunkte: trackManöverPunkt()
 
