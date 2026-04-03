@@ -212,6 +212,10 @@ async function _wakeLockAnfordern() {
         _wakeLock.addEventListener("release", () => {
             _wakeLock = null;
             trackStatusAnzeigen(_watchId !== null);
+            /* Sofort neu anfordern falls Fahrt noch aktiv */
+            if (_watchId !== null && document.visibilityState === "visible" && stoppZustandLaden() === "fahrt") {
+                _wakeLockAnfordern();
+            }
         });
     } catch (_) {
         _wakeLock = null;
@@ -228,17 +232,17 @@ function _wakeLockFreigeben() {
 
 /* visibilitychange: Wake Lock bei App-Rückkehr neu anfordern */
 document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && _watchId !== null && _wakeLock === null) {
+    if (document.visibilityState === "visible" && _watchId !== null && _wakeLock === null && stoppZustandLaden() === "fahrt") {
         _wakeLockAnfordern();
     }
 });
 
-/* Periodischer Check: Wake Lock alle 5s neu anfordern falls verloren (iOS-Schutz) */
+/* Periodischer Check: Wake Lock alle 3 min erneuern falls verloren */
 setInterval(() => {
-    if (_watchId !== null && _wakeLock === null && document.visibilityState === "visible") {
+    if (_watchId !== null && _wakeLock === null && document.visibilityState === "visible" && stoppZustandLaden() === "fahrt") {
         _wakeLockAnfordern();
     }
-}, 5000);
+}, 180000);
 
 /* --- trackStoppen ----------------------------------------------- */
 
