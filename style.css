@@ -2337,3 +2337,17 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
     font-weight: 700;
     color: #1a3a5c;
 }
+
+/* --- Rudergänger Shake ------------------------------------------ */
+
+@keyframes rudergaenger-shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+
+.btn-rudergaenger-shake {
+    animation: rudergaenger-shake 0.4s ease-in-out;
+}

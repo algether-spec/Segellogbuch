@@ -1563,6 +1563,15 @@ function validierungsWarnung(meldung) {
     setTimeout(() => toast.remove(), 3000);
 }
 
+function rudergaengerButtonShake() {
+    const btn = document.getElementById("btn-rudergaenger");
+    if (!btn) return;
+    btn.classList.remove("btn-rudergaenger-shake");
+    void btn.offsetWidth; /* Reflow – Animation neu starten */
+    btn.classList.add("btn-rudergaenger-shake");
+    setTimeout(() => btn.classList.remove("btn-rudergaenger-shake"), 500);
+}
+
 /* --- Notiz-Popup ------------------------------------------------- */
 
 let _pendingNote        = "";
@@ -1727,6 +1736,12 @@ async function schnellEintragSpeichern(typ) {
     const letzte  = ladeLetzteWerte() || {};
     const ruder   = letzte.rudergaenger || "";
     const zeitIso = lokalZeitIso();
+
+    if (!ruder) {
+        validierungsWarnung("Bitte zuerst Rudergänger auswählen");
+        rudergaengerButtonShake();
+        return;
+    }
 
     /* Ladeanzeige im Logbuch-Card unten */
     logLadeStatusSetzen("⏳ GPS + Wind…", 3500);
