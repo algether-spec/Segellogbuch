@@ -16,6 +16,7 @@ body {
 .app {
     max-width: 680px;
     margin: 0 auto;
+    padding-bottom: 110px;
 }
 
 /* --- Header ----------------------------------------------------- */
@@ -910,8 +911,6 @@ button:active { opacity: 0.75; }
 .btn-mob-float span { font-size: 12px; font-weight: 900; letter-spacing: 1px; }
 .btn-mob-float:active { opacity: 0.85; }
 
-/* Abstand damit Content nicht unter MOB-Button endet */
-.app { padding-bottom: 96px; }
 
 /* --- Update-Hinweis --------------------------------------------- */
 
