@@ -524,8 +524,6 @@
         </div>
     </div><!-- /tab-einstellungen -->
 
-    <!-- version-label: für JS (config.js) – ausgeblendet -->
-    <span id="version-label" hidden></span>
 
 </div><!-- /app -->
 
@@ -536,10 +534,7 @@
     </div>
     <button type="button" id="btn-sonnenmodus" class="btn-sonnenmodus" onclick="sonnenmodusToggle()">☀️</button>
     <div class="bottom-bar-mitte">
-        <div class="bottom-bar-zeile1">
-            <button type="button" id="btn-update" class="btn-update" onclick="updateErzwingen()"></button>
-            <span id="backup-status" class="backup-status"></span>
-        </div>
+        <span id="version-label" class="bottom-bar-version"></span>
         <span class="bottom-bar-autor">Al.Gether</span>
     </div>
     <button type="button" id="btn-mob" class="btn-mob-float">
@@ -623,10 +618,10 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="storage.js?v=2.5.66"></script>
-<script src="config.js?v=2.5.66"></script>
-<script src="track.js?v=2.5.66"></script>
-<script src="app.js?v=2.5.66"></script>
+<script src="storage.js?v=2.5.67"></script>
+<script src="config.js?v=2.5.67"></script>
+<script src="track.js?v=2.5.67"></script>
+<script src="app.js?v=2.5.67"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");

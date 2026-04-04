@@ -3,13 +3,11 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "2.5.66";
+const APP_VERSION = "2.5.67";
 
 function updateButtonInit() {
-    const btn = document.getElementById("btn-update");
-    if (btn) btn.textContent = "v" + APP_VERSION;
     const lbl = document.getElementById("version-label");
-    if (lbl) lbl.textContent = "v" + APP_VERSION + " · von Al.Gether";
+    if (lbl) lbl.textContent = "v" + APP_VERSION;
 }
 
 async function autoUpdatePruefen() {
@@ -18,15 +16,14 @@ async function autoUpdatePruefen() {
         const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
-        const btn = document.getElementById("btn-update");
-        if (!btn) return;
+        const lbl = document.getElementById("version-label");
+        if (!lbl) return;
         if (data.version && data.version !== APP_VERSION) {
-            btn.textContent = "🔄 Update " + data.version;
-            btn.classList.add("btn-update-available");
+            lbl.textContent = "🔄 Update " + data.version;
+            lbl.classList.add("update-verfuegbar");
             updateHinweisZeigen(data.version);
         } else {
-            btn.textContent = "v" + APP_VERSION;
-            btn.classList.remove("btn-update-available");
+            lbl.classList.remove("update-verfuegbar");
         }
     } catch { /* kein Netz – kein Problem */ }
 }

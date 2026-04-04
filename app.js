@@ -2323,14 +2323,17 @@ function toernAbschliessenAktion() {
 /* --- Auto-Backup ------------------------------------------------ */
 
 function backupStatusAktualisieren() {
-    const el = document.getElementById("backup-status");
+    const el = document.getElementById("version-label");
     if (!el) return;
     const backup = backupLaden();
-    if (!backup || !backup.timestamp) { el.textContent = ""; return; }
-    const d = new Date(backup.timestamp);
     const pad = n => String(n).padStart(2, "0");
+    if (!backup || !backup.timestamp) {
+        el.textContent = "v" + APP_VERSION;
+        return;
+    }
+    const d = new Date(backup.timestamp);
     const zeit = pad(d.getHours()) + ":" + pad(d.getMinutes());
-    el.textContent = "💾 " + zeit;
+    el.textContent = "v" + APP_VERSION + " · 💾 " + zeit;
 }
 
 function backupBannerPruefen() {

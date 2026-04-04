@@ -934,13 +934,6 @@ button:active { opacity: 0.75; }
     pointer-events: none;
 }
 
-.bottom-bar-zeile1 {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #64748b;
-}
 
 .bottom-bar-autor {
     font-size: 10px;
@@ -1085,30 +1078,16 @@ button:active { opacity: 0.75; }
     gap: 10px;
 }
 
-#version-label {
+.bottom-bar-version {
     font-size: 12px;
-    color: #94a3b8;
-}
-
-.backup-status {
-    font-size: 12px;
-    color: #64748b;
-}
-
-.btn-update {
-    font-size: 12px;
-    font-weight: 400;
-    padding: 0;
-    background: none;
-    border: none;
     color: #64748b;
     cursor: pointer;
     pointer-events: auto;
 }
 
-.btn-update-available {
-    background: #059669;
-    color: #fff;
+.bottom-bar-version.update-verfuegbar {
+    color: #059669;
+    font-weight: 600;
     animation: pulse-green 1.5s infinite;
 }
 
