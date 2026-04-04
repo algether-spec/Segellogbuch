@@ -524,26 +524,29 @@
         </div>
     </div><!-- /tab-einstellungen -->
 
-    <!-- Versionszeile -->
-    <div class="version-bar">
-        <span id="version-label">v1.5.3 · von Al.Gether</span>
-        <span id="backup-status" class="backup-status"></span>
-        <button type="button" id="btn-sonnenmodus" class="btn-sonnenmodus" onclick="sonnenmodusToggle()">☀️</button>
-        <button type="button" id="btn-update" class="btn-update" onclick="updateErzwingen()"></button>
-    </div>
+    <!-- version-label: für JS (config.js) – ausgeblendet -->
+    <span id="version-label" hidden></span>
 
 </div><!-- /app -->
 
-<!-- Status-Badge (floating, oben rechts) -->
-<div id="btn-fahrt-status" class="btn-fahrt-status btn-fahrt-stopp">
-    <span id="btn-fahrt-status-text">STOPP</span>
+<!-- Fixe Leiste unten -->
+<div class="bottom-bar">
+    <div id="btn-fahrt-status" class="btn-fahrt-status btn-fahrt-stopp">
+        <span id="btn-fahrt-status-text">STOPP</span>
+    </div>
+    <button type="button" id="btn-sonnenmodus" class="btn-sonnenmodus" onclick="sonnenmodusToggle()">☀️</button>
+    <div class="bottom-bar-mitte">
+        <div class="bottom-bar-zeile1">
+            <button type="button" id="btn-update" class="btn-update" onclick="updateErzwingen()"></button>
+            <span id="backup-status" class="backup-status"></span>
+        </div>
+        <span class="bottom-bar-autor">Al.Gether</span>
+    </div>
+    <button type="button" id="btn-mob" class="btn-mob-float">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M9 8h6l-1 6"/><path d="M4 19c2-3 4.5-2 8-1s6 2 8-2"/><line x1="12" y1="14" x2="10" y2="19"/></svg>
+        <span>MOB</span>
+    </button>
 </div>
-
-<!-- MOB-Button (floating, immer sichtbar) -->
-<button type="button" id="btn-mob" class="btn-mob-float">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M9 8h6l-1 6"/><path d="M4 19c2-3 4.5-2 8-1s6 2 8-2"/><line x1="12" y1="14" x2="10" y2="19"/></svg>
-    <span>MOB</span>
-</button>
 
 <!-- Druckbereich (nur beim Drucken sichtbar) -->
 <div id="druck-bereich"></div>
@@ -620,10 +623,10 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="storage.js?v=2.5.63"></script>
-<script src="config.js?v=2.5.63"></script>
-<script src="track.js?v=2.5.63"></script>
-<script src="app.js?v=2.5.63"></script>
+<script src="storage.js?v=2.5.64"></script>
+<script src="config.js?v=2.5.64"></script>
+<script src="track.js?v=2.5.64"></script>
+<script src="app.js?v=2.5.64"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
