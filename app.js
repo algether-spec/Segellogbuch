@@ -2836,3 +2836,76 @@ async function testdatenLaden() {
         statusSetzen("❌ Testdaten konnten nicht geladen werden: " + e.message, "error", 5000);
     }
 }
+
+/* --- Daten Export / Import -------------------------------------- */
+
+function datenExportierenDialog() {
+    const overlay = document.getElementById("export-dialog-overlay");
+    if (overlay) overlay.hidden = false;
+}
+
+function exportDialogSchliessen() {
+    const overlay = document.getElementById("export-dialog-overlay");
+    if (overlay) overlay.hidden = true;
+}
+
+function _jsonDownload(data, dateiname) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = dateiname;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function datenExportAktivToern() {
+    exportDialogSchliessen();
+    if (!aktuellerToern) { statusSetzen("Kein aktiver Törn.", "error", 3000); return; }
+    const datum = new Date().toISOString().slice(0, 10);
+    const name  = (aktuellerToern.tripName || "Toern").replace(/[^a-zA-Z0-9äöüÄÖÜß_-]/g, "_");
+    _jsonDownload({ toerns: [aktuellerToern] }, "segellogbuch_" + name + "_" + datum + ".json");
+}
+
+function datenExportAlle() {
+    exportDialogSchliessen();
+    const datum = new Date().toISOString().slice(0, 10);
+    _jsonDownload({ toerns: alleToernsLaden() }, "segellogbuch_alle_" + datum + ".json");
+}
+
+function datenImportieren() {
+    const input = document.getElementById("import-file-input");
+    if (input) { input.value = ""; input.click(); }
+}
+
+function datenImportVerarbeiten(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            /* Array von Törns oder { toerns: [...] } */
+            const toerns = Array.isArray(data) ? data
+                         : Array.isArray(data.toerns) ? data.toerns
+                         : null;
+            if (!toerns) { statusSetzen("❌ Ungültiges Format.", "error", 4000); return; }
+
+            if (toerns.length > 1 || !aktuellerToern) {
+                /* Mehrere Törns → Bestätigung ob alles ersetzt wird */
+                if (!confirm("Alle bestehenden Daten ersetzen? (" + toerns.length + " Törns werden importiert)")) return;
+                speichereToerns(toerns);
+                window.location.reload();
+            } else {
+                /* Einzelner Törn → hinzufügen */
+                const alle = alleToernsLaden();
+                alle.push(toerns[0]);
+                speichereToerns(alle);
+                window.location.reload();
+            }
+        } catch (err) {
+            statusSetzen("❌ Import fehlgeschlagen: " + err.message, "error", 5000);
+        }
+    };
+    reader.readAsText(file);
+}

@@ -41,6 +41,8 @@
             <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
             <button type="button" class="sidebar-btn" data-seite="tab-trackliste" onclick="seitenWechseln('tab-trackliste')">📍 Trackliste</button>
             <button type="button" class="sidebar-btn" onclick="trackCsvExportieren(); sidebarSchliessen()">📥 Track als CSV exportieren</button>
+            <button type="button" class="sidebar-btn" onclick="datenExportierenDialog(); sidebarSchliessen()">📤 Daten exportieren</button>
+            <button type="button" class="sidebar-btn" onclick="datenImportieren(); sidebarSchliessen()">📥 Daten importieren</button>
             <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
             <button type="button" class="sidebar-btn" data-seite="tab-einstellungen" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
         </nav>
@@ -528,6 +530,19 @@
 
 </div><!-- /app -->
 
+<!-- Export-Dialog -->
+<div id="export-dialog-overlay" class="export-dialog-overlay" hidden onclick="exportDialogSchliessen()">
+    <div class="export-dialog" onclick="event.stopPropagation()">
+        <h3>📤 Daten exportieren</h3>
+        <button type="button" class="btn-primary" onclick="datenExportAktivToern()">Aktiver Törn</button>
+        <button type="button" class="btn-secondary" onclick="datenExportAlle()">Alle Törns</button>
+        <button type="button" class="btn-secondary" onclick="exportDialogSchliessen()">Abbrechen</button>
+    </div>
+</div>
+
+<!-- Import File-Input (versteckt) -->
+<input type="file" id="import-file-input" accept=".json" style="display:none" onchange="datenImportVerarbeiten(event)">
+
 <!-- Fixe Leiste unten -->
 <div class="bottom-bar">
     <div id="btn-fahrt-status" class="btn-fahrt-status btn-fahrt-stopp">
@@ -618,10 +633,10 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="storage.js?v=2.5.69"></script>
-<script src="config.js?v=2.5.69"></script>
-<script src="track.js?v=2.5.69"></script>
-<script src="app.js?v=2.5.69"></script>
+<script src="storage.js?v=2.5.70"></script>
+<script src="config.js?v=2.5.70"></script>
+<script src="track.js?v=2.5.70"></script>
+<script src="app.js?v=2.5.70"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");

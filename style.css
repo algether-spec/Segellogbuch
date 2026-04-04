@@ -2307,3 +2307,33 @@ body.sonnenmodus .bottom-bar-autor { color: #475569; }
 body.sonnenmodus .tu-main { background: #132036; color: #e2e8f0; }
 body.sonnenmodus .tu-item { border-color: #1e3a5f; }
 body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border-color: #1e3a5f; }
+
+/* --- Export-Dialog ---------------------------------------------- */
+
+.export-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.export-dialog {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px 20px;
+    width: min(320px, 90vw);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.export-dialog h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a3a5c;
+}
