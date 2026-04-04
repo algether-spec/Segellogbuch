@@ -2330,7 +2330,7 @@ function backupStatusAktualisieren() {
     const d = new Date(backup.timestamp);
     const pad = n => String(n).padStart(2, "0");
     const zeit = pad(d.getHours()) + ":" + pad(d.getMinutes());
-    el.textContent = "💾 Zuletzt gesichert: " + zeit;
+    el.textContent = "💾 " + zeit;
 }
 
 function backupBannerPruefen() {

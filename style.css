@@ -1092,15 +1092,13 @@ button:active { opacity: 0.75; }
 }
 
 .btn-update {
-    font-size: 13px;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: #e2e8f0;
-    color: #334155;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 0;
+    background: none;
+    color: #64748b;
     cursor: pointer;
     border: none;
-    transition: background 0.2s, color 0.2s;
 }
 
 .btn-update-available {
