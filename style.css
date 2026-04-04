@@ -36,8 +36,12 @@ header {
 .header-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
+}
+
+.header-titel {
+    flex: 1;
+    text-align: center;
 }
 
 header h1 {
@@ -2191,13 +2195,18 @@ button:active { opacity: 0.75; }
 /* === Sonnenmodus ================================================= */
 
 .btn-sonnenmodus {
-    font-size: 28px;
+    font-size: 24px;
     background: none;
     border: none;
-    padding: 0;
+    padding: 0 8px;
     cursor: pointer;
     line-height: 1;
     flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 body.sonnenmodus {
