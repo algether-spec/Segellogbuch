@@ -3,7 +3,8 @@
    Logik und UI-Steuerung
 ====================== */
 
-let aktuellerToern = null;
+let aktuellerToern      = null;
+let _trackAnzeigeTimer  = null;
 
 /* --- DOM-Elemente ----------------------------------------------- */
 
@@ -332,8 +333,16 @@ function hafenSperrungAktualisieren(stopp) {
 
     /* Wende/Halse/Reffen-Zustand immer aktualisieren, Track je nach Status */
     zustandAktualisieren();
-    if (!istStopp) trackStarten();
-    else { trackStoppen(); liveMarkerEntfernen(); }
+    if (!istStopp) {
+        trackStarten();
+        clearInterval(_trackAnzeigeTimer);
+        _trackAnzeigeTimer = setInterval(letzteTrackPunkteZeigen, 15000);
+    } else {
+        trackStoppen();
+        liveMarkerEntfernen();
+        clearInterval(_trackAnzeigeTimer);
+        _trackAnzeigeTimer = null;
+    }
 
     /* Statusleiste: Modus-Text überschreiben wenn gestoppt */
     const modus = document.getElementById("ls-modus");
