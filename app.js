@@ -1746,49 +1746,55 @@ async function schnellEintragSpeichern(typ) {
         return;
     }
 
-    /* Ladeanzeige im Logbuch-Card unten */
-    logLadeStatusSetzen("⏳ GPS + Wind…", 3500);
+    /* _pendingNote vor Schritt 1 sichern */
+    const note = _pendingNote;
+    _pendingNote = "";
 
-    /* GPS + frisches Wetter mit 3s Timeout */
-    const gps = await gpsUndWetterHolen(3000);
-
+    /* 1. Event sofort erstellen — ohne GPS/Wetter */
     const ev = {
         id:           generateId(),
         type:         typ,
         kategorie:    kategorieFuerTyp(typ),
         antrieb:      antriebFuerTyp(typ),
         zeit:         zeitIso,
-        ort:          gps?.ort || "",
+        ort:          "",
         rudergaenger: ruder ? { name: ruder } : null,
-        note:         _pendingNote,
-        weather:      gps?.weather || null
+        note:         note,
+        weather:      null,
+        pos:          null
     };
-    _pendingNote = "";
-    if (gps) ev.pos = { lat: gps.lat, lon: gps.lon, sog: gps.sog };
 
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
 
-    /* GPS-Position des Events als Manöver-Punkt in track.js speichern */
-    if (ev.pos) trackManöverPunkt(ev.pos.lat, ev.pos.lon, ev.pos.sog, zeitIso);
-
-    /* Stopp-Zustand VOR zeigeLogs speichern – sonst liest UI alten Zustand */
-    if (STOPP_EREIGNISSE[typ])      stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
+    /* 2. Stopp-Zustand sofort setzen */
+    if (STOPP_EREIGNISSE[typ])          stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
     else if (START_EREIGNISSE.has(typ)) stoppZustandSpeichern("fahrt");
 
-    if (gps?.weather) speichereLetzteWerte(String(gps.weather.windKnots), ruder);
-    else              speichereLetzteWerte("", ruder);
+    /* 3. UI sofort aktualisieren */
+    zeigeLogs();
 
+    /* 4. Sofort speichern */
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
-    zeigeLogs();
 
     if (typ === "MOB") {
         statusSetzen("🆘 MOB – Mann über Bord! Zeit: " + ev.zeit.slice(11, 16), "error", 10000);
     } else {
         logLadeStatusSetzen("✅ " + typ + " gespeichert.", 2000);
     }
+
+    /* 5. GPS/Wetter nachträglich (fire-and-forget) */
+    gpsUndWetterHolen(3000).then(gps => {
+        if (!gps) return;
+        ev.pos     = { lat: gps.lat, lon: gps.lon, sog: gps.sog };
+        ev.weather = gps.weather || null;
+        ev.ort     = gps.ort || "";
+        if (ev.pos) trackManöverPunkt(ev.pos.lat, ev.pos.lon, ev.pos.sog, ev.zeit);
+        if (gps.weather) speichereLetzteWerte(String(gps.weather.windKnots), ruder);
+        toernSpeichern(aktuellerToern);
+    }).catch(() => {});
 }
 
 

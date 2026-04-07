@@ -10,7 +10,7 @@ falsche Zustände oder defektes Tracking verursachen.
 | `zustandAktualisieren()`       | app.js | Segeln/Motor-Buttons visuell aktualisieren          |
 | `hafenSperrungAktualisieren()` | app.js | FAHRT/STOPP-Zustand auf UI anwenden                 |
 | `stoppZustandSpeichern()`      | app.js | Fahrt-Zustand in localStorage + Törn schreiben      |
-| `schnellEintragSpeichern()`    | app.js | Schnellbutton → GPS → Event → Speichern             |
+| `schnellEintragSpeichern()`    | app.js | Schnellbutton → Event sofort + GPS nachträglich      |
 | `gpsAbfragen()`                | app.js | GPS-Position asynchron holen und in Event schreiben |
 | `stoppZustandLaden()`          | app.js | Fahrt-Zustand aus localStorage lesen                |
 
@@ -41,16 +41,22 @@ Ankern         → "anker"    (STOPP_EREIGNISSE)
 An Boje        → "boje"     (STOPP_EREIGNISSE)
 ```
 
-**Aufrufkette nach jedem Event-Save:**
+**Aufrufkette nach jedem Event-Save (Optimistic Update seit v2.5.73-dev):**
 
 ```
 schnellEintragSpeichern(typ)
-  → stoppZustandSpeichern(neuerZustand)
-  → zeigeLogs()
+  → ev sofort erstellen (pos: null, weather: null, ort: "")
+  → stoppZustandSpeichern(neuerZustand)   ← sofort
+  → zeigeLogs()                           ← sofort, UI reagiert ohne Wartezeit
     → logbuchStatusAktualisieren()
       → hafenSperrungAktualisieren(stoppZustandLaden())
         → zustandAktualisieren()
         → trackStarten() ODER trackStoppen()
+  → toernSpeichern()                      ← sofort
+  → gpsUndWetterHolen(3000).then(...)     ← fire-and-forget, nachträglich
+      → ev.pos / ev.weather / ev.ort setzen
+      → trackManöverPunkt()
+      → toernSpeichern()                  ← nach GPS-Antwort
 ```
 
 ### Motor/Segeln-Zustand
