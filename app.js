@@ -1311,8 +1311,10 @@ function toernLaden(tripId) {
     stoppZustandSpeichern(toern.stoppZustand || "hafen");
     hafenSperrungAktualisieren(toern.stoppZustand || "hafen");
     speichereAktivenToern(tripId);
-    /* Rudergänger zurücksetzen beim Törn-Wechsel */
-    speichereLetzteWerte((ladeLetzteWerte() || {}).wind || "", "");
+    /* Rudergänger aus Törn-Events laden, Fallback auf last_values */
+    const _lvT = ladeLetzteWerte() || {};
+    const _letzterRuderEv = [...(toern.events || [])].reverse().find(e => e.rudergaenger?.name);
+    speichereLetzteWerte(_lvT.wind || "", _letzterRuderEv ? _letzterRuderEv.rudergaenger.name : (_lvT.rudergaenger || ""));
     /* Logbuch + Log direkt initialisieren (kein Tab-Wechsel mehr nötig) */
     logZeitVorbefuellen();
     tabInhaltToggeln();
@@ -1325,8 +1327,9 @@ function toernLaden(tripId) {
 function neuerToernAnlegen() {
     trackStoppen();
     aktuellerToern = neuerToern();
-    /* Rudergänger zurücksetzen – kein Vorausfüllen aus altem Törn */
-    speichereLetzteWerte((ladeLetzteWerte() || {}).wind || "", "");
+    /* Rudergänger aus last_values beibehalten */
+    const _lvN = ladeLetzteWerte() || {};
+    speichereLetzteWerte(_lvN.wind || "", _lvN.rudergaenger || "");
     formularFuellen(aktuellerToern);
     formSection.hidden = false;
     btnToernLoeschen.hidden = true;
