@@ -9,11 +9,12 @@ Nach jeder Codeänderung automatisch:
 
 Keine Rückfrage – direkt ausführen nach jeder Änderung.
 
-## Branch-Strategie
+## Branch-Regeln
 
-- Standard-Branch für alle Änderungen: **dev**
-- Auf **main** wird nur gepusht wenn der Prompt explizit **"merge to main"** enthält
-- Versions-Suffix auf dev: `-dev` — Beispiel: `v2.5.73-dev`
+- Alle Änderungen werden auf **dev** gepusht — NIEMALS auf **main**
+- Push auf **main** NUR wenn der Prompt explizit **"merge to main"** oder **"push to main"** enthält
+- Patch-Version bei dev-Commits mit `-dev` Suffix — Beispiel: `v2.5.73-dev`
+- Vor jedem Push prüfen: `git branch` — sicherstellen dass **dev** aktiv ist
 - Merge zu main: Version ohne `-dev` Suffix, dann `git checkout main && git merge dev && git push && git checkout dev`
 
 ## Geschützte Funktionen (nie ändern ohne explizite Anweisung)
