@@ -1,0 +1,144 @@
+{
+  "toerns": [
+    {
+      "tripId": "adria001test",
+      "tripName": "Adria – Split nach Hvar",
+      "startDate": "2026-03-23",
+      "startTime": "07:30",
+      "endDate": "2026-03-23",
+      "endTime": "14:45",
+      "skipper": "Al.Gether",
+      "crew": [
+        { "id": "crew001", "name": "Maria S.",  "role": "Co-Skipper" },
+        { "id": "crew002", "name": "Thomas B.", "role": "Crew" },
+        { "id": "crew003", "name": "Jana K.",   "role": "Crew" }
+      ],
+      "shipData": {
+        "name": "Adriawind",
+        "type": "Bavaria 38",
+        "registration": "HR-ST-1234",
+        "engine": "Volvo D1-30"
+      },
+      "generalWeather": {
+        "windForce": "4",
+        "windDirection": "NW",
+        "seaState": "leicht",
+        "visibility": "gut",
+        "clouds": "heiter"
+      },
+      "notes": "Schöner Frühlingstag, Bora flaut nachmittags ab.",
+      "stoppZustand": "hafen",
+      "events": [
+        {
+          "id": "ev001", "type": "Ablegen", "kategorie": "Motor",
+          "antrieb": "motor", "zeit": "2026-03-23T07:30",
+          "ort": "Split, ACI Marina",
+          "rudergaenger": { "name": "Al.Gether" },
+          "note": "Liegeplatz B-47 verlassen",
+          "weather": { "windForce": 3, "windKnots": 9.7, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.504, "lon": 16.438, "sog": 0.0 }
+        },
+        {
+          "id": "ev002", "type": "Motor an", "kategorie": "Motor",
+          "antrieb": "motor", "zeit": "2026-03-23T07:35",
+          "ort": "Split Kanal",
+          "rudergaenger": { "name": "Al.Gether" },
+          "note": "",
+          "weather": { "windForce": 3, "windKnots": 9.7, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.498, "lon": 16.441, "sog": 4.2 }
+        },
+        {
+          "id": "ev003", "type": "Segeln", "kategorie": "Segeln",
+          "antrieb": "segeln", "zeit": "2026-03-23T08:10",
+          "ort": "Split Kanal",
+          "rudergaenger": { "name": "Maria S." },
+          "note": "Groß und Genua gesetzt, NW 4",
+          "weather": { "windForce": 4, "windKnots": 13.6, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.460, "lon": 16.443, "sog": 6.1 }
+        },
+        {
+          "id": "ev004", "type": "Ruderwechsel", "kategorie": "Allgemein",
+          "antrieb": "segeln", "zeit": "2026-03-23T09:00",
+          "ort": "",
+          "rudergaenger": { "name": "Thomas B." },
+          "note": "",
+          "weather": { "windForce": 4, "windKnots": 13.6, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.415, "lon": 16.443, "sog": 6.4 }
+        },
+        {
+          "id": "ev005", "type": "Wende", "kategorie": "Segeln",
+          "antrieb": "segeln", "zeit": "2026-03-23T09:30",
+          "ort": "",
+          "rudergaenger": { "name": "Thomas B." },
+          "note": "Wende auf Steuerbordhalse",
+          "weather": { "windForce": 4, "windKnots": 13.6, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.380, "lon": 16.440, "sog": 5.8 }
+        },
+        {
+          "id": "ev006", "type": "Reffen", "kategorie": "Segeln",
+          "antrieb": "segeln", "zeit": "2026-03-23T10:15",
+          "ort": "",
+          "rudergaenger": { "name": "Jana K." },
+          "note": "1. Reff eingebunden, Wind frischt auf",
+          "weather": { "windForce": 5, "windKnots": 18.4, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.310, "lon": 16.442, "sog": 7.2 }
+        },
+        {
+          "id": "ev007", "type": "Halse", "kategorie": "Segeln",
+          "antrieb": "segeln", "zeit": "2026-03-23T11:00",
+          "ort": "",
+          "rudergaenger": { "name": "Al.Gether" },
+          "note": "Kontrollierte Halse vor Hvar",
+          "weather": { "windForce": 5, "windKnots": 18.4, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.245, "lon": 16.441, "sog": 7.0 }
+        },
+        {
+          "id": "ev008", "type": "Motor an", "kategorie": "Motor",
+          "antrieb": "motor", "zeit": "2026-03-23T13:50",
+          "ort": "Hvar Zufahrt",
+          "rudergaenger": { "name": "Al.Gether" },
+          "note": "Segel geborgen, Motor für Einlaufen",
+          "weather": { "windForce": 3, "windKnots": 9.7, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.180, "lon": 16.443, "sog": 3.5 }
+        },
+        {
+          "id": "ev009", "type": "Anlegen", "kategorie": "Motor",
+          "antrieb": "", "zeit": "2026-03-23T14:45",
+          "ort": "Hvar, Stadtkai",
+          "rudergaenger": { "name": "Al.Gether" },
+          "note": "Liegeplatz Stadtkai, Med-Moor",
+          "weather": { "windForce": 2, "windKnots": 5.8, "windDirection": "NW", "description": "" },
+          "pos": { "lat": 43.173, "lon": 16.444, "sog": 0.0 }
+        }
+      ],
+      "track": {
+        "enabled": true,
+        "intervalSeconds": 60,
+        "startedAt": "2026-03-23T07:30",
+        "stoppedAt": "2026-03-23T14:45",
+        "source": "device_gps",
+        "points": [
+          { "lat": 43.5040, "lon": 16.4380, "sog": 0.0, "zeit": "2026-03-23T07:30" },
+          { "lat": 43.4980, "lon": 16.4410, "sog": 4.2, "zeit": "2026-03-23T07:35" },
+          { "lat": 43.4850, "lon": 16.4420, "sog": 4.8, "zeit": "2026-03-23T07:50" },
+          { "lat": 43.4650, "lon": 16.4425, "sog": 5.5, "zeit": "2026-03-23T08:05" },
+          { "lat": 43.4600, "lon": 16.4430, "sog": 6.1, "zeit": "2026-03-23T08:10" },
+          { "lat": 43.4350, "lon": 16.4430, "sog": 6.3, "zeit": "2026-03-23T08:30" },
+          { "lat": 43.4150, "lon": 16.4430, "sog": 6.4, "zeit": "2026-03-23T09:00" },
+          { "lat": 43.3900, "lon": 16.4420, "sog": 6.2, "zeit": "2026-03-23T09:20" },
+          { "lat": 43.3800, "lon": 16.4400, "sog": 5.8, "zeit": "2026-03-23T09:30" },
+          { "lat": 43.3550, "lon": 16.4415, "sog": 6.0, "zeit": "2026-03-23T09:50" },
+          { "lat": 43.3100, "lon": 16.4420, "sog": 7.2, "zeit": "2026-03-23T10:15" },
+          { "lat": 43.2750, "lon": 16.4418, "sog": 7.1, "zeit": "2026-03-23T10:40" },
+          { "lat": 43.2450, "lon": 16.4410, "sog": 7.0, "zeit": "2026-03-23T11:00" },
+          { "lat": 43.2200, "lon": 16.4420, "sog": 6.8, "zeit": "2026-03-23T11:20" },
+          { "lat": 43.2000, "lon": 16.4425, "sog": 6.5, "zeit": "2026-03-23T11:40" },
+          { "lat": 43.1900, "lon": 16.4435, "sog": 5.2, "zeit": "2026-03-23T13:30" },
+          { "lat": 43.1800, "lon": 16.4430, "sog": 3.5, "zeit": "2026-03-23T13:50" },
+          { "lat": 43.1730, "lon": 16.4440, "sog": 0.0, "zeit": "2026-03-23T14:45" }
+        ]
+      }
+    }
+  ],
+  "crew": ["Al.Gether", "Maria S.", "Thomas B.", "Jana K."]
+}
