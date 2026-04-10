@@ -9,6 +9,9 @@ const KEY_AUTOBACKUP      = "segel_logbuch_autobackup";
 const KEY_PERMANENT_BACKUP = "segel_logbuch_backup_permanent";
 const KEY_LETZTE_WERTE    = "last_values";
 const KEY_AKTIVER_TOERN   = "segel_logbuch_aktiver_toern";
+const KEY_STOPP           = "segel_logbuch_stopp";
+const KEY_SONNENMODUS     = "segel_sonnenmodus";
+const KEY_PWA_MIGRATION   = "pwa_migration_done";
 
 
 /* --- Hilfsfunktion ---------------------------------------------- */
@@ -264,3 +267,41 @@ function permanentBackupPruefen() {
         } catch {}
     }
 })();
+
+
+/* --- Fahrt-Zustand ---------------------------------------------- */
+
+function ladeStoppZustand() {
+    /* Rückwärtskompatibel: altes im_hafen-Flag migrieren */
+    if (localStorage.getItem("segel_logbuch_im_hafen") === "true") {
+        localStorage.setItem(KEY_STOPP, "hafen");
+        localStorage.removeItem("segel_logbuch_im_hafen");
+    }
+    return localStorage.getItem(KEY_STOPP) || "hafen";
+}
+
+function speichereStoppZustand(val) {
+    localStorage.setItem(KEY_STOPP, val);
+}
+
+
+/* --- Sonnenmodus ------------------------------------------------ */
+
+function ladeSonnenmodus() {
+    return localStorage.getItem(KEY_SONNENMODUS) === "1";
+}
+
+function speichereSonnenmodus(aktiv) {
+    localStorage.setItem(KEY_SONNENMODUS, aktiv ? "1" : "0");
+}
+
+
+/* --- PWA-Migration ---------------------------------------------- */
+
+function ladeMigrationFlag() {
+    return !!localStorage.getItem(KEY_PWA_MIGRATION);
+}
+
+function speichereMigrationFlag() {
+    localStorage.setItem(KEY_PWA_MIGRATION, "1");
+}
