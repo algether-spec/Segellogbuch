@@ -1341,6 +1341,16 @@ function toernSpeichernAktion() {
     if (!aktuellerToern) return;
     if (!validieren()) return;
     formularLesen();
+    /* Schiffsführer automatisch in Crew eintragen falls noch nicht vorhanden */
+    const skipperName = aktuellerToern.skipper?.trim();
+    if (skipperName) {
+        if (!aktuellerToern.crew) aktuellerToern.crew = [];
+        const bereitsVorhanden = aktuellerToern.crew.some(c => c.name === skipperName);
+        if (!bereitsVorhanden) {
+            aktuellerToern.crew.unshift({ id: generateId(), name: skipperName, role: "Schiffsführer" });
+            crewListeRendern(aktuellerToern.crew);
+        }
+    }
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
