@@ -1240,6 +1240,7 @@ function toernUebersichtRendern() {
         main.className = "tu-main";
         main.innerHTML =
             '<span class="tu-name">' + (t.tripName || "(ohne Name)") + '</span>' +
+            '<span class="tu-meta" style="font-size:10px;opacity:0.45;font-family:monospace">ID: ' + t.tripId + '</span>' +
             '<span class="tu-meta">' + zeitraum + '</span>' +
             '<span class="tu-meta">' + (t.skipper ? '👤 ' + t.skipper : '') + '</span>' +
             '<span class="tu-badge">' + anzahl + ' Ereignis' + (anzahl !== 1 ? 'se' : '') + '</span>';
