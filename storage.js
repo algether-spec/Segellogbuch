@@ -4,7 +4,6 @@
 ====================== */
 
 const KEY_TOERNS          = "segel_logbuch_toerns";
-const KEY_CREW            = "segel_logbuch_crew";
 const KEY_AUTOBACKUP      = "segel_logbuch_autobackup";
 const KEY_PERMANENT_BACKUP = "segel_logbuch_backup_permanent";
 const KEY_LETZTE_WERTE    = "last_values";
@@ -44,19 +43,11 @@ function toernSpeichern(toern) {
     const idx = alle.findIndex(t => t.tripId === toern.tripId);
     idx >= 0 ? alle[idx] = toern : alle.push(toern);
     speichereToerns(alle);
-    /* Crew-Namen dieses Törns in globale Liste übernehmen */
-    const namen = new Set(ladeCrew());
-    (toern.crew || []).forEach(p => { if (p.name) namen.add(p.name); });
-    speichereCrew([...namen]);
 }
 
 function toernLoeschen(tripId) {
     const verbleibend = ladeToerns().filter(t => t.tripId !== tripId);
     speichereToerns(verbleibend);
-    /* Crew-Namen bereinigen: nur Namen behalten die noch in anderen Törns vorkommen */
-    const nochVorhanden = new Set();
-    verbleibend.forEach(t => (t.crew || []).forEach(p => { if (p.name) nochVorhanden.add(p.name); }));
-    speichereCrew([...nochVorhanden]);
 }
 
 function neuerToern() {
@@ -97,29 +88,11 @@ function neuerToern() {
 }
 
 
-/* --- Crew (global) ---------------------------------------------- */
-
-function ladeCrew() {
-    try {
-        const raw = localStorage.getItem(KEY_CREW);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-    } catch { return []; }
-}
-
-function speichereCrew(namen) {
-    const bereinigt = [...new Set(namen.filter(n => typeof n === "string" && n.trim()))];
-    localStorage.setItem(KEY_CREW, JSON.stringify(bereinigt));
-}
-
-
 /* --- Export / Import -------------------------------------------- */
 
 function exportJSON() {
     const data = {
-        toerns: ladeToerns(),
-        crew:   ladeCrew()
+        toerns: ladeToerns()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url  = URL.createObjectURL(blob);
@@ -133,7 +106,6 @@ function exportJSON() {
 function importJSON(data) {
     if (data && Array.isArray(data.toerns)) {
         speichereToerns(data.toerns);
-        if (Array.isArray(data.crew)) speichereCrew(data.crew);
         return data.toerns.length;
     }
     /* Legacy: einfaches Törn-Array (aus altem Format) */
@@ -179,8 +151,7 @@ function autoBackupSpeichern() {
     if (toerns.length === 0) return;
     const backup = {
         timestamp: new Date().toISOString(),
-        toerns,
-        crew: ladeCrew()
+        toerns
     };
     try {
         const json = JSON.stringify(backup);
@@ -198,7 +169,6 @@ function backupLaden() {
 
 function backupWiederherstellen(backup) {
     speichereToerns(backup.toerns);
-    if (Array.isArray(backup.crew)) speichereCrew(backup.crew);
 }
 
 
@@ -210,8 +180,7 @@ function permanentBackupSpeichern() {
     try {
         localStorage.setItem(KEY_PERMANENT_BACKUP, JSON.stringify({
             timestamp: new Date().toISOString(),
-            toerns,
-            crew: ladeCrew()
+            toerns
         }));
     } catch { /* Storage voll */ }
 }
@@ -236,7 +205,6 @@ function permanentBackupPruefen() {
     const backup = permanentBackupLaden();
     if (backup && Array.isArray(backup.toerns) && backup.toerns.length > 0) {
         speichereToerns(backup.toerns);
-        if (Array.isArray(backup.crew)) speichereCrew(backup.crew);
         return true;
     }
     return false;
@@ -256,16 +224,9 @@ function permanentBackupPruefen() {
     if (alt && !localStorage.getItem(KEY_TOERNS)) {
         localStorage.setItem(KEY_TOERNS, alt);
         localStorage.removeItem(altKey);
-        /* Crew-Namen aus alten Törns in globale Liste übernehmen */
-        try {
-            const toerns = JSON.parse(alt);
-            if (Array.isArray(toerns)) {
-                const namen = new Set();
-                toerns.forEach(t => (t.crew || []).forEach(p => { if (p.name) namen.add(p.name); }));
-                if (namen.size) speichereCrew([...namen]);
-            }
-        } catch {}
     }
+    /* Veralteten separaten Crew-Key entfernen */
+    localStorage.removeItem("segel_logbuch_crew");
 })();
 
 
