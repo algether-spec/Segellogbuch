@@ -3,7 +3,7 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "2.5.78-dev";
+const APP_VERSION = "2.5.79-dev";
 
 function updateButtonInit() {
     const lbl = document.getElementById("version-label");
@@ -34,8 +34,9 @@ function updateHinweisZeigen(neueVersion) {
     div.id = "update-hinweis";
     div.className = "update-hinweis";
     div.innerHTML =
-        "<span>⚠️ Update " + neueVersion + " – Backup empfohlen!</span>" +
-        "<button type=\"button\" onclick=\"exportJSON()\">💾 Backup erstellen</button>";
+        "<span>⚠️ Update " + neueVersion + " verfügbar</span>" +
+        "<button type=\"button\" onclick=\"exportJSON()\">💾 Backup</button>" +
+        "<button type=\"button\" onclick=\"updateErzwingen()\">⬆️ Installieren</button>";
     const versionBar = document.querySelector(".version-bar");
     if (versionBar) versionBar.insertAdjacentElement("beforebegin", div);
 }
