@@ -109,10 +109,11 @@ function importJSON(data) {
         : null;
     if (!toerns) throw new Error("Ungültiges Format");
 
-    /* Doppelte tripIds erkennen und neu vergeben */
+    /* Doppelte tripIds erkennen – innerhalb der Datei UND gegen vorhandene Törns */
+    const vorhandeneIds = new Set(ladeToerns().map(t => t.tripId));
     const gesehenIds = new Set();
     toerns.forEach(t => {
-        if (!t.tripId || gesehenIds.has(t.tripId)) {
+        if (!t.tripId || gesehenIds.has(t.tripId) || vorhandeneIds.has(t.tripId)) {
             t.tripId = generateId();
         }
         gesehenIds.add(t.tripId);
