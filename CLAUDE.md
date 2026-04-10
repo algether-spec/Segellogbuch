@@ -2,15 +2,30 @@
 
 ## Versionierung & Deployment
 Nach jeder Codeänderung automatisch:
-1. Patch-Version erhöhen (x.x.N+1) in app.js und sw.js
-2. git add -A
-3. git commit -m "v{neue Version}: {kurze Beschreibung der Änderung}"
+1. Patch-Version erhöhen (x.x.N+1) in config.js, sw.js, version.json und index.html (?v=)
+2. git add (nur geänderte Dateien, kein -A)
+3. git commit (auf Deutsch, Format: typ(bereich): beschreibung + vVersion)
 4. git push
 
 Keine Rückfrage – direkt ausführen nach jeder Änderung.
 
+## Branch-Regeln
+
+- Alle Änderungen werden auf **dev** gepusht — NIEMALS auf **main**
+- Push auf **main** NUR wenn der Prompt explizit **"merge to main"** oder **"push to main"** enthält
+- Patch-Version bei dev-Commits mit `-dev` Suffix — Beispiel: `v2.5.73-dev`
+- Vor jedem Push prüfen: `git branch` — sicherstellen dass **dev** aktiv ist
+- Merge zu main: Version ohne `-dev` Suffix, dann `git checkout main && git merge dev && git push && git checkout dev`
+
 ## Geschützte Funktionen (nie ändern ohne explizite Anweisung)
 Siehe LOGIK.md
+
+## Logikschutz
+
+- Bestehende Logik (Zustandsübergänge, Event-Validierung, Track-Berechnung, GPS-Handling, Update-Mechanismus) wird NIE verändert ohne explizite Aufforderung im Prompt.
+- Bei CSS/UI-Änderungen: nur style.css und index.html (Optik) anfassen — app.js, track.js, storage.js nur wenn der Prompt das explizit fordert.
+- Wenn eine UI-Änderung einen bestehenden Event-Handler, onclick, oder JS-Funktionsaufruf betreffen würde: STOPP — Befund ausgeben und warten. Nicht selbst entscheiden.
+- Wenn ein Element umgebaut wird (z.B. button → span): zuerst prüfen ob darauf Event-Handler registriert sind. Falls ja: Befund ausgeben und warten.
 
 ---
 

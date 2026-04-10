@@ -3,7 +3,7 @@
    Offline-Cache für Segellogbuch
 ====================== */
 
-const CACHE = "segellogbuch-v2.5.72";
+const CACHE = "segellogbuch-v2.5.74-dev";
 
 const ASSETS = [
     "./index.html",
@@ -64,6 +64,6 @@ self.addEventListener("fetch", e => {
 
     /* Alle anderen Assets: Cache-First */
     e.respondWith(
-        caches.match(e.request).then(cached => cached || fetch(e.request))
+        caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => new Response("", { status: 503 })))
     );
 });
