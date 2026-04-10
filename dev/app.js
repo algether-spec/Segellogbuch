@@ -297,16 +297,11 @@ const STOPP_EREIGNISSE = { "Anlegen": "hafen", "Ankern": "anker", "An Boje": "bo
 const START_EREIGNISSE = new Set(["Ablegen", "Anker lichten", "Von Boje"]);
 
 function stoppZustandLaden() {
-    /* Rückwärtskompatibel: altes im_hafen-Flag migrieren */
-    if (localStorage.getItem("segel_logbuch_im_hafen") === "true") {
-        localStorage.setItem("segel_logbuch_stopp", "hafen");
-        localStorage.removeItem("segel_logbuch_im_hafen");
-    }
-    return localStorage.getItem("segel_logbuch_stopp") || "hafen";
+    return ladeStoppZustand();
 }
 
 function stoppZustandSpeichern(val) {
-    localStorage.setItem("segel_logbuch_stopp", val);
+    speichereStoppZustand(val);
     if (aktuellerToern) aktuellerToern.stoppZustand = val;
 }
 
@@ -1979,13 +1974,13 @@ function tabInhaltToggeln() {
 
 function sonnenmodusToggle() {
     const aktiv = document.body.classList.toggle("sonnenmodus");
-    localStorage.setItem("segel_sonnenmodus", aktiv ? "1" : "0");
+    speichereSonnenmodus(aktiv);
     const btn = document.getElementById("btn-sonnenmodus");
     if (btn) btn.textContent = aktiv ? "🌙" : "☀️";
 }
 
 (function () {
-    if (localStorage.getItem("segel_sonnenmodus") === "1") {
+    if (ladeSonnenmodus()) {
         document.body.classList.add("sonnenmodus");
         const btn = document.getElementById("btn-sonnenmodus");
         if (btn) btn.textContent = "🌙";
@@ -2422,7 +2417,7 @@ function pwaMigrationModalZeigen() {
             try {
                 const data   = JSON.parse(e.target.result);
                 const anzahl = importJSON(data);
-                localStorage.setItem("pwa_migration_done", "1");
+                speichereMigrationFlag();
                 document.getElementById("pwa-result").innerHTML =
                     '<p class="migration-ok">✅ ' + anzahl + " Törn" +
                     (anzahl !== 1 ? "s" : "") + " importiert.</p>";
@@ -2440,7 +2435,7 @@ function pwaMigrationModalZeigen() {
     });
 
     document.getElementById("pwa-btn-skip").onclick = () => {
-        localStorage.setItem("pwa_migration_done", "1");
+        speichereMigrationFlag();
         overlay.remove();
     };
 }
@@ -2448,9 +2443,9 @@ function pwaMigrationModalZeigen() {
 function pwaMigrationPruefen() {
     const istPWA = window.matchMedia("(display-mode: standalone)").matches;
     if (!istPWA) return;
-    if (localStorage.getItem("pwa_migration_done")) return;
+    if (ladeMigrationFlag()) return;
     if (ladeToerns().length > 0) {
-        localStorage.setItem("pwa_migration_done", "1");
+        speichereMigrationFlag();
         return;
     }
     pwaMigrationModalZeigen();

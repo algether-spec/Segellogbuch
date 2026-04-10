@@ -9,10 +9,10 @@ falsche Zustände oder defektes Tracking verursachen.
 | ------------------------------ | ------ | --------------------------------------------------- |
 | `zustandAktualisieren()`       | app.js | Segeln/Motor-Buttons visuell aktualisieren          |
 | `hafenSperrungAktualisieren()` | app.js | FAHRT/STOPP-Zustand auf UI anwenden                 |
-| `stoppZustandSpeichern()`      | app.js | Fahrt-Zustand in localStorage + Törn schreiben      |
+| `stoppZustandSpeichern()`      | app.js | Fahrt-Zustand via storage.js + Törn schreiben       |
 | `schnellEintragSpeichern()`    | app.js | Schnellbutton → Event sofort + GPS nachträglich      |
 | `gpsAbfragen()`                | app.js | GPS-Position asynchron holen und in Event schreiben |
-| `stoppZustandLaden()`          | app.js | Fahrt-Zustand aus localStorage lesen                |
+| `stoppZustandLaden()`          | app.js | Fahrt-Zustand via storage.js lesen                  |
 
 ---
 
