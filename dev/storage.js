@@ -104,16 +104,22 @@ function exportJSON() {
 }
 
 function importJSON(data) {
-    if (data && Array.isArray(data.toerns)) {
-        speichereToerns(data.toerns);
-        return data.toerns.length;
-    }
-    /* Legacy: einfaches Törn-Array (aus altem Format) */
-    if (Array.isArray(data)) {
-        speichereToerns(data);
-        return data.length;
-    }
-    throw new Error("Ungültiges Format");
+    const toerns = data && Array.isArray(data.toerns) ? data.toerns
+        : Array.isArray(data) ? data
+        : null;
+    if (!toerns) throw new Error("Ungültiges Format");
+
+    /* Doppelte tripIds erkennen und neu vergeben */
+    const gesehenIds = new Set();
+    toerns.forEach(t => {
+        if (!t.tripId || gesehenIds.has(t.tripId)) {
+            t.tripId = generateId();
+        }
+        gesehenIds.add(t.tripId);
+    });
+
+    speichereToerns(toerns);
+    return toerns.length;
 }
 
 
