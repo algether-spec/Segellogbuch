@@ -2915,21 +2915,35 @@ function datenImportVerarbeiten(event) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            /* Array von Törns oder { toerns: [...] } */
             const toerns = Array.isArray(data) ? data
                          : Array.isArray(data.toerns) ? data.toerns
                          : null;
             if (!toerns) { statusSetzen("❌ Ungültiges Format.", "error", 4000); return; }
 
-            if (toerns.length > 1 || !aktuellerToern) {
-                /* Mehrere Törns → Bestätigung ob alles ersetzt wird */
-                if (!confirm("Alle bestehenden Daten ersetzen? (" + toerns.length + " Törns werden importiert)")) return;
-                speichereToerns(toerns);
+            const vorhandeneIds = new Set(alleToernsLaden().map(t => t.tripId));
+
+            if (toerns.length === 1) {
+                /* Einzelner Törn */
+                const t = toerns[0];
+                if (t.tripId && vorhandeneIds.has(t.tripId)) {
+                    statusSetzen(`⚠️ Törn "${t.tripName || "(ohne Name)"}" ist bereits vorhanden.`, "error", 5000);
+                    return;
+                }
+                const alle = alleToernsLaden();
+                alle.push(t);
+                speichereToerns(alle);
                 window.location.reload();
             } else {
-                /* Einzelner Törn → hinzufügen */
+                /* Mehrere Törns → jeden einzeln prüfen, Duplikate überspringen */
+                const neu = toerns.filter(t => !t.tripId || !vorhandeneIds.has(t.tripId));
+                const duplikate = toerns.length - neu.length;
+                if (neu.length === 0) {
+                    statusSetzen(`⚠️ Alle ${duplikate} Törns bereits vorhanden — nichts importiert.`, "error", 5000);
+                    return;
+                }
+                if (!confirm(neu.length + " Törns importieren" + (duplikate > 0 ? ` (${duplikate} bereits vorhanden, werden übersprungen)` : "") + "?")) return;
                 const alle = alleToernsLaden();
-                alle.push(toerns[0]);
+                neu.forEach(t => alle.push(t));
                 speichereToerns(alle);
                 window.location.reload();
             }
