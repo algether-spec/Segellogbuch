@@ -10,7 +10,7 @@ falsche Zustände oder defektes Tracking verursachen.
 | `zustandAktualisieren()`       | app.js | Segeln/Motor-Buttons visuell aktualisieren          |
 | `hafenSperrungAktualisieren()` | app.js | FAHRT/STOPP-Zustand auf UI anwenden                 |
 | `stoppZustandSpeichern()`      | app.js | Fahrt-Zustand in localStorage + Törn schreiben      |
-| `schnellEintragSpeichern()`    | app.js | Schnellbutton → Event sofort + GPS nachträglich      |
+| `schnellEintragSpeichern()`    | app.js | Schnellbutton → GPS → Event → Speichern             |
 | `gpsAbfragen()`                | app.js | GPS-Position asynchron holen und in Event schreiben |
 | `stoppZustandLaden()`          | app.js | Fahrt-Zustand aus localStorage lesen                |
 
@@ -41,22 +41,16 @@ Ankern         → "anker"    (STOPP_EREIGNISSE)
 An Boje        → "boje"     (STOPP_EREIGNISSE)
 ```
 
-**Aufrufkette nach jedem Event-Save (Optimistic Update seit v2.5.73-dev):**
+**Aufrufkette nach jedem Event-Save:**
 
 ```
 schnellEintragSpeichern(typ)
-  → ev sofort erstellen (pos: null, weather: null, ort: "")
-  → stoppZustandSpeichern(neuerZustand)   ← sofort
-  → zeigeLogs()                           ← sofort, UI reagiert ohne Wartezeit
+  → stoppZustandSpeichern(neuerZustand)
+  → zeigeLogs()
     → logbuchStatusAktualisieren()
       → hafenSperrungAktualisieren(stoppZustandLaden())
         → zustandAktualisieren()
         → trackStarten() ODER trackStoppen()
-  → toernSpeichern()                      ← sofort
-  → gpsUndWetterHolen(3000).then(...)     ← fire-and-forget, nachträglich
-      → ev.pos / ev.weather / ev.ort setzen
-      → trackManöverPunkt()
-      → toernSpeichern()                  ← nach GPS-Antwort
 ```
 
 ### Motor/Segeln-Zustand
@@ -177,8 +171,9 @@ Track-Aufzeichnung ist in **`track.js`** ausgelagert (ab v2.5.0).
 ### Zustands-Variablen (track.js)
 
 ```js
-let _watchId    = null; /* watchPosition-Handle (null = nicht aktiv)  */
-let _letzterPkt = null; /* letzter gespeicherter Punkt (für Distanz/Zeit-Check) */
+let _watchId = null; /* watchPosition-Handle (null = nicht aktiv)  */
+let _letzterPkt =
+  null; /* letzter gespeicherter Punkt (für Distanz/Zeit-Check) */
 ```
 
 ### Ablauf
@@ -224,14 +219,14 @@ Punkte mit SOG ≤ Schwelle werden nicht gespeichert (außer Fallback nach 180 s
 Berechnung: `minDistM = trackDistanzLaden() * 1852` (nm → Meter)
 Abstand zum letzten Punkt: `haversineKm(...) * 1000` (km → Meter)
 
-| Einstellung        | Distanz |
-| ------------------ | ------- |
-| 0,05 nm            | ~93 m   |
-| 0,1 nm (Standard)  | ~185 m  |
-| 0,2 nm             | ~370 m  |
-| 0,3 nm             | ~556 m  |
-| 0,4 nm             | ~741 m  |
-| 0,5 nm             | ~926 m  |
+| Einstellung       | Distanz |
+| ----------------- | ------- |
+| 0,05 nm           | ~93 m   |
+| 0,1 nm (Standard) | ~185 m  |
+| 0,2 nm            | ~370 m  |
+| 0,3 nm            | ~556 m  |
+| 0,4 nm            | ~741 m  |
+| 0,5 nm            | ~926 m  |
 
 Punkt wird **immer** gespeichert wenn letzter Punkt älter als das **Fallback-Intervall**
 (`alterSek >= trackIntervallLaden()`), unabhängig von der Distanz.
@@ -335,15 +330,15 @@ jeder GPS-Position aufgerufen (Hook via `typeof`-Guard).
 
 ## LOCALSTORAGE KEYS
 
-| Key                              | Inhalt                                       |
-| -------------------------------- | -------------------------------------------- |
-| `segel_logbuch_trips`            | Array aller Törns                            |
-| `segel_logbuch_stopp`            | aktueller Fahrt-Zustand ("hafen"/"fahrt"/…)  |
-| `segel_logbuch_aktiver_toern`    | tripId des aktiven Törns                     |
-| `last_values`                    | letzter Rudergänger + Wind                   |
-| `segel_logbuch_autobackup`       | automatisches Backup                         |
-| `segel_logbuch_backup_permanent` | permanentes Backup                           |
+| Key                              | Inhalt                                           |
+| -------------------------------- | ------------------------------------------------ |
+| `segel_logbuch_trips`            | Array aller Törns                                |
+| `segel_logbuch_stopp`            | aktueller Fahrt-Zustand ("hafen"/"fahrt"/…)      |
+| `segel_logbuch_aktiver_toern`    | tripId des aktiven Törns                         |
+| `last_values`                    | letzter Rudergänger + Wind                       |
+| `segel_logbuch_autobackup`       | automatisches Backup                             |
+| `segel_logbuch_backup_permanent` | permanentes Backup                               |
 | `segel_track_distanz`            | Track-Auflösung in nm (0.05/0.1/0.2/0.3/0.4/0.5) |
-| `segel_sog_schwelle`             | SOG-Schwelle für GPS-Jitter-Filter (kn)       |
-| `segel_track_intervall`          | Fallback-Intervall in Sekunden (30–180)       |
+| `segel_sog_schwelle`             | SOG-Schwelle für GPS-Jitter-Filter (kn)          |
+| `segel_track_intervall`          | Fallback-Intervall in Sekunden (30–180)          |
 | `segel_track_accuracy`           | Max. GPS-Ungenauigkeit in Metern (25/50/100/200) |

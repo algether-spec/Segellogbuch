@@ -297,16 +297,11 @@ const STOPP_EREIGNISSE = { "Anlegen": "hafen", "Ankern": "anker", "An Boje": "bo
 const START_EREIGNISSE = new Set(["Ablegen", "Anker lichten", "Von Boje"]);
 
 function stoppZustandLaden() {
-    /* Rückwärtskompatibel: altes im_hafen-Flag migrieren */
-    if (localStorage.getItem("segel_logbuch_im_hafen") === "true") {
-        localStorage.setItem("segel_logbuch_stopp", "hafen");
-        localStorage.removeItem("segel_logbuch_im_hafen");
-    }
-    return localStorage.getItem("segel_logbuch_stopp") || "hafen";
+    return ladeStoppZustand();
 }
 
 function stoppZustandSpeichern(val) {
-    localStorage.setItem("segel_logbuch_stopp", val);
+    speichereStoppZustand(val);
     if (aktuellerToern) aktuellerToern.stoppZustand = val;
 }
 
@@ -1245,6 +1240,7 @@ function toernUebersichtRendern() {
         main.className = "tu-main";
         main.innerHTML =
             '<span class="tu-name">' + (t.tripName || "(ohne Name)") + '</span>' +
+            '<span class="tu-meta" style="font-size:10px;opacity:0.45;font-family:monospace">ID: ' + t.tripId + '</span>' +
             '<span class="tu-meta">' + zeitraum + '</span>' +
             '<span class="tu-meta">' + (t.skipper ? '👤 ' + t.skipper : '') + '</span>' +
             '<span class="tu-badge">' + anzahl + ' Ereignis' + (anzahl !== 1 ? 'se' : '') + '</span>';
@@ -1345,6 +1341,16 @@ function toernSpeichernAktion() {
     if (!aktuellerToern) return;
     if (!validieren()) return;
     formularLesen();
+    /* Schiffsführer automatisch in Crew eintragen falls noch nicht vorhanden */
+    const skipperName = aktuellerToern.skipper?.trim();
+    if (skipperName) {
+        if (!aktuellerToern.crew) aktuellerToern.crew = [];
+        const bereitsVorhanden = aktuellerToern.crew.some(c => c.name === skipperName);
+        if (!bereitsVorhanden) {
+            aktuellerToern.crew.unshift({ id: generateId(), name: skipperName, role: "Schiffsführer" });
+            crewListeRendern(aktuellerToern.crew);
+        }
+    }
     toernSpeichern(aktuellerToern);
     autoBackupSpeichern();
     backupStatusAktualisieren();
@@ -1979,13 +1985,13 @@ function tabInhaltToggeln() {
 
 function sonnenmodusToggle() {
     const aktiv = document.body.classList.toggle("sonnenmodus");
-    localStorage.setItem("segel_sonnenmodus", aktiv ? "1" : "0");
+    speichereSonnenmodus(aktiv);
     const btn = document.getElementById("btn-sonnenmodus");
     if (btn) btn.textContent = aktiv ? "🌙" : "☀️";
 }
 
 (function () {
-    if (localStorage.getItem("segel_sonnenmodus") === "1") {
+    if (ladeSonnenmodus()) {
         document.body.classList.add("sonnenmodus");
         const btn = document.getElementById("btn-sonnenmodus");
         if (btn) btn.textContent = "🌙";
@@ -2422,7 +2428,7 @@ function pwaMigrationModalZeigen() {
             try {
                 const data   = JSON.parse(e.target.result);
                 const anzahl = importJSON(data);
-                localStorage.setItem("pwa_migration_done", "1");
+                speichereMigrationFlag();
                 document.getElementById("pwa-result").innerHTML =
                     '<p class="migration-ok">✅ ' + anzahl + " Törn" +
                     (anzahl !== 1 ? "s" : "") + " importiert.</p>";
@@ -2440,7 +2446,7 @@ function pwaMigrationModalZeigen() {
     });
 
     document.getElementById("pwa-btn-skip").onclick = () => {
-        localStorage.setItem("pwa_migration_done", "1");
+        speichereMigrationFlag();
         overlay.remove();
     };
 }
@@ -2448,9 +2454,9 @@ function pwaMigrationModalZeigen() {
 function pwaMigrationPruefen() {
     const istPWA = window.matchMedia("(display-mode: standalone)").matches;
     if (!istPWA) return;
-    if (localStorage.getItem("pwa_migration_done")) return;
+    if (ladeMigrationFlag()) return;
     if (ladeToerns().length > 0) {
-        localStorage.setItem("pwa_migration_done", "1");
+        speichereMigrationFlag();
         return;
     }
     pwaMigrationModalZeigen();
@@ -2909,21 +2915,35 @@ function datenImportVerarbeiten(event) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            /* Array von Törns oder { toerns: [...] } */
             const toerns = Array.isArray(data) ? data
                          : Array.isArray(data.toerns) ? data.toerns
                          : null;
             if (!toerns) { statusSetzen("❌ Ungültiges Format.", "error", 4000); return; }
 
-            if (toerns.length > 1 || !aktuellerToern) {
-                /* Mehrere Törns → Bestätigung ob alles ersetzt wird */
-                if (!confirm("Alle bestehenden Daten ersetzen? (" + toerns.length + " Törns werden importiert)")) return;
-                speichereToerns(toerns);
+            const vorhandeneIds = new Set(alleToernsLaden().map(t => t.tripId));
+
+            if (toerns.length === 1) {
+                /* Einzelner Törn */
+                const t = toerns[0];
+                if (t.tripId && vorhandeneIds.has(t.tripId)) {
+                    statusSetzen(`⚠️ Törn "${t.tripName || "(ohne Name)"}" ist bereits vorhanden.`, "error", 5000);
+                    return;
+                }
+                const alle = alleToernsLaden();
+                alle.push(t);
+                speichereToerns(alle);
                 window.location.reload();
             } else {
-                /* Einzelner Törn → hinzufügen */
+                /* Mehrere Törns → jeden einzeln prüfen, Duplikate überspringen */
+                const neu = toerns.filter(t => !t.tripId || !vorhandeneIds.has(t.tripId));
+                const duplikate = toerns.length - neu.length;
+                if (neu.length === 0) {
+                    statusSetzen(`⚠️ Alle ${duplikate} Törns bereits vorhanden — nichts importiert.`, "error", 5000);
+                    return;
+                }
+                if (!confirm(neu.length + " Törns importieren" + (duplikate > 0 ? ` (${duplikate} bereits vorhanden, werden übersprungen)` : "") + "?")) return;
                 const alle = alleToernsLaden();
-                alle.push(toerns[0]);
+                neu.forEach(t => alle.push(t));
                 speichereToerns(alle);
                 window.location.reload();
             }
