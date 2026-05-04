@@ -742,6 +742,7 @@ function zeigeLogs() {
                     <span class="event-time-label">${info}</span>
                     ${ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : ''}
                     ${posHtml}
+                    ${ev.unterschrift ? '<img src="' + ev.unterschrift + '" style="display:block;max-width:100%;height:60px;margin-top:6px;border-radius:6px;border:1px solid var(--border);background:#fff">' : ''}
                 </span>
                 <button type="button" class="btn-crew-del" data-id="${ev.id}">✕</button>
             </li>`;
