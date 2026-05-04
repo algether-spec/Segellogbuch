@@ -200,7 +200,7 @@ const KATEGORIE_MAP = {
     "Drehen Motor": "Motor", "Box-Manöver": "Motor", "Mooring": "Motor",
     "Ankern": "Anker", "Anker lichten": "Anker",
     "An Boje": "Boje", "Von Boje": "Boje",
-    "Ruderwechsel": "Allgemein", "Sichtung": "Allgemein",
+    "Ruderwechsel": "Allgemein", "Schiffsführerwechsel": "Allgemein", "Sichtung": "Allgemein",
     "MOB": "Allgemein", "Notfall": "Allgemein",
     "Sicherheitseinweisung": "Sicherheit",
     "Tageskontrolle": "Kontrolle",
@@ -3026,10 +3026,38 @@ function schiffsfuehrerWechselnSpeichern() {
         return;
     }
 
+    if (!aktuellerToern) {
+        statusSetzen("⚠️ Kein aktiver Törn.", "error", 3000);
+        schiffsfuehrerModalSchliessen();
+        return;
+    }
+
     const zeitIso = datum && zeit ? `${datum}T${zeit}:00` : new Date().toISOString().slice(0, 19);
-    const canvas  = document.getElementById("sf-canvas");
+
+    const canvas = document.getElementById("sf-canvas");
     const unterschriftDataUrl = canvas.toDataURL("image/png");
 
+    const ev = {
+        id:           generateId(),
+        type:         "Schiffsführerwechsel",
+        kategorie:    "Allgemein",
+        antrieb:      "",
+        zeit:         zeitIso,
+        ort:          "",
+        rudergaenger: { name },
+        note:         "",
+        weather:      null,
+        pos:          null,
+        unterschrift: unterschriftDataUrl
+    };
+
+    aktuellerToern.events.push(ev);
+    aktuellerToern.events.sort((a, b) => evZeitIso(a).localeCompare(evZeitIso(b)));
+
+    gpsAbfragen(ev);
+    toernSpeichern(aktuellerToern);
+    zeigeLogs();
+    statusSetzen("🧑‍✈️ " + name + " ist jetzt Schiffsführer.", "ok", 3000);
+
     schiffsfuehrerModalSchliessen();
-    rudergaengerWechseln(name, zeitIso, unterschriftDataUrl);
 }
