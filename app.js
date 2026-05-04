@@ -2219,13 +2219,13 @@ function ruderDropdownToggeln() {
     dd.hidden = false;
 }
 
-function rudergaengerWechseln(name) {
+function rudergaengerWechseln(name, zeitOverride = null, unterschrift = null) {
     const dd = document.getElementById("ruder-dropdown");
     if (dd) dd.hidden = true;
     if (!name || !aktuellerToern) return;
     const letzte  = ladeLetzteWerte() || {};
     speichereLetzteWerte(letzte.wind || "", name);
-    const zeitIso = lokalZeitIso();
+    const zeitIso = zeitOverride || lokalZeitIso();
     const ev = {
         id:           generateId(),
         type:         "Ruderwechsel",
@@ -2237,7 +2237,8 @@ function rudergaengerWechseln(name) {
         note:         "",
         weather:      letzte.wind
                         ? { windForce: msToBft(parseFloat(letzte.wind) / 1.94384), windKnots: parseFloat(letzte.wind), windDirection: "", description: "" }
-                        : null
+                        : null,
+        ...(unterschrift ? { unterschrift } : {})
     };
     aktuellerToern.events.push(ev);
     gpsAbfragen(ev);
@@ -2952,4 +2953,83 @@ function datenImportVerarbeiten(event) {
         }
     };
     reader.readAsText(file);
+}
+
+// ── Schiffsführer-Wechsel-Dialog ──────────────────────────────────────────
+function schiffsfuehrerWechselnDialog() {
+    const jetzt = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    const datum = `${jetzt.getFullYear()}-${pad(jetzt.getMonth()+1)}-${pad(jetzt.getDate())}`;
+    const zeit  = `${pad(jetzt.getHours())}:${pad(jetzt.getMinutes())}`;
+
+    document.getElementById("sf-datum").value = datum;
+    document.getElementById("sf-zeit").value  = zeit;
+    document.getElementById("sf-name").value  = "";
+
+    const canvas = document.getElementById("sf-canvas");
+    const rect   = canvas.getBoundingClientRect();
+    canvas.width  = rect.width  || canvas.offsetWidth  || 340;
+    canvas.height = rect.height || canvas.offsetHeight || 140;
+    sfCanvasLeeren();
+    sfCanvasSetup(canvas);
+
+    document.getElementById("schiffsfuehrer-modal").style.display = "flex";
+    setTimeout(() => document.getElementById("sf-name").focus(), 100);
+}
+
+function schiffsfuehrerModalSchliessen() {
+    document.getElementById("schiffsfuehrer-modal").style.display = "none";
+}
+
+function sfCanvasLeeren() {
+    const canvas = document.getElementById("sf-canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function sfCanvasSetup(canvas) {
+    // Alte Listener entfernen (clone-Trick)
+    const neu = canvas.cloneNode(true);
+    canvas.parentNode.replaceChild(neu, canvas);
+    const c  = document.getElementById("sf-canvas");
+    const cx = c.getContext("2d");
+    cx.strokeStyle = "#1a1a2e";
+    cx.lineWidth   = 2.5;
+    cx.lineCap     = "round";
+    cx.lineJoin    = "round";
+
+    let zeichnen = false;
+
+    function getPos(e) {
+        const r   = c.getBoundingClientRect();
+        const src = e.touches ? e.touches[0] : e;
+        return { x: src.clientX - r.left, y: src.clientY - r.top };
+    }
+
+    c.addEventListener("mousedown",  e => { zeichnen = true; const p = getPos(e); cx.beginPath(); cx.moveTo(p.x, p.y); });
+    c.addEventListener("mousemove",  e => { if (!zeichnen) return; const p = getPos(e); cx.lineTo(p.x, p.y); cx.stroke(); });
+    c.addEventListener("mouseup",    () => { zeichnen = false; });
+    c.addEventListener("mouseleave", () => { zeichnen = false; });
+
+    c.addEventListener("touchstart", e => { e.preventDefault(); zeichnen = true; const p = getPos(e); cx.beginPath(); cx.moveTo(p.x, p.y); }, { passive: false });
+    c.addEventListener("touchmove",  e => { e.preventDefault(); if (!zeichnen) return; const p = getPos(e); cx.lineTo(p.x, p.y); cx.stroke(); }, { passive: false });
+    c.addEventListener("touchend",   () => { zeichnen = false; });
+}
+
+function schiffsfuehrerWechselnSpeichern() {
+    const name  = document.getElementById("sf-name").value.trim();
+    const datum = document.getElementById("sf-datum").value;
+    const zeit  = document.getElementById("sf-zeit").value;
+
+    if (!name) {
+        document.getElementById("sf-name").focus();
+        return;
+    }
+
+    const zeitIso = datum && zeit ? `${datum}T${zeit}:00` : new Date().toISOString().slice(0, 19);
+    const canvas  = document.getElementById("sf-canvas");
+    const unterschriftDataUrl = canvas.toDataURL("image/png");
+
+    schiffsfuehrerModalSchliessen();
+    rudergaengerWechseln(name, zeitIso, unterschriftDataUrl);
 }
