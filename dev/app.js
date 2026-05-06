@@ -402,7 +402,7 @@ function logbuchStatusAktualisieren() {
     }
 
     /* Rudergänger-Button aktualisieren */
-    const mitRuder  = [...events].reverse().find(e => e.rudergaenger?.name);
+    const mitRuder  = [...events].reverse().find(e => e.rudergaenger?.name && e.type !== "Schiffsführerwechsel");
     const aktRuder  = mitRuder ? mitRuder.rudergaenger.name : "";
     const btnRuder  = document.getElementById("btn-rudergaenger");
     if (btnRuder) btnRuder.textContent = aktRuder ? "👤 Rudergänger: " + aktRuder : "👤 Rudergänger: —";
