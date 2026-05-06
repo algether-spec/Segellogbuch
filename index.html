@@ -634,10 +634,10 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.90-dev"></script>
-<script src="config.js?v=2.5.90-dev"></script>
-<script src="track.js?v=2.5.90-dev"></script>
-<script src="app.js?v=2.5.90-dev"></script>
+<script src="storage.js?v=2.5.91-dev"></script>
+<script src="config.js?v=2.5.91-dev"></script>
+<script src="track.js?v=2.5.91-dev"></script>
+<script src="app.js?v=2.5.91-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
@@ -678,10 +678,9 @@ setInterval(autoUpdatePruefen, 30000);
   <div class="modal-box" style="max-width:380px; width:92%">
     <h2 style="margin-bottom:12px">🧑‍✈️ Schiffsführer wechseln</h2>
 
-    <label style="display:block;margin-bottom:4px;font-weight:600">Name</label>
-    <input id="sf-name" type="text" placeholder="Name eingeben"
-      style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;
-             border:1.5px solid var(--border);font-size:1rem;margin-bottom:12px">
+    <label style="display:block;margin-bottom:4px;font-weight:600">Schiffsführer</label>
+    <div id="sf-crew-buttons" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+    <input id="sf-name" type="hidden">
 
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <div style="flex:1">
