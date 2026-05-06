@@ -34,19 +34,25 @@
             <button type="button" class="btn-sidebar-close" onclick="sidebarSchliessen()">✕</button>
         </div>
         <nav class="sidebar-nav">
-            <button type="button" class="sidebar-btn" data-seite="tab-toern"     onclick="seitenWechseln('tab-toern')">📋 Törn</button>
-            <button type="button" class="sidebar-btn" data-seite="tab-crew"      onclick="seitenWechseln('tab-crew')">👥 Crew</button>
-            <button type="button" class="sidebar-btn" data-seite="tab-sicherheit" onclick="seitenWechseln('tab-sicherheit')">🛟 Sicherheit</button>
-            <button type="button" class="sidebar-btn" data-seite="tab-kontrolle" onclick="seitenWechseln('tab-kontrolle')">✅ Tageskontrolle</button>
-            <button type="button" class="sidebar-btn" data-seite="tab-statistik" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
-            <button type="button" class="sidebar-btn" data-seite="tab-trackliste" onclick="seitenWechseln('tab-trackliste')">📍 Trackliste</button>
+            <div class="sidebar-group-label">Törn</div>
+            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-toern')">📋 Törn</button>
+            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-crew')">👥 Crew</button>
+
+            <div class="sidebar-group-label">Bord</div>
+            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-sicherheit')">🛟 Sicherheit</button>
+            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-kontrolle')">✅ Tageskontrolle</button>
+            <button type="button" class="sidebar-btn" onclick="schiffsfuehrerWechselnDialog(); sidebarSchliessen()">🧑‍✈️ Schiffsführer wechseln</button>
+
+            <div class="sidebar-group-label">Daten</div>
+            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
+            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-trackliste')">📍 Trackliste</button>
             <button type="button" class="sidebar-btn" onclick="trackCsvExportieren(); sidebarSchliessen()">📥 Track als CSV exportieren</button>
             <button type="button" class="sidebar-btn" onclick="datenExportierenDialog(); sidebarSchliessen()">📤 Daten exportieren</button>
             <button type="button" class="sidebar-btn" onclick="datenImportieren(); sidebarSchliessen()">📥 Daten importieren</button>
-            <button type="button" class="sidebar-btn sidebar-btn-testdaten"      onclick="testdatenLaden()">🧪 Testdaten laden</button>
-            <button type="button" class="sidebar-btn" onclick="schiffsfuehrerWechselnDialog(); sidebarSchliessen()">🧑‍✈️ Schiffsführer wechseln</button>
-            <button type="button" class="sidebar-btn" data-seite="tab-einstellungen" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
-            <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+
+            <div class="sidebar-group-label">System</div>
+            <button type="button" class="sidebar-btn sidebar-btn-testdaten" onclick="testdatenLaden()">🧪 Testdaten laden</button>
+            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
             <button type="button" class="sidebar-btn" onclick="updateErzwingen(); sidebarSchliessen()">🔄 Update erzwingen</button>
         </nav>
     </div>
@@ -636,10 +642,10 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.93-dev"></script>
-<script src="config.js?v=2.5.93-dev"></script>
-<script src="track.js?v=2.5.93-dev"></script>
-<script src="app.js?v=2.5.93-dev"></script>
+<script src="storage.js?v=2.5.94-dev"></script>
+<script src="config.js?v=2.5.94-dev"></script>
+<script src="track.js?v=2.5.94-dev"></script>
+<script src="app.js?v=2.5.94-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");

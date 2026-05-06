@@ -2338,6 +2338,17 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
     color: #1a3a5c;
 }
 
+/* --- Sidebar Gruppenüberschriften --------------------------------- */
+
+.sidebar-group-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 14px 16px 4px;
+}
+
 /* --- Rudergänger Shake ------------------------------------------ */
 
 @keyframes rudergaenger-shake {
