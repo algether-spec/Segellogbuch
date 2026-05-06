@@ -2974,6 +2974,37 @@ function schiffsfuehrerWechselnDialog() {
     sfCanvasLeeren();
     sfCanvasSetup(canvas);
 
+    // Crew-Buttons befüllen
+    const crew = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name).filter(Boolean) : [];
+    const sfCrewDiv = document.getElementById("sf-crew-buttons");
+    sfCrewDiv.innerHTML = "";
+    document.getElementById("sf-name").value = "";
+
+    if (crew.length === 0) {
+        sfCrewDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.9rem">Keine Crew eingetragen.</span>';
+    } else {
+        crew.forEach(name => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = name;
+            btn.style.cssText = "padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg-card);font-size:0.95rem;cursor:pointer";
+            btn.onclick = () => {
+                document.getElementById("sf-name").value = name;
+                sfCrewDiv.querySelectorAll("button").forEach(b => {
+                    b.style.background = "var(--bg-card)";
+                    b.style.borderColor = "var(--border)";
+                    b.style.fontWeight = "normal";
+                    b.style.color = "";
+                });
+                btn.style.background = "var(--primary)";
+                btn.style.borderColor = "var(--primary)";
+                btn.style.color = "#fff";
+                btn.style.fontWeight = "600";
+            };
+            sfCrewDiv.appendChild(btn);
+        });
+    }
+
     document.getElementById("schiffsfuehrer-modal").style.display = "flex";
     setTimeout(() => document.getElementById("sf-name").focus(), 100);
 }
@@ -3023,7 +3054,7 @@ function schiffsfuehrerWechselnSpeichern() {
     const zeit  = document.getElementById("sf-zeit").value;
 
     if (!name) {
-        document.getElementById("sf-name").focus();
+        statusSetzen("⚠️ Bitte Schiffsführer auswählen.", "error", 3000);
         return;
     }
 
