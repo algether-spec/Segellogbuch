@@ -2957,6 +2957,14 @@ function datenImportVerarbeiten(event) {
 }
 
 // ── Schiffsführer-Wechsel-Dialog ──────────────────────────────────────────
+function sidebarAccToggle(id) {
+    const body = document.getElementById(id);
+    const icon = document.getElementById(id + "-icon");
+    const open = body.style.display !== "none";
+    body.style.display = open ? "none" : "block";
+    icon.textContent = open ? "▶" : "▼";
+}
+
 function schiffsfuehrerWechselnDialog() {
     const jetzt = new Date();
     const pad = n => String(n).padStart(2, "0");
