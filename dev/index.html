@@ -34,26 +34,48 @@
             <button type="button" class="btn-sidebar-close" onclick="sidebarSchliessen()">✕</button>
         </div>
         <nav class="sidebar-nav">
-            <div class="sidebar-group-label">Törn</div>
-            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-toern')">📋 Törn</button>
-            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-crew')">👥 Crew</button>
+            <button type="button" class="sidebar-acc-header" onclick="sidebarAccToggle('acc-toern')">
+                <span>📋 Törn</span><span id="acc-toern-icon">▼</span>
+            </button>
+            <div id="acc-toern" class="sidebar-acc-body">
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-toern')">📋 Törn</button>
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-crew')">👥 Crew</button>
+            </div>
 
-            <div class="sidebar-group-label">Bord</div>
-            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-sicherheit')">🛟 Sicherheit</button>
-            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-kontrolle')">✅ Tageskontrolle</button>
-            <button type="button" class="sidebar-btn" onclick="schiffsfuehrerWechselnDialog(); sidebarSchliessen()">🧑‍✈️ Schiffsführer wechseln</button>
+            <div class="sidebar-acc-divider"></div>
 
-            <div class="sidebar-group-label">Daten</div>
-            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
-            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-trackliste')">📍 Trackliste</button>
-            <button type="button" class="sidebar-btn" onclick="trackCsvExportieren(); sidebarSchliessen()">📥 Track als CSV exportieren</button>
-            <button type="button" class="sidebar-btn" onclick="datenExportierenDialog(); sidebarSchliessen()">📤 Daten exportieren</button>
-            <button type="button" class="sidebar-btn" onclick="datenImportieren(); sidebarSchliessen()">📥 Daten importieren</button>
+            <button type="button" class="sidebar-acc-header" onclick="sidebarAccToggle('acc-bord')">
+                <span>⚓ Bord</span><span id="acc-bord-icon">▶</span>
+            </button>
+            <div id="acc-bord" class="sidebar-acc-body" style="display:none">
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-sicherheit')">🛟 Sicherheit</button>
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-kontrolle')">✅ Tageskontrolle</button>
+                <button type="button" class="sidebar-acc-btn" onclick="schiffsfuehrerWechselnDialog(); sidebarSchliessen()">🧑‍✈️ Schiffsführer wechseln</button>
+            </div>
 
-            <div class="sidebar-group-label">System</div>
-            <button type="button" class="sidebar-btn sidebar-btn-testdaten" onclick="testdatenLaden()">🧪 Testdaten laden</button>
-            <button type="button" class="sidebar-btn" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
-            <button type="button" class="sidebar-btn" onclick="updateErzwingen(); sidebarSchliessen()">🔄 Update erzwingen</button>
+            <div class="sidebar-acc-divider"></div>
+
+            <button type="button" class="sidebar-acc-header" onclick="sidebarAccToggle('acc-daten')">
+                <span>📊 Daten</span><span id="acc-daten-icon">▶</span>
+            </button>
+            <div id="acc-daten" class="sidebar-acc-body" style="display:none">
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-statistik')">📊 Statistik</button>
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-trackliste')">📍 Trackliste</button>
+                <button type="button" class="sidebar-acc-btn" onclick="trackCsvExportieren(); sidebarSchliessen()">📥 Track als CSV</button>
+                <button type="button" class="sidebar-acc-btn" onclick="datenExportierenDialog(); sidebarSchliessen()">📤 Daten exportieren</button>
+                <button type="button" class="sidebar-acc-btn" onclick="datenImportieren(); sidebarSchliessen()">📥 Daten importieren</button>
+            </div>
+
+            <div class="sidebar-acc-divider"></div>
+
+            <button type="button" class="sidebar-acc-header" onclick="sidebarAccToggle('acc-system')">
+                <span>⚙️ System</span><span id="acc-system-icon">▶</span>
+            </button>
+            <div id="acc-system" class="sidebar-acc-body" style="display:none">
+                <button type="button" class="sidebar-acc-btn" onclick="testdatenLaden()">🧪 Testdaten laden</button>
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-einstellungen')">⚙️ Einstellungen</button>
+                <button type="button" class="sidebar-acc-btn" onclick="updateErzwingen(); sidebarSchliessen()">🔄 Update erzwingen</button>
+            </div>
         </nav>
     </div>
 
@@ -642,10 +664,10 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.94-dev"></script>
-<script src="config.js?v=2.5.94-dev"></script>
-<script src="track.js?v=2.5.94-dev"></script>
-<script src="app.js?v=2.5.94-dev"></script>
+<script src="storage.js?v=2.5.95-dev"></script>
+<script src="config.js?v=2.5.95-dev"></script>
+<script src="track.js?v=2.5.95-dev"></script>
+<script src="app.js?v=2.5.95-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
