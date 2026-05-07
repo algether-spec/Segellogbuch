@@ -11,6 +11,8 @@ body {
     color: #1e293b;
     min-height: 100vh;
     padding: 16px;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
 }
 
 .app {
@@ -924,6 +926,7 @@ button:active { opacity: 0.75; }
     border-top: 1px solid #e2e8f0;
     box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
     gap: 10px;
+    -webkit-transform: translateZ(0);
 }
 
 .bottom-bar-mitte {
