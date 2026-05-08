@@ -200,7 +200,7 @@ const KATEGORIE_MAP = {
     "Drehen Motor": "Motor", "Box-Manöver": "Motor", "Mooring": "Motor",
     "Ankern": "Anker", "Anker lichten": "Anker",
     "An Boje": "Boje", "Von Boje": "Boje",
-    "Ruderwechsel": "Allgemein", "Sichtung": "Allgemein",
+    "Ruderwechsel": "Allgemein", "Schiffsführerwechsel": "Allgemein", "Sichtung": "Allgemein",
     "MOB": "Allgemein", "Notfall": "Allgemein",
     "Sicherheitseinweisung": "Sicherheit",
     "Tageskontrolle": "Kontrolle",
@@ -402,7 +402,7 @@ function logbuchStatusAktualisieren() {
     }
 
     /* Rudergänger-Button aktualisieren */
-    const mitRuder  = [...events].reverse().find(e => e.rudergaenger?.name);
+    const mitRuder  = [...events].reverse().find(e => e.rudergaenger?.name && e.type !== "Schiffsführerwechsel");
     const aktRuder  = mitRuder ? mitRuder.rudergaenger.name : "";
     const btnRuder  = document.getElementById("btn-rudergaenger");
     if (btnRuder) btnRuder.textContent = aktRuder ? "👤 Rudergänger: " + aktRuder : "👤 Rudergänger: —";
@@ -742,6 +742,7 @@ function zeigeLogs() {
                     <span class="event-time-label">${info}</span>
                     ${ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : ''}
                     ${posHtml}
+                    ${ev.unterschrift ? '<img src="' + ev.unterschrift + '" style="display:block;max-width:100%;height:60px;margin-top:6px;border-radius:6px;border:1px solid var(--border);background:#fff">' : ''}
                 </span>
                 <button type="button" class="btn-crew-del" data-id="${ev.id}">✕</button>
             </li>`;
@@ -2219,13 +2220,13 @@ function ruderDropdownToggeln() {
     dd.hidden = false;
 }
 
-function rudergaengerWechseln(name) {
+function rudergaengerWechseln(name, zeitOverride = null, unterschrift = null) {
     const dd = document.getElementById("ruder-dropdown");
     if (dd) dd.hidden = true;
     if (!name || !aktuellerToern) return;
     const letzte  = ladeLetzteWerte() || {};
     speichereLetzteWerte(letzte.wind || "", name);
-    const zeitIso = lokalZeitIso();
+    const zeitIso = zeitOverride || lokalZeitIso();
     const ev = {
         id:           generateId(),
         type:         "Ruderwechsel",
@@ -2237,7 +2238,8 @@ function rudergaengerWechseln(name) {
         note:         "",
         weather:      letzte.wind
                         ? { windForce: msToBft(parseFloat(letzte.wind) / 1.94384), windKnots: parseFloat(letzte.wind), windDirection: "", description: "" }
-                        : null
+                        : null,
+        ...(unterschrift ? { unterschrift } : {})
     };
     aktuellerToern.events.push(ev);
     gpsAbfragen(ev);
@@ -2952,4 +2954,150 @@ function datenImportVerarbeiten(event) {
         }
     };
     reader.readAsText(file);
+}
+
+// ── Schiffsführer-Wechsel-Dialog ──────────────────────────────────────────
+function sidebarAccToggle(id) {
+    const body = document.getElementById(id);
+    const icon = document.getElementById(id + "-icon");
+    const open = body.style.display !== "none";
+    body.style.display = open ? "none" : "block";
+    icon.textContent = open ? "▶" : "▼";
+}
+
+function schiffsfuehrerWechselnDialog() {
+    const jetzt = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    const datum = `${jetzt.getFullYear()}-${pad(jetzt.getMonth()+1)}-${pad(jetzt.getDate())}`;
+    const zeit  = `${pad(jetzt.getHours())}:${pad(jetzt.getMinutes())}`;
+
+    document.getElementById("sf-datum").value = datum;
+    document.getElementById("sf-zeit").value  = zeit;
+    document.getElementById("sf-name").value  = "";
+
+    const canvas = document.getElementById("sf-canvas");
+    const rect   = canvas.getBoundingClientRect();
+    canvas.width  = rect.width  || canvas.offsetWidth  || 340;
+    canvas.height = rect.height || canvas.offsetHeight || 140;
+    sfCanvasLeeren();
+    sfCanvasSetup(canvas);
+
+    // Crew-Buttons befüllen
+    const crew = aktuellerToern ? (aktuellerToern.crew || []).map(p => p.name).filter(Boolean) : [];
+    const sfCrewDiv = document.getElementById("sf-crew-buttons");
+    sfCrewDiv.innerHTML = "";
+    document.getElementById("sf-name").value = "";
+
+    if (crew.length === 0) {
+        sfCrewDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.9rem">Keine Crew eingetragen.</span>';
+    } else {
+        crew.forEach(name => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = name;
+            btn.style.cssText = "padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg-card);font-size:0.95rem;cursor:pointer";
+            btn.onclick = () => {
+                document.getElementById("sf-name").value = name;
+                sfCrewDiv.querySelectorAll("button").forEach(b => {
+                    b.style.background = "var(--bg-card)";
+                    b.style.borderColor = "var(--border)";
+                    b.style.fontWeight = "normal";
+                    b.style.color = "";
+                });
+                btn.style.background = "var(--primary)";
+                btn.style.borderColor = "var(--primary)";
+                btn.style.color = "#fff";
+                btn.style.fontWeight = "600";
+            };
+            sfCrewDiv.appendChild(btn);
+        });
+    }
+
+    document.getElementById("schiffsfuehrer-modal").style.display = "flex";
+    setTimeout(() => document.getElementById("sf-name").focus(), 100);
+}
+
+function schiffsfuehrerModalSchliessen() {
+    document.getElementById("schiffsfuehrer-modal").style.display = "none";
+}
+
+function sfCanvasLeeren() {
+    const canvas = document.getElementById("sf-canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function sfCanvasSetup(canvas) {
+    // Alte Listener entfernen (clone-Trick)
+    const neu = canvas.cloneNode(true);
+    canvas.parentNode.replaceChild(neu, canvas);
+    const c  = document.getElementById("sf-canvas");
+    const cx = c.getContext("2d");
+    cx.strokeStyle = "#1a1a2e";
+    cx.lineWidth   = 2.5;
+    cx.lineCap     = "round";
+    cx.lineJoin    = "round";
+
+    let zeichnen = false;
+
+    function getPos(e) {
+        const r   = c.getBoundingClientRect();
+        const src = e.touches ? e.touches[0] : e;
+        return { x: src.clientX - r.left, y: src.clientY - r.top };
+    }
+
+    c.addEventListener("mousedown",  e => { zeichnen = true; const p = getPos(e); cx.beginPath(); cx.moveTo(p.x, p.y); });
+    c.addEventListener("mousemove",  e => { if (!zeichnen) return; const p = getPos(e); cx.lineTo(p.x, p.y); cx.stroke(); });
+    c.addEventListener("mouseup",    () => { zeichnen = false; });
+    c.addEventListener("mouseleave", () => { zeichnen = false; });
+
+    c.addEventListener("touchstart", e => { e.preventDefault(); zeichnen = true; const p = getPos(e); cx.beginPath(); cx.moveTo(p.x, p.y); }, { passive: false });
+    c.addEventListener("touchmove",  e => { e.preventDefault(); if (!zeichnen) return; const p = getPos(e); cx.lineTo(p.x, p.y); cx.stroke(); }, { passive: false });
+    c.addEventListener("touchend",   () => { zeichnen = false; });
+}
+
+function schiffsfuehrerWechselnSpeichern() {
+    const name  = document.getElementById("sf-name").value.trim();
+    const datum = document.getElementById("sf-datum").value;
+    const zeit  = document.getElementById("sf-zeit").value;
+
+    if (!name) {
+        statusSetzen("⚠️ Bitte Schiffsführer auswählen.", "error", 3000);
+        return;
+    }
+
+    if (!aktuellerToern) {
+        statusSetzen("⚠️ Kein aktiver Törn.", "error", 3000);
+        schiffsfuehrerModalSchliessen();
+        return;
+    }
+
+    const zeitIso = datum && zeit ? `${datum}T${zeit}:00` : new Date().toISOString().slice(0, 19);
+
+    const canvas = document.getElementById("sf-canvas");
+    const unterschriftDataUrl = canvas.toDataURL("image/png");
+
+    const ev = {
+        id:           generateId(),
+        type:         "Schiffsführerwechsel",
+        kategorie:    "Allgemein",
+        antrieb:      "",
+        zeit:         zeitIso,
+        ort:          "",
+        rudergaenger: { name },
+        note:         "",
+        weather:      null,
+        pos:          null,
+        unterschrift: unterschriftDataUrl
+    };
+
+    aktuellerToern.events.push(ev);
+    aktuellerToern.events.sort((a, b) => evZeitIso(a).localeCompare(evZeitIso(b)));
+
+    gpsAbfragen(ev);
+    toernSpeichern(aktuellerToern);
+    zeigeLogs();
+    statusSetzen("🧑‍✈️ " + name + " ist jetzt Schiffsführer.", "ok", 3000);
+
+    schiffsfuehrerModalSchliessen();
 }
