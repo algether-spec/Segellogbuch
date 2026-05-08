@@ -3,7 +3,7 @@
    Offline-Cache für Segellogbuch
 ====================== */
 
-const CACHE = "segellogbuch-v2.5.99-dev";
+const CACHE = "segellogbuch-v2.5.100-dev";
 
 const ASSETS = [
     "./index.html",
