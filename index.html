@@ -402,28 +402,32 @@
                     <div id="logbuch-karte" style="width:100%;height:200px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"></div>
                 </div>
 
-                <!-- Letzte 3 Einträge Vorschau -->
-                <div id="log-vorschau" class="log-vorschau" hidden></div>
+                <div id="logbuch-daten-scroll" style="max-height:320px;overflow-y:auto;-webkit-overflow-scrolling:touch">
 
-                <!-- Lade-Status (GPS + Wind Meldung) -->
-                <div id="log-lade-status" class="log-lade-status" hidden></div>
+                    <!-- Letzte 3 Einträge Vorschau -->
+                    <div id="log-vorschau" class="log-vorschau" hidden></div>
 
-                <!-- Statusleiste (ganz unten, dezent) -->
-                <div id="logbuch-status" class="logbuch-status" hidden>
-                    <span id="ls-modus"></span>
-                    <span id="ls-manoever-wrap" hidden><span class="ls-sep">·</span><span id="ls-manoever"></span></span>
-                    <span id="ls-wind-wrap" hidden><span class="ls-sep">·</span><select id="ls-wind-select" class="ls-ruder-select" title="Wind ändern"></select></span>
-                    <span id="ls-sog-wrap" hidden><span class="ls-sep">·</span><span id="ls-sog"></span></span>
-                    <span id="ls-nm-gesamt-wrap" hidden><span class="ls-sep">·</span><span id="ls-nm-gesamt"></span></span>
-                    <span id="ls-nm-heute-wrap" hidden><span class="ls-sep">·</span><span id="ls-nm-heute"></span></span>
-                    <span class="ls-sep">·</span>
-                    <span id="ls-track">🔴 Track aus</span>
-                    <span class="ls-sep">·</span>
-                    <span id="ls-seit"></span>
+                    <!-- Lade-Status (GPS + Wind Meldung) -->
+                    <div id="log-lade-status" class="log-lade-status" hidden></div>
+
+                    <!-- Statusleiste (ganz unten, dezent) -->
+                    <div id="logbuch-status" class="logbuch-status" hidden>
+                        <span id="ls-modus"></span>
+                        <span id="ls-manoever-wrap" hidden><span class="ls-sep">·</span><span id="ls-manoever"></span></span>
+                        <span id="ls-wind-wrap" hidden><span class="ls-sep">·</span><select id="ls-wind-select" class="ls-ruder-select" title="Wind ändern"></select></span>
+                        <span id="ls-sog-wrap" hidden><span class="ls-sep">·</span><span id="ls-sog"></span></span>
+                        <span id="ls-nm-gesamt-wrap" hidden><span class="ls-sep">·</span><span id="ls-nm-gesamt"></span></span>
+                        <span id="ls-nm-heute-wrap" hidden><span class="ls-sep">·</span><span id="ls-nm-heute"></span></span>
+                        <span class="ls-sep">·</span>
+                        <span id="ls-track">🔴 Track aus</span>
+                        <span class="ls-sep">·</span>
+                        <span id="ls-seit"></span>
+                    </div>
+
+                    <!-- Letzte Track-Punkte -->
+                    <div id="letzte-trackpunkte" class="letzte-trackpunkte" hidden></div>
+
                 </div>
-
-                <!-- Letzte Track-Punkte -->
-                <div id="letzte-trackpunkte" class="letzte-trackpunkte" hidden></div>
             </div>
 
         </div>
@@ -675,10 +679,10 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.101-dev"></script>
-<script src="config.js?v=2.5.101-dev"></script>
-<script src="track.js?v=2.5.101-dev"></script>
-<script src="app.js?v=2.5.101-dev"></script>
+<script src="storage.js?v=2.5.102-dev"></script>
+<script src="config.js?v=2.5.102-dev"></script>
+<script src="track.js?v=2.5.102-dev"></script>
+<script src="app.js?v=2.5.102-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
