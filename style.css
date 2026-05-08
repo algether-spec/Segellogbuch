@@ -2360,6 +2360,25 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
     padding: 14px 16px 4px;
 }
 
+/* --- Logbuch Toggle -------------------------------------------- */
+
+.logbuch-toggle-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border, #e2e8f0);
+    background: var(--bg-card, #fff);
+    color: var(--text, #1e293b);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.logbuch-toggle-btn.aktiv {
+    background: var(--primary, #1a3a5c);
+    color: #fff;
+    border-color: var(--primary, #1a3a5c);
+}
+
 /* --- Sidebar Akkordeon ------------------------------------------- */
 
 .sidebar-acc-header {
