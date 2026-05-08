@@ -2364,12 +2364,12 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
 
 .logbuch-toggle-btn {
     flex: 1;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 20px;
     border: 1.5px solid var(--border, #e2e8f0);
     background: var(--bg-card, #fff);
     color: var(--text, #1e293b);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     cursor: pointer;
 }
 
