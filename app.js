@@ -1297,10 +1297,8 @@ function toernLaden(tripId) {
     if (_btnK) _btnK.classList.remove("aktiv");
     const _kc = document.getElementById("logbuch-karte-container");
     if (_kc) _kc.style.display = "none";
-    ["log-vorschau", "logbuch-status", "letzte-trackpunkte"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "";
-    });
+    const _ds = document.getElementById("logbuch-daten-scroll");
+    if (_ds) _ds.style.display = "";
     const alle = alleToernsLaden();
     const toern = alle.find(t => t.tripId === tripId);
     if (!toern) return;
@@ -3131,22 +3129,17 @@ let _logbuchAnsicht = "daten";
 function logbuchAnsichtWechseln(ansicht) {
     _logbuchAnsicht = ansicht;
 
-    const datenEls = [
-        document.getElementById("log-vorschau"),
-        document.getElementById("logbuch-status"),
-        document.getElementById("letzte-trackpunkte")
-    ].filter(Boolean);
-
+    const datenScroll  = document.getElementById("logbuch-daten-scroll");
     const karteContainer = document.getElementById("logbuch-karte-container");
 
     document.getElementById("btn-logbuch-daten").classList.toggle("aktiv", ansicht === "daten");
     document.getElementById("btn-logbuch-karte").classList.toggle("aktiv", ansicht === "karte");
 
     if (ansicht === "daten") {
-        datenEls.forEach(el => el.style.display = "");
+        if (datenScroll) datenScroll.style.display = "";
         karteContainer.style.display = "none";
     } else {
-        datenEls.forEach(el => el.style.display = "none");
+        if (datenScroll) datenScroll.style.display = "none";
         karteContainer.style.display = "block";
         logbuchKarteRendern();
     }
