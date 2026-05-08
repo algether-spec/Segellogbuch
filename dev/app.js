@@ -1286,6 +1286,20 @@ function toernUebersichtRendern() {
 function toernLaden(tripId) {
     trackStoppen();
     liveMarkerEntfernen();
+    if (_logbuchKarte) { _logbuchKarte.remove(); _logbuchKarte = null; }
+    _logbuchLiveMarker = null;
+    _logbuchLiveCircle = null;
+    _logbuchAnsicht = "daten";
+    const _btnD = document.getElementById("btn-logbuch-daten");
+    const _btnK = document.getElementById("btn-logbuch-karte");
+    if (_btnD) _btnD.classList.add("aktiv");
+    if (_btnK) _btnK.classList.remove("aktiv");
+    const _kc = document.getElementById("logbuch-karte-container");
+    if (_kc) _kc.style.display = "none";
+    ["log-vorschau", "logbuch-status", "letzte-trackpunkte"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "";
+    });
     const alle = alleToernsLaden();
     const toern = alle.find(t => t.tripId === tripId);
     if (!toern) return;
@@ -2524,6 +2538,8 @@ function livePositionAktualisieren(lat, lon, sogKn) {
         _hauptKarte.panTo([lat, lon], { animate: true, duration: 0.5 });
         if (aktuellerToern) trackKarteRendern(aktuellerToern);
     }
+
+    logbuchKarteLiveAktualisieren(lat, lon);
 }
 
 function trackKarteRendern(toern) {
@@ -3100,4 +3116,84 @@ function schiffsfuehrerWechselnSpeichern() {
     statusSetzen("🧑‍✈️ " + name + " ist jetzt Schiffsführer.", "ok", 3000);
 
     schiffsfuehrerModalSchliessen();
+}
+
+// ── Logbuch-Karte ────────────────────────────────────────────────────────────
+let _logbuchKarte = null;
+let _logbuchLiveMarker = null;
+let _logbuchLiveCircle = null;
+let _logbuchAnsicht = "daten";
+
+function logbuchAnsichtWechseln(ansicht) {
+    _logbuchAnsicht = ansicht;
+
+    const datenEls = [
+        document.getElementById("log-vorschau"),
+        document.getElementById("logbuch-status"),
+        document.getElementById("letzte-trackpunkte")
+    ].filter(Boolean);
+
+    const karteContainer = document.getElementById("logbuch-karte-container");
+
+    document.getElementById("btn-logbuch-daten").classList.toggle("aktiv", ansicht === "daten");
+    document.getElementById("btn-logbuch-karte").classList.toggle("aktiv", ansicht === "karte");
+
+    if (ansicht === "daten") {
+        datenEls.forEach(el => el.style.display = "");
+        karteContainer.style.display = "none";
+    } else {
+        datenEls.forEach(el => el.style.display = "none");
+        karteContainer.style.display = "block";
+        logbuchKarteRendern();
+    }
+}
+
+function logbuchKarteRendern() {
+    const toern = aktuellerToern;
+    const container = document.getElementById("logbuch-karte");
+    if (!container) return;
+
+    if (!_logbuchKarte) {
+        _logbuchKarte = L.map(container, { zoomControl: true, attributionControl: false });
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 18
+        }).addTo(_logbuchKarte);
+    } else {
+        _logbuchKarte.eachLayer(layer => {
+            if (!(layer instanceof L.TileLayer)) _logbuchKarte.removeLayer(layer);
+        });
+        _logbuchLiveMarker = null;
+        _logbuchLiveCircle = null;
+    }
+
+    const pts = toern?.track?.points || [];
+    if (pts.length > 1) {
+        const latlngs = pts.map(p => [p.lat, p.lon]);
+        L.polyline(latlngs, { color: "#0ea5e9", weight: 3, opacity: 0.85 }).addTo(_logbuchKarte);
+        L.circleMarker(latlngs[0], { radius: 6, color: "#22c55e", fillOpacity: 1 }).addTo(_logbuchKarte);
+        L.circleMarker(latlngs[latlngs.length - 1], { radius: 6, color: "#ef4444", fillOpacity: 1 }).addTo(_logbuchKarte);
+        _logbuchKarte.fitBounds(L.latLngBounds(latlngs), { padding: [20, 20] });
+    } else if (pts.length === 1) {
+        _logbuchKarte.setView([pts[0].lat, pts[0].lon], 14);
+    } else {
+        _logbuchKarte.setView([47.5, 14.0], 7);
+    }
+
+    setTimeout(() => _logbuchKarte.invalidateSize(), 100);
+}
+
+function logbuchKarteLiveAktualisieren(lat, lon) {
+    if (_logbuchAnsicht !== "karte" || !_logbuchKarte) return;
+
+    if (!_logbuchLiveMarker) {
+        _logbuchLiveMarker = L.circleMarker([lat, lon], {
+            radius: 10, color: "#0ea5e9", fillColor: "#0ea5e9", fillOpacity: 0.9
+        }).addTo(_logbuchKarte);
+        _logbuchLiveCircle = L.circleMarker([lat, lon], {
+            radius: 20, color: "#0ea5e9", fillOpacity: 0.15
+        }).addTo(_logbuchKarte);
+    } else {
+        _logbuchLiveMarker.setLatLng([lat, lon]);
+        _logbuchLiveCircle.setLatLng([lat, lon]);
+    }
 }
