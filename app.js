@@ -1284,6 +1284,7 @@ function toernUebersichtRendern() {
 /* --- Aktionen --------------------------------------------------- */
 
 function toernLaden(tripId) {
+    try {
     trackStoppen();
     liveMarkerEntfernen();
     if (_logbuchKarte) { _logbuchKarte.remove(); _logbuchKarte = null; }
@@ -1333,6 +1334,9 @@ function toernLaden(tripId) {
     zeigeLogs();
     sicherheitSeiteAktualisieren();
     kontrolleSeiteAktualisieren();
+    } catch(e) {
+        alert("toernLaden Fehler: " + e.message + "\n" + e.stack);
+    }
 }
 
 function neuerToernAnlegen() {
