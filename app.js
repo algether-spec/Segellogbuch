@@ -1554,7 +1554,7 @@ function gpsUndWetterHolen(timeoutMs) {
                 resolve({ lat, lon, sog, weather, ort: ort || "" });
             },
             () => { clearTimeout(done); resolve(null); },
-            { maximumAge: 10000, timeout: timeoutMs, enableHighAccuracy: false }
+            { maximumAge: 10000, timeout: timeoutMs, enableHighAccuracy: true }
         );
     });
 }
@@ -2337,11 +2337,13 @@ function gpsAbfragen(ev) {
                     if (!ev.weather.description)   ev.weather.description   = w.description;
                 }
             }
+            if (typeof trackManöverPunkt === "function")
+                trackManöverPunkt(ev.pos.lat, ev.pos.lon, ev.pos.sog, ev.zeit);
             toernSpeichern(aktuellerToern);
             zeigeLogs();
         },
         () => { /* kein GPS verfügbar oder verweigert – ignorieren */ },
-        { maximumAge: 30000, timeout: 8000, enableHighAccuracy: false }
+        { maximumAge: 30000, timeout: 8000, enableHighAccuracy: true }
     );
 }
 
