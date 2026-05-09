@@ -2491,6 +2491,10 @@ let _liveMarker = null;
 let _liveCircle = null;
 let _karteKlickModus = false;
 let _trackpunktPendingLatLng = null;
+let _logbuchKarte = null;
+let _logbuchLiveMarker = null;
+let _logbuchLiveCircle = null;
+let _logbuchAnsicht = "daten";
 
 /* haversineKm() → track.js */
 
@@ -3123,10 +3127,6 @@ function schiffsfuehrerWechselnSpeichern() {
 }
 
 // ── Logbuch-Karte ────────────────────────────────────────────────────────────
-let _logbuchKarte = null;
-let _logbuchLiveMarker = null;
-let _logbuchLiveCircle = null;
-let _logbuchAnsicht = "daten";
 
 function logbuchAnsichtWechseln(ansicht) {
     _logbuchAnsicht = ansicht;
