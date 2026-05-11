@@ -663,11 +663,23 @@ button:active { opacity: 0.75; }
     position: sticky;
     top: 126px;
     z-index: 40;
-    background: #f4f6f9;
-    padding-bottom: 8px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px 14px 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+#log-card {
+    padding: 0;
+}
+
+#logbuch-daten-scroll {
+    min-height: 150px;
+    overflow-y: auto;
 }
 
 /* --- Log-Card Header (Titel + Rudergänger nebeneinander) -------- */
@@ -1932,7 +1944,7 @@ button:active { opacity: 0.75; }
     .sidebar-acc-body   { background: rgba(0,0,0,0.2); }
     .sidebar-acc-btn    { color: #cbd5e1; }
     .sidebar-acc-divider { background: rgba(255,255,255,0.1); }
-    .logbuch-sticky { background: #0f172a; }
+    .logbuch-sticky { background: #1e293b; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
     #ls-modus { color: #7dd3fc; }
     #ls-seit  { color: #fb923c; }
     .log-lade-status::after { border-color: #334155; border-top-color: #60a5fa; }
