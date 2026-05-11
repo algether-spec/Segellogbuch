@@ -601,6 +601,30 @@
     </button>
 </div>
 
+<!-- MOB-Notfall-Overlay -->
+<div id="mob-overlay" class="mob-overlay" style="display:none">
+    <div class="mob-overlay-content">
+        <div class="mob-titel">🆘 MANN ÜBER BORD</div>
+        <div class="mob-info-grid">
+            <span class="mob-label">Zeit</span>
+            <span id="mob-zeit-wert" class="mob-wert">—</span>
+            <span class="mob-label">GPS</span>
+            <span id="mob-pos-wert" class="mob-wert">wird ermittelt…</span>
+            <span class="mob-label">SOG</span>
+            <span id="mob-sog-wert" class="mob-wert">—</span>
+        </div>
+        <div class="mob-timer-box">
+            Vergangen: <span id="mob-timer-wert" class="mob-timer-zahl">00:00</span>
+        </div>
+        <button type="button" class="mob-geborgen-btn" onclick="mobGeborgen()">✅ GEBORGEN</button>
+        <textarea id="mob-notiz" class="mob-notiz-feld" placeholder="Notiz (optional)…" rows="2"></textarea>
+        <details class="mob-mayday-details">
+            <summary>📻 Mayday-Text (tippen zum öffnen)</summary>
+            <p id="mob-mayday-text" class="mob-mayday-text"></p>
+        </details>
+    </div>
+</div>
+
 <!-- Druckbereich (nur beim Drucken sichtbar) -->
 <div id="druck-bereich"></div>
 <div id="abschluss-druck-bereich"></div>
@@ -676,13 +700,13 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.114"></script>
-<script src="config.js?v=2.5.114"></script>
-<script src="track.js?v=2.5.114"></script>
-<script src="karte.js?v=2.5.114"></script>
-<script src="statistik.js?v=2.5.114"></script>
-<script src="modals.js?v=2.5.114"></script>
-<script src="app.js?v=2.5.114"></script>
+<script src="storage.js?v=2.5.117"></script>
+<script src="config.js?v=2.5.117"></script>
+<script src="track.js?v=2.5.117"></script>
+<script src="karte.js?v=2.5.117"></script>
+<script src="statistik.js?v=2.5.117"></script>
+<script src="modals.js?v=2.5.117"></script>
+<script src="app.js?v=2.5.117"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
