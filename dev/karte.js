@@ -30,6 +30,7 @@ function liveMarkerEntfernen() {
 }
 
 function livePositionAktualisieren(lat, lon, sogKn) {
+    logbuchKarteLiveAktualisieren(lat, lon);
     if (!_hauptKarte) return;
 
     if (!_liveMarker) {
@@ -66,7 +67,6 @@ function livePositionAktualisieren(lat, lon, sogKn) {
         if (aktuellerToern) trackKarteRendern(aktuellerToern);
     }
 
-    logbuchKarteLiveAktualisieren(lat, lon);
 }
 
 function trackKarteRendern(toern) {
