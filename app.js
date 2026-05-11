@@ -1620,6 +1620,68 @@ async function ortBestimmen(lat, lon) {
     } catch { return ""; }
 }
 
+/* --- MOB-Speicherung (bypass Validierung) ----------------------- */
+
+function mobSpeichern() {
+    const zeitIso = lokalZeitIso();
+    const letzte  = ladeLetzteWerte() || {};
+    const ev = {
+        id:           generateId(),
+        type:         "MOB",
+        kategorie:    "Allgemein",
+        antrieb:      "",
+        zeit:         zeitIso,
+        ort:          "",
+        rudergaenger: letzte.rudergaenger ? { name: letzte.rudergaenger } : null,
+        note:         "",
+        weather:      null,
+        pos:          null
+    };
+    if (aktuellerToern) {
+        if (!aktuellerToern.events) aktuellerToern.events = [];
+        aktuellerToern.events.push(ev);
+        toernSpeichern(aktuellerToern);
+        autoBackupSpeichern();
+        zeigeLogs();
+    }
+    statusSetzen("🆘 MOB – Mann über Bord! Zeit: " + zeitIso.slice(11, 16), "error", 30000);
+    gpsUndWetterHolen(8000).then(gps => {
+        if (!gps) return;
+        ev.pos = { lat: gps.lat, lon: gps.lon, sog: gps.sog };
+        if (typeof mobOverlayPositionAktualisieren === "function")
+            mobOverlayPositionAktualisieren(gps.lat, gps.lon, gps.sog);
+        if (aktuellerToern) {
+            if (typeof trackManöverPunkt === "function")
+                trackManöverPunkt(gps.lat, gps.lon, gps.sog, zeitIso);
+            toernSpeichern(aktuellerToern);
+        }
+    }).catch(() => {});
+    return ev;
+}
+
+function mobGeborgenSpeichern(notiz, dauerSek) {
+    if (!aktuellerToern) return;
+    const m = Math.floor(dauerSek / 60), s = dauerSek % 60;
+    const note = "Geborgen nach " + m + "min " + s + "s" + (notiz ? " – " + notiz : "");
+    const ev = {
+        id:           generateId(),
+        type:         "MOB geborgen",
+        kategorie:    "Allgemein",
+        antrieb:      "",
+        zeit:         lokalZeitIso(),
+        ort:          "",
+        rudergaenger: null,
+        note,
+        weather:      null,
+        pos:          null
+    };
+    aktuellerToern.events.push(ev);
+    toernSpeichern(aktuellerToern);
+    autoBackupSpeichern();
+    zeigeLogs();
+    gpsAbfragen(ev);
+}
+
 function gpsAbfragen(ev) {
     if (!navigator.geolocation || !aktuellerToern) return;
     if (stoppZustandLaden() !== "fahrt") return;

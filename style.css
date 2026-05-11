@@ -2450,3 +2450,130 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
 .btn-rudergaenger-shake {
     animation: rudergaenger-shake 0.4s ease-in-out;
 }
+
+/* --- MOB-Overlay ------------------------------------------------ */
+
+.mob-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: #7f1d1d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.mob-overlay-content {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mob-titel {
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    text-align: center;
+    letter-spacing: 1px;
+    animation: mob-puls 1.2s ease-in-out infinite;
+}
+
+@keyframes mob-puls {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.55; }
+}
+
+.mob-info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 14px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.mob-label {
+    color: #fca5a5;
+    font-size: 13px;
+    font-weight: 700;
+    align-self: center;
+}
+
+.mob-wert {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.mob-timer-box {
+    text-align: center;
+    color: #fca5a5;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.mob-timer-zahl {
+    color: #fff;
+    font-size: 36px;
+    font-weight: 900;
+    font-family: monospace;
+    display: block;
+    margin-top: 4px;
+}
+
+.mob-geborgen-btn {
+    width: 100%;
+    padding: 18px;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(22,163,74,0.5);
+    letter-spacing: 1px;
+}
+
+.mob-geborgen-btn:active { opacity: 0.85; }
+
+.mob-notiz-feld {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    font-size: 14px;
+    resize: none;
+}
+
+.mob-notiz-feld::placeholder { color: #fca5a5; }
+
+.mob-mayday-details {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fca5a5;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.mob-mayday-details summary {
+    font-weight: 700;
+    list-style: none;
+    color: #fca5a5;
+}
+
+.mob-mayday-text {
+    margin-top: 10px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.6;
+    font-style: italic;
+}
