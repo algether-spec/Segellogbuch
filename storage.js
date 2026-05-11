@@ -39,6 +39,7 @@ function speichereToerns(toerns) {
 function alleToernsLaden() { return ladeToerns(); }
 
 function toernSpeichern(toern) {
+    if (!toern) return;
     const alle = ladeToerns();
     const idx = alle.findIndex(t => t.tripId === toern.tripId);
     idx >= 0 ? alle[idx] = toern : alle.push(toern);
