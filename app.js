@@ -1360,6 +1360,7 @@ function hauptTabWechseln(tabId) {
     /* Logbuch-Sticky nur beim Logbuch-Tab anzeigen */
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(!!aktuellerToern && !_aktiveSeitenId && tabId === "tab-logbuch");
+    requestAnimationFrame(logbuchScrollHoeheAnpassen);
     /* Klick-Modus abbrechen wenn Karte verlassen */
     if (tabId !== "tab-karte" && _karteKlickModus) trackPunktHinzufuegen();
     /* Popup und Sidebar schließen wenn Karte verlassen */
@@ -1432,6 +1433,7 @@ function tabInhaltToggeln() {
     /* Logbuch-Sticky: sichtbar wenn Törn aktiv, Hauptbereich sichtbar, Logbuch-Tab aktiv */
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(aktiv && !_aktiveSeitenId && _aktiverHauptTab === "tab-logbuch");
+    requestAnimationFrame(logbuchScrollHoeheAnpassen);
     const subtitle = document.getElementById("header-subtitle");
     if (subtitle) {
         subtitle.textContent = aktiv
@@ -1440,6 +1442,21 @@ function tabInhaltToggeln() {
     }
 }
 
+
+/* --- Logbuch Scroll-Höhe ---------------------------------------- */
+
+function logbuchScrollHoeheAnpassen() {
+    const sticky = document.getElementById("logbuch-sticky");
+    const scroll = document.getElementById("logbuch-daten-scroll");
+    if (!sticky || !scroll || sticky.hidden) return;
+    const bottomBar = document.querySelector(".bottom-bar");
+    const stickyBottom = sticky.getBoundingClientRect().bottom;
+    const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
+    const hoehe = Math.max(150, window.innerHeight - stickyBottom - bottomH - 16);
+    scroll.style.height = hoehe + "px";
+}
+
+window.addEventListener("resize", logbuchScrollHoeheAnpassen);
 
 /* --- Sonnenmodus ------------------------------------------------ */
 

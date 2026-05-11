@@ -678,8 +678,7 @@ button:active { opacity: 0.75; }
 }
 
 #logbuch-daten-scroll {
-    height: calc(100svh - 600px);
-    min-height: 160px;
+    min-height: 150px;
     overflow-y: auto;
 }
 
