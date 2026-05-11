@@ -260,8 +260,71 @@ function kontrolleAbschliessen() {
 
 /* --- Floating Buttons ------------------------------------------- */
 
+let _mobTimerInterval = null;
+let _mobStartTime     = null;
+
 function mobAusloesen() {
-    schnellEintragSpeichern("MOB");
+    const ev = mobSpeichern();
+    mobOverlayZeigen(ev);
+}
+
+function mobOverlayZeigen(ev) {
+    _mobStartTime = Date.now();
+
+    const overlay = document.getElementById("mob-overlay");
+    if (!overlay) return;
+    overlay.style.display = "flex";
+
+    document.getElementById("mob-zeit-wert").textContent  = ev.zeit.slice(11, 16);
+    document.getElementById("mob-pos-wert").textContent   = "wird ermittelt…";
+    document.getElementById("mob-sog-wert").textContent   = "—";
+    document.getElementById("mob-timer-wert").textContent = "00:00";
+    document.getElementById("mob-notiz").value            = "";
+
+    const schiff = aktuellerToern?.shipData?.name || "Unbekanntes Schiff";
+    const crew   = aktuellerToern?.crew?.length   ?? "?";
+    document.getElementById("mob-mayday-text").textContent =
+        "Mayday Mayday Mayday – " + schiff + " – Position wird ermittelt – " +
+        "Mann über Bord – " + crew + " Personen verbleibend – Über.";
+
+    clearInterval(_mobTimerInterval);
+    _mobTimerInterval = setInterval(() => {
+        const sek = Math.floor((Date.now() - _mobStartTime) / 1000);
+        const m   = String(Math.floor(sek / 60)).padStart(2, "0");
+        const s   = String(sek % 60).padStart(2, "0");
+        document.getElementById("mob-timer-wert").textContent = m + ":" + s;
+    }, 1000);
+}
+
+function mobOverlayPositionAktualisieren(lat, lon, sog) {
+    const posEl = document.getElementById("mob-pos-wert");
+    if (posEl) posEl.textContent = lat.toFixed(4) + ", " + lon.toFixed(4);
+    const sogEl = document.getElementById("mob-sog-wert");
+    if (sogEl) sogEl.textContent = (sog != null ? sog : "—") + " kn";
+
+    const schiff = aktuellerToern?.shipData?.name || "Unbekanntes Schiff";
+    const crew   = aktuellerToern?.crew?.length   ?? "?";
+    const mtEl   = document.getElementById("mob-mayday-text");
+    if (mtEl) mtEl.textContent =
+        "Mayday Mayday Mayday – " + schiff + " – Position " +
+        lat.toFixed(4) + ", " + lon.toFixed(4) +
+        " – Mann über Bord – " + crew + " Personen verbleibend – Über.";
+}
+
+function mobGeborgen() {
+    clearInterval(_mobTimerInterval);
+    _mobTimerInterval = null;
+
+    const dauerSek = _mobStartTime ? Math.floor((Date.now() - _mobStartTime) / 1000) : 0;
+    const notiz    = document.getElementById("mob-notiz")?.value.trim() || "";
+
+    if (typeof mobGeborgenSpeichern === "function") {
+        mobGeborgenSpeichern(notiz, dauerSek);
+    }
+
+    const overlay = document.getElementById("mob-overlay");
+    if (overlay) overlay.style.display = "none";
+    _mobStartTime = null;
 }
 
 function mobButtonInit() {
