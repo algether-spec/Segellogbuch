@@ -344,18 +344,20 @@ function trackpunktZeitAbbrechen() {
 function logbuchAnsichtWechseln(ansicht) {
     _logbuchAnsicht = ansicht;
 
-    const datenScroll  = document.getElementById("logbuch-daten-scroll");
+    const datenScroll    = document.getElementById("logbuch-daten-scroll");
     const karteContainer = document.getElementById("logbuch-karte-container");
+    const btnDaten       = document.getElementById("btn-logbuch-daten");
+    const btnKarte       = document.getElementById("btn-logbuch-karte");
 
-    document.getElementById("btn-logbuch-daten").classList.toggle("aktiv", ansicht === "daten");
-    document.getElementById("btn-logbuch-karte").classList.toggle("aktiv", ansicht === "karte");
+    if (btnDaten) btnDaten.classList.toggle("aktiv", ansicht === "daten");
+    if (btnKarte) btnKarte.classList.toggle("aktiv", ansicht === "karte");
 
     if (ansicht === "daten") {
-        if (datenScroll) datenScroll.style.display = "";
-        karteContainer.style.display = "none";
+        if (datenScroll)    datenScroll.style.display    = "";
+        if (karteContainer) karteContainer.style.display = "none";
     } else {
-        if (datenScroll) datenScroll.style.display = "none";
-        karteContainer.style.display = "block";
+        if (datenScroll)    datenScroll.style.display    = "none";
+        if (karteContainer) karteContainer.style.display = "block";
         logbuchKarteRendern();
     }
 }
