@@ -332,10 +332,10 @@ function mobButtonInit() {
     if (!btn) return;
     let _mobTimer = null;
     let _mobInterval = null;
-    let _mobCountdown = 2;
+    let _mobCountdown = 1;
 
     function mobStart() {
-        _mobCountdown = 2;
+        _mobCountdown = 1;
         btn.style.transform = "scale(0.95)";
         _mobInterval = setInterval(() => {
             _mobCountdown--;
@@ -353,7 +353,7 @@ function mobButtonInit() {
         clearInterval(_mobInterval);
         _mobTimer = null;
         _mobInterval = null;
-        _mobCountdown = 3;
+        _mobCountdown = 1;
         btn.querySelector("span").textContent = "MOB";
         btn.style.transform = "";
     }
@@ -362,6 +362,7 @@ function mobButtonInit() {
     btn.addEventListener("pointerup", mobAbbrechen);
     btn.addEventListener("pointerleave", mobAbbrechen);
     btn.addEventListener("pointercancel", mobAbbrechen);
+    btn.addEventListener("contextmenu", e => e.preventDefault());
 }
 
 mobButtonInit();
