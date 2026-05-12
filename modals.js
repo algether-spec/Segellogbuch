@@ -350,7 +350,7 @@ function mobGeborgen() {
     const notiz    = document.getElementById("mob-notiz")?.value.trim() || "";
 
     if (typeof mobGeborgenSpeichern === "function") {
-        mobGeborgenSpeichern(notiz, dauerSek);
+        mobGeborgenSpeichern(notiz, dauerSek, _mobTyp);
     }
 
     const overlay = document.getElementById("mob-overlay");
