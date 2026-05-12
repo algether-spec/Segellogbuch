@@ -3,7 +3,7 @@
    App-Version und Auto-Update-Logik
 ====================== */
 
-const APP_VERSION = "2.5.123-dev";
+const APP_VERSION = "2.5.124-dev";
 let _updateIntervalId = null;
 
 function updateButtonInit() {
@@ -49,17 +49,23 @@ function updateHinweisZeigen(neueVersion) {
 }
 
 async function updateErzwingen() {
+    const zeitlimit = new Promise(resolve => setTimeout(resolve, 5000));
     try {
-        /* 1. Alle SW-Caches löschen – localStorage bleibt unangetastet */
-        if ("caches" in window) {
-            const keys = await caches.keys();
-            await Promise.all(keys.map(k => caches.delete(k)));
-        }
-        /* 2. Service Worker deregistrieren */
-        if ("serviceWorker" in navigator) {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map(r => r.unregister()));
-        }
+        await Promise.race([
+            (async () => {
+                /* 1. Alle SW-Caches löschen – localStorage bleibt unangetastet */
+                if ("caches" in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+                /* 2. Service Worker deregistrieren */
+                if ("serviceWorker" in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(regs.map(r => r.unregister()));
+                }
+            })(),
+            zeitlimit  /* Timeout nach 5s – auch bei schlechtem Netz */
+        ]);
     } catch (e) {
         console.warn("Update-Vorbereitung Fehler:", e);
     }

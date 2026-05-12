@@ -3,7 +3,7 @@
    Offline-Cache für Segellogbuch
 ====================== */
 
-const CACHE = "segellogbuch-v2.5.123-dev";
+const CACHE = "segellogbuch-v2.5.124-dev";
 
 const ASSETS = [
     "./index.html",
@@ -20,15 +20,16 @@ const ASSETS = [
     "./leaflet.js",
     "./leaflet.css",
     "./manifest.json",
-    "./version.json",
     "./testdaten-adria.json"
+    /* version.json absichtlich NICHT gecacht – immer frisch vom Netz */
 ];
 
 self.addEventListener("install", e => {
-    /* skipWaiting sofort – nicht erst nach dem Cachen */
-    self.skipWaiting();
+    /* skipWaiting erst NACH erfolgreichem Cache – verhindert kaputten Cache-Zustand */
     e.waitUntil(
-        caches.open(CACHE).then(c => c.addAll(ASSETS))
+        caches.open(CACHE)
+            .then(c => c.addAll(ASSETS))
+            .then(() => self.skipWaiting())
     );
 });
 
@@ -44,13 +45,14 @@ self.addEventListener("fetch", e => {
     const url = new URL(e.request.url);
     const sameOrigin = url.origin === self.location.origin;
 
-    /* version.json + sw.js: immer frisch vom Netz */
+    /* version.json + sw.js: immer frisch, HTTP-Cache umgehen */
     if (sameOrigin && (
         url.pathname.endsWith("/version.json") ||
         url.pathname.endsWith("/sw.js")
     )) {
         e.respondWith(
-            fetch(e.request).catch(() => caches.match(e.request))
+            fetch(new Request(e.request, { cache: "no-store" }))
+                .catch(() => caches.match(e.request))
         );
         return;
     }
