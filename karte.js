@@ -359,7 +359,20 @@ function logbuchAnsichtWechseln(ansicht) {
         if (datenScroll)    datenScroll.style.display    = "none";
         if (karteContainer) karteContainer.style.display = "block";
         logbuchKarteRendern();
+        requestAnimationFrame(logbuchKarteHoeheAnpassen);
     }
+}
+
+function logbuchKarteHoeheAnpassen() {
+    const sticky  = document.getElementById("logbuch-sticky");
+    const karte   = document.getElementById("logbuch-karte");
+    if (!sticky || !karte) return;
+    const bottomBar    = document.querySelector(".bottom-bar");
+    const stickyBottom = sticky.getBoundingClientRect().bottom;
+    const bottomH      = bottomBar ? bottomBar.offsetHeight : 70;
+    const hoehe        = Math.max(200, window.innerHeight - stickyBottom - bottomH - 16);
+    karte.style.height = hoehe + "px";
+    if (_logbuchKarte) _logbuchKarte.invalidateSize();
 }
 
 function logbuchKarteRendern() {
