@@ -687,6 +687,17 @@ button:active { opacity: 0.75; }
     isolation: isolate;
 }
 
+.logbuch-tiefen-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text, #1e293b);
+    cursor: pointer;
+    padding: 4px 2px;
+}
+
 /* --- Log-Card Header (Titel + Rudergänger nebeneinander) -------- */
 
 .log-card-header {

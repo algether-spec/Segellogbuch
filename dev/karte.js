@@ -14,7 +14,8 @@ let _logbuchKarte = null;
 let _logbuchLiveMarker = null;
 let _logbuchLiveCircle = null;
 let _logbuchAnsicht = "daten";
-let _logbuchSeaLayer = null;
+let _logbuchSeaLayer    = null;
+let _logbuchEmodnetLayer = null;
 
 /* haversineKm() → track.js */
 
@@ -355,6 +356,14 @@ function logbuchAnsichtWechseln(ansicht) {
     if (btnKarte) btnKarte.classList.toggle("aktiv", ansicht === "karte");
     if (btnSee)   btnSee.classList.toggle("aktiv",   ansicht === "opensea");
 
+    const tiefenBar = document.getElementById("logbuch-tiefen-bar");
+    if (tiefenBar) tiefenBar.style.display = (ansicht === "opensea") ? "" : "none";
+    if (ansicht !== "opensea") {
+        const cb = document.getElementById("cb-tiefen");
+        if (cb) cb.checked = false;
+        logbuchTiefenToggeln(false);
+    }
+
     if (ansicht === "daten") {
         if (datenScroll)    datenScroll.style.display    = "";
         if (karteContainer) karteContainer.style.display = "none";
@@ -365,6 +374,25 @@ function logbuchAnsichtWechseln(ansicht) {
         logbuchKarteRendern();
         logbuchSeaLayerAnpassen();
         requestAnimationFrame(logbuchKarteHoeheAnpassen);
+    }
+}
+
+function logbuchTiefenToggeln(aktiv) {
+    if (!_logbuchKarte) return;
+    if (aktiv) {
+        if (!_logbuchEmodnetLayer) {
+            _logbuchEmodnetLayer = L.tileLayer.wms(
+                "https://ows.emodnet-bathymetry.eu/wms",
+                { layers: "emodnet:mean_atlas_land", format: "image/png",
+                  transparent: true, opacity: 0.55,
+                  attribution: "© EMODnet Bathymetry" }
+            ).addTo(_logbuchKarte);
+        }
+    } else {
+        if (_logbuchEmodnetLayer) {
+            _logbuchKarte.removeLayer(_logbuchEmodnetLayer);
+            _logbuchEmodnetLayer = null;
+        }
     }
 }
 
