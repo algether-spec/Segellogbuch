@@ -606,6 +606,11 @@
 <!-- MOB-Notfall-Overlay -->
 <div id="mob-overlay" class="mob-overlay" style="display:none">
     <div class="mob-overlay-content">
+        <div class="mob-typ-bar">
+            <button id="mob-typ-mob"    class="mob-typ-btn aktiv" onclick="mobTypSetzen('mob')">🆘 MOB</button>
+            <button id="mob-typ-boje"   class="mob-typ-btn"       onclick="mobTypSetzen('boje')">🔵 Boje</button>
+            <button id="mob-typ-uebung" class="mob-typ-btn"       onclick="mobTypSetzen('uebung')">🎓 Übung</button>
+        </div>
         <div class="mob-titel">🆘 MANN ÜBER BORD</div>
         <div class="mob-info-grid">
             <span class="mob-label">Zeit</span>
@@ -622,7 +627,8 @@
         <textarea id="mob-notiz" class="mob-notiz-feld" placeholder="Notiz (optional)…" rows="2"></textarea>
         <details class="mob-mayday-details">
             <summary>📻 Mayday-Text (tippen zum öffnen)</summary>
-            <p id="mob-mayday-text" class="mob-mayday-text"></p>
+            <p id="mob-mayday-text-de" class="mob-mayday-text"></p>
+            <p id="mob-mayday-text-en" class="mob-mayday-text" style="margin-top:8px;opacity:0.75;font-style:italic"></p>
         </details>
     </div>
 </div>
@@ -702,13 +708,13 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.127-dev"></script>
-<script src="config.js?v=2.5.127-dev"></script>
-<script src="track.js?v=2.5.127-dev"></script>
-<script src="karte.js?v=2.5.127-dev"></script>
-<script src="statistik.js?v=2.5.127-dev"></script>
-<script src="modals.js?v=2.5.127-dev"></script>
-<script src="app.js?v=2.5.127-dev"></script>
+<script src="storage.js?v=2.5.128-dev"></script>
+<script src="config.js?v=2.5.128-dev"></script>
+<script src="track.js?v=2.5.128-dev"></script>
+<script src="karte.js?v=2.5.128-dev"></script>
+<script src="statistik.js?v=2.5.128-dev"></script>
+<script src="modals.js?v=2.5.128-dev"></script>
+<script src="app.js?v=2.5.128-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")

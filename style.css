@@ -2601,3 +2601,26 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
     line-height: 1.6;
     font-style: italic;
 }
+
+.mob-typ-bar {
+    display: flex;
+    gap: 6px;
+}
+
+.mob-typ-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    border-radius: 10px;
+    background: rgba(0,0,0,0.25);
+    color: #fca5a5;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mob-typ-btn.aktiv {
+    background: rgba(255,255,255,0.22);
+    border-color: #fff;
+    color: #fff;
+}
