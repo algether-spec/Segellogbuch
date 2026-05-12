@@ -683,6 +683,10 @@ button:active { opacity: 0.75; }
     overflow-y: auto;
 }
 
+#logbuch-karte {
+    isolation: isolate;
+}
+
 /* --- Log-Card Header (Titel + Rudergänger nebeneinander) -------- */
 
 .log-card-header {
@@ -1576,6 +1580,7 @@ button:active { opacity: 0.75; }
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid #e2e8f0;
+    isolation: isolate;
 }
 
 /* --- Track-Karte (Statistik) ------------------------------------ */
@@ -1586,6 +1591,7 @@ button:active { opacity: 0.75; }
     overflow: hidden;
     margin-bottom: 12px;
     border: 1px solid #e2e8f0;
+    isolation: isolate;
 }
 
 .track-tabelle-wrap {
