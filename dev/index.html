@@ -391,13 +391,7 @@
                     <button type="button" id="btn-logbuch-karte" class="logbuch-toggle-btn" onclick="logbuchAnsichtWechseln('karte')">🗺 Karte</button>
                     <button type="button" id="btn-logbuch-opensea" class="logbuch-toggle-btn" onclick="logbuchAnsichtWechseln('opensea')">⚓ See</button>
                 </div>
-                <!-- EMODnet Tiefen-Toggle – nur bei See-Ansicht sichtbar -->
-                <div id="logbuch-tiefen-bar" style="display:none;margin:4px 0 0">
-                    <label class="logbuch-tiefen-label">
-                        <input type="checkbox" id="cb-tiefen" onchange="logbuchTiefenToggeln(this.checked)">
-                        📊 Tiefen (EMODnet)
-                    </label>
-                </div>
+
             </div>
 
             <div class="card" id="log-card">
@@ -708,13 +702,13 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.125-dev"></script>
-<script src="config.js?v=2.5.125-dev"></script>
-<script src="track.js?v=2.5.125-dev"></script>
-<script src="karte.js?v=2.5.125-dev"></script>
-<script src="statistik.js?v=2.5.125-dev"></script>
-<script src="modals.js?v=2.5.125-dev"></script>
-<script src="app.js?v=2.5.125-dev"></script>
+<script src="storage.js?v=2.5.126-dev"></script>
+<script src="config.js?v=2.5.126-dev"></script>
+<script src="track.js?v=2.5.126-dev"></script>
+<script src="karte.js?v=2.5.126-dev"></script>
+<script src="statistik.js?v=2.5.126-dev"></script>
+<script src="modals.js?v=2.5.126-dev"></script>
+<script src="app.js?v=2.5.126-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")

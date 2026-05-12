@@ -18,6 +18,7 @@ let _logbuchSeaLayer      = null;
 let _logbuchTiefenLayer   = null;
 let _logbuchTiefenAbort   = null;
 let _logbuchEmodnetAktiv  = false;
+let _logbuchSeeModus      = "aus"; /* "aus" | "see" | "tiefen" */
 
 /* haversineKm() → track.js */
 
@@ -356,13 +357,15 @@ function logbuchAnsichtWechseln(ansicht) {
 
     if (btnDaten) btnDaten.classList.toggle("aktiv", ansicht === "daten");
     if (btnKarte) btnKarte.classList.toggle("aktiv", ansicht === "karte");
-    if (btnSee)   btnSee.classList.toggle("aktiv",   ansicht === "opensea");
 
-    const tiefenBar = document.getElementById("logbuch-tiefen-bar");
-    if (tiefenBar) tiefenBar.style.display = (ansicht === "opensea") ? "" : "none";
-    if (ansicht !== "opensea") {
-        const cb = document.getElementById("cb-tiefen");
-        if (cb) cb.checked = false;
+    if (ansicht === "opensea") {
+        /* Zyklus: see → tiefen → see → ... */
+        _logbuchSeeModus = (_logbuchSeeModus === "see") ? "tiefen" : "see";
+        if (btnSee) { btnSee.classList.add("aktiv"); btnSee.textContent = _logbuchSeeModus === "tiefen" ? "⚓ See 📊" : "⚓ See"; }
+        logbuchTiefenToggeln(_logbuchSeeModus === "tiefen");
+    } else {
+        _logbuchSeeModus = "aus";
+        if (btnSee) { btnSee.classList.remove("aktiv"); btnSee.textContent = "⚓ See"; }
         logbuchTiefenToggeln(false);
         if (_logbuchKarte) _logbuchKarte.off("moveend", _logbuchTiefenOnMove);
     }
