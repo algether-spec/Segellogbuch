@@ -700,18 +700,20 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.119-dev"></script>
-<script src="config.js?v=2.5.119-dev"></script>
-<script src="track.js?v=2.5.119-dev"></script>
-<script src="karte.js?v=2.5.119-dev"></script>
-<script src="statistik.js?v=2.5.119-dev"></script>
-<script src="modals.js?v=2.5.119-dev"></script>
-<script src="app.js?v=2.5.119-dev"></script>
+<script src="storage.js?v=2.5.120-dev"></script>
+<script src="config.js?v=2.5.120-dev"></script>
+<script src="track.js?v=2.5.120-dev"></script>
+<script src="karte.js?v=2.5.120-dev"></script>
+<script src="statistik.js?v=2.5.120-dev"></script>
+<script src="modals.js?v=2.5.120-dev"></script>
+<script src="app.js?v=2.5.120-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
         .catch(err => console.warn("SW-Registrierung fehlgeschlagen:", err));
-    /* controllerchange: kein Auto-Reload – Update-Banner übernimmt Benachrichtigung */
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+        setTimeout(() => window.location.reload(), 1000);
+    });
 }
 /* Cache-Busting-Parameter nach Update-Reload entfernen */
 if (window.location.search.startsWith("?v=")) {
