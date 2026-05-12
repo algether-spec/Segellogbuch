@@ -14,6 +14,7 @@ let _logbuchKarte = null;
 let _logbuchLiveMarker = null;
 let _logbuchLiveCircle = null;
 let _logbuchAnsicht = "daten";
+let _logbuchSeaLayer = null;
 
 /* haversineKm() → track.js */
 
@@ -348,18 +349,39 @@ function logbuchAnsichtWechseln(ansicht) {
     const karteContainer = document.getElementById("logbuch-karte-container");
     const btnDaten       = document.getElementById("btn-logbuch-daten");
     const btnKarte       = document.getElementById("btn-logbuch-karte");
+    const btnSee         = document.getElementById("btn-logbuch-opensea");
 
     if (btnDaten) btnDaten.classList.toggle("aktiv", ansicht === "daten");
     if (btnKarte) btnKarte.classList.toggle("aktiv", ansicht === "karte");
+    if (btnSee)   btnSee.classList.toggle("aktiv",   ansicht === "opensea");
 
     if (ansicht === "daten") {
         if (datenScroll)    datenScroll.style.display    = "";
         if (karteContainer) karteContainer.style.display = "none";
+        logbuchSeaLayerAnpassen();
     } else {
         if (datenScroll)    datenScroll.style.display    = "none";
         if (karteContainer) karteContainer.style.display = "block";
         logbuchKarteRendern();
+        logbuchSeaLayerAnpassen();
         requestAnimationFrame(logbuchKarteHoeheAnpassen);
+    }
+}
+
+function logbuchSeaLayerAnpassen() {
+    if (!_logbuchKarte) return;
+    if (_logbuchAnsicht === "opensea") {
+        if (!_logbuchSeaLayer) {
+            _logbuchSeaLayer = L.tileLayer(
+                "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
+                { attribution: "© OpenSeaMap", maxZoom: 18, opacity: 0.85 }
+            ).addTo(_logbuchKarte);
+        }
+    } else {
+        if (_logbuchSeaLayer) {
+            _logbuchKarte.removeLayer(_logbuchSeaLayer);
+            _logbuchSeaLayer = null;
+        }
     }
 }
 
