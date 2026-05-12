@@ -14,8 +14,10 @@ let _logbuchKarte = null;
 let _logbuchLiveMarker = null;
 let _logbuchLiveCircle = null;
 let _logbuchAnsicht = "daten";
-let _logbuchSeaLayer    = null;
-let _logbuchEmodnetLayer = null;
+let _logbuchSeaLayer      = null;
+let _logbuchTiefenLayer   = null;
+let _logbuchTiefenAbort   = null;
+let _logbuchEmodnetAktiv  = false;
 
 /* haversineKm() → track.js */
 
@@ -362,6 +364,7 @@ function logbuchAnsichtWechseln(ansicht) {
         const cb = document.getElementById("cb-tiefen");
         if (cb) cb.checked = false;
         logbuchTiefenToggeln(false);
+        if (_logbuchKarte) _logbuchKarte.off("moveend", _logbuchTiefenOnMove);
     }
 
     if (ansicht === "daten") {
@@ -378,21 +381,51 @@ function logbuchAnsichtWechseln(ansicht) {
 }
 
 function logbuchTiefenToggeln(aktiv) {
+    _logbuchEmodnetAktiv = aktiv;
+    if (!aktiv) {
+        if (_logbuchTiefenAbort) { _logbuchTiefenAbort.abort(); _logbuchTiefenAbort = null; }
+        if (_logbuchTiefenLayer && _logbuchKarte) { _logbuchKarte.removeLayer(_logbuchTiefenLayer); _logbuchTiefenLayer = null; }
+        return;
+    }
     if (!_logbuchKarte) return;
-    if (aktiv) {
-        if (!_logbuchEmodnetLayer) {
-            _logbuchEmodnetLayer = L.tileLayer.wms(
-                "https://ows.emodnet-bathymetry.eu/wms",
-                { layers: "emodnet:mean_atlas_land", format: "image/png",
-                  transparent: true, opacity: 0.55,
-                  attribution: "© EMODnet Bathymetry" }
-            ).addTo(_logbuchKarte);
-        }
-    } else {
-        if (_logbuchEmodnetLayer) {
-            _logbuchKarte.removeLayer(_logbuchEmodnetLayer);
-            _logbuchEmodnetLayer = null;
-        }
+    logbuchTiefenLaden();
+    _logbuchKarte.on("moveend", _logbuchTiefenOnMove);
+}
+
+function _logbuchTiefenOnMove() {
+    if (_logbuchEmodnetAktiv) logbuchTiefenLaden();
+}
+
+async function logbuchTiefenLaden() {
+    if (!_logbuchKarte || !_logbuchEmodnetAktiv) return;
+    if (_logbuchTiefenAbort) _logbuchTiefenAbort.abort();
+    _logbuchTiefenAbort = new AbortController();
+    if (_logbuchTiefenLayer) { _logbuchKarte.removeLayer(_logbuchTiefenLayer); _logbuchTiefenLayer = null; }
+
+    const b = _logbuchKarte.getBounds();
+    const url = "https://ows.emodnet-bathymetry.eu/wfs?SERVICE=WFS&VERSION=2.0.0" +
+        "&REQUEST=GetFeature&TYPENAMES=emodnet:contours&OUTPUTFORMAT=application/json" +
+        "&BBOX=" + b.getWest() + "," + b.getSouth() + "," + b.getEast() + "," + b.getNorth() + ",EPSG:4326" +
+        "&count=300";
+    try {
+        const res  = await fetch(url, { signal: _logbuchTiefenAbort.signal });
+        const data = await res.json();
+        _logbuchTiefenLayer = L.geoJSON(data, {
+            style: f => {
+                const d = Math.abs(f.properties.elevation || 0);
+                return {
+                    color:   d < 20 ? "#93c5fd" : d < 50 ? "#60a5fa" : d < 100 ? "#2563eb" : d < 200 ? "#1d4ed8" : "#1e3a8a",
+                    weight:  d % 100 === 0 ? 2.5 : 1,
+                    opacity: 0.75
+                };
+            },
+            onEachFeature: (f, layer) => {
+                layer.bindTooltip(Math.abs(f.properties.elevation || 0) + " m",
+                    { sticky: true, direction: "top" });
+            }
+        }).addTo(_logbuchKarte);
+    } catch (e) {
+        if (e.name !== "AbortError") console.warn("Tiefenlinien:", e);
     }
 }
 
