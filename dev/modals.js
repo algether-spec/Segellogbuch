@@ -262,10 +262,51 @@ function kontrolleAbschliessen() {
 
 let _mobTimerInterval = null;
 let _mobStartTime     = null;
+let _mobTyp           = "mob";   /* "mob" | "boje" | "uebung" */
+let _mobEvent         = null;    /* Referenz auf aktives Event */
+let _mobPos           = null;    /* letzte GPS-Position */
 
 function mobAusloesen() {
-    const ev = mobSpeichern();
+    _mobTyp   = "mob";
+    _mobPos   = null;
+    const ev  = mobSpeichern();
+    _mobEvent = ev;
     mobOverlayZeigen(ev);
+}
+
+function mobTypSetzen(typ) {
+    _mobTyp = typ;
+    ["mob", "boje", "uebung"].forEach(t => {
+        const b = document.getElementById("mob-typ-" + t);
+        if (b) b.classList.toggle("aktiv", t === typ);
+    });
+    const titelEl = document.querySelector(".mob-titel");
+    const titel = { mob: "🆘 MANN ÜBER BORD", boje: "🔵 BOJE ÜBER BORD", uebung: "🎓 MOB ÜBUNG" };
+    if (titelEl) titelEl.textContent = titel[typ] || titel.mob;
+    if (_mobEvent && typeof aktuellerToern !== "undefined" && aktuellerToern) {
+        const typen = { mob: "MOB", boje: "Boje über Bord", uebung: "MOB Übung" };
+        _mobEvent.type = typen[typ] || "MOB";
+        if (typeof toernSpeichern === "function") toernSpeichern(aktuellerToern);
+    }
+    mobMaydayTextAktualisieren(_mobPos?.lat, _mobPos?.lon);
+}
+
+function mobMaydayTextAktualisieren(lat, lon) {
+    const deEl  = document.getElementById("mob-mayday-text-de");
+    const enEl  = document.getElementById("mob-mayday-text-en");
+    const schiff = (typeof aktuellerToern !== "undefined" && aktuellerToern?.shipData?.name) || "Unbekanntes Schiff";
+    const crew   = (typeof aktuellerToern !== "undefined" && aktuellerToern?.crew?.length)   ?? "?";
+    const pos    = lat ? lat.toFixed(4) + ", " + lon.toFixed(4) : "wird ermittelt";
+
+    if (_mobTyp === "uebung") {
+        if (deEl) deEl.textContent = "⚠️ Dies ist eine Übung – kein echter Notfall.";
+        if (enEl) enEl.textContent = "⚠️ This is a drill – not a real emergency.";
+        return;
+    }
+    const geDE = _mobTyp === "boje" ? "Boje über Bord" : "Mann über Bord";
+    const geEN = _mobTyp === "boje" ? "Buoy overboard"  : "Man Overboard";
+    if (deEl) deEl.textContent = "Mayday Mayday Mayday – " + schiff + " – Position " + pos + " – " + geDE + " – " + crew + " Personen verbleibend – Über.";
+    if (enEl) enEl.textContent = "Mayday Mayday Mayday – " + schiff + " – Position " + pos + " – " + geEN + " – " + crew + " persons on board – Over.";
 }
 
 function mobOverlayZeigen(ev) {
@@ -280,12 +321,8 @@ function mobOverlayZeigen(ev) {
     document.getElementById("mob-sog-wert").textContent   = "—";
     document.getElementById("mob-timer-wert").textContent = "00:00";
     document.getElementById("mob-notiz").value            = "";
-
-    const schiff = aktuellerToern?.shipData?.name || "Unbekanntes Schiff";
-    const crew   = aktuellerToern?.crew?.length   ?? "?";
-    document.getElementById("mob-mayday-text").textContent =
-        "Mayday Mayday Mayday – " + schiff + " – Position wird ermittelt – " +
-        "Mann über Bord – " + crew + " Personen verbleibend – Über.";
+    /* Typ-Buttons zurücksetzen */
+    mobTypSetzen("mob");
 
     clearInterval(_mobTimerInterval);
     _mobTimerInterval = setInterval(() => {
@@ -301,14 +338,8 @@ function mobOverlayPositionAktualisieren(lat, lon, sog) {
     if (posEl) posEl.textContent = lat.toFixed(4) + ", " + lon.toFixed(4);
     const sogEl = document.getElementById("mob-sog-wert");
     if (sogEl) sogEl.textContent = (sog != null ? sog : "—") + " kn";
-
-    const schiff = aktuellerToern?.shipData?.name || "Unbekanntes Schiff";
-    const crew   = aktuellerToern?.crew?.length   ?? "?";
-    const mtEl   = document.getElementById("mob-mayday-text");
-    if (mtEl) mtEl.textContent =
-        "Mayday Mayday Mayday – " + schiff + " – Position " +
-        lat.toFixed(4) + ", " + lon.toFixed(4) +
-        " – Mann über Bord – " + crew + " Personen verbleibend – Über.";
+    _mobPos = { lat, lon };
+    mobMaydayTextAktualisieren(lat, lon);
 }
 
 function mobGeborgen() {
@@ -325,6 +356,8 @@ function mobGeborgen() {
     const overlay = document.getElementById("mob-overlay");
     if (overlay) overlay.style.display = "none";
     _mobStartTime = null;
+    _mobEvent     = null;
+    _mobPos       = null;
 }
 
 function mobButtonInit() {
