@@ -1456,7 +1456,11 @@ function logbuchScrollHoeheAnpassen() {
     scroll.style.height = hoehe + "px";
 }
 
-window.addEventListener("resize", logbuchScrollHoeheAnpassen);
+window.addEventListener("resize", () => {
+    logbuchScrollHoeheAnpassen();
+    if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "karte")
+        logbuchKarteHoeheAnpassen();
+});
 
 /* --- Sonnenmodus ------------------------------------------------ */
 

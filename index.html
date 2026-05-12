@@ -396,7 +396,7 @@
 
                 <!-- Kompakte Karte (versteckt) -->
                 <div id="logbuch-karte-container" style="display:none;margin-bottom:10px">
-                    <div id="logbuch-karte" style="width:100%;height:200px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"></div>
+                    <div id="logbuch-karte" style="width:100%;border-radius:12px;overflow:hidden;border:1px solid var(--border)"></div>
                 </div>
 
                 <div id="logbuch-daten-scroll" style="overflow-y:auto">
@@ -700,18 +700,20 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.117"></script>
-<script src="config.js?v=2.5.117"></script>
-<script src="track.js?v=2.5.117"></script>
-<script src="karte.js?v=2.5.117"></script>
-<script src="statistik.js?v=2.5.117"></script>
-<script src="modals.js?v=2.5.117"></script>
-<script src="app.js?v=2.5.117"></script>
+<script src="storage.js?v=2.5.120"></script>
+<script src="config.js?v=2.5.120"></script>
+<script src="track.js?v=2.5.120"></script>
+<script src="karte.js?v=2.5.120"></script>
+<script src="statistik.js?v=2.5.120"></script>
+<script src="modals.js?v=2.5.120"></script>
+<script src="app.js?v=2.5.120"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
         .catch(err => console.warn("SW-Registrierung fehlgeschlagen:", err));
-    /* controllerchange: kein Auto-Reload – Update-Banner übernimmt Benachrichtigung */
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+        setTimeout(() => window.location.reload(), 1000);
+    });
 }
 /* Cache-Busting-Parameter nach Update-Reload entfernen */
 if (window.location.search.startsWith("?v=")) {
