@@ -1663,13 +1663,24 @@ function mobSpeichern() {
     return ev;
 }
 
-function mobGeborgenSpeichern(notiz, dauerSek) {
+function mobGeborgenSpeichern(notiz, dauerSek, mobTyp) {
     if (!aktuellerToern) return;
     const m = Math.floor(dauerSek / 60), s = dauerSek % 60;
-    const note = "Geborgen nach " + m + "min " + s + "s" + (notiz ? " – " + notiz : "");
+    const dauer = m + "min " + s + "s";
+    const beschriftung = {
+        mob:    "Mann über Bord geborgen nach " + dauer,
+        boje:   "Boje geborgen nach " + dauer,
+        uebung: "MOB Übung beendet nach " + dauer
+    };
+    const eventTyp = {
+        mob:    "MOB geborgen",
+        boje:   "Boje geborgen",
+        uebung: "MOB Übung beendet"
+    };
+    const note = (beschriftung[mobTyp] || beschriftung.mob) + (notiz ? " – " + notiz : "");
     const ev = {
         id:           generateId(),
-        type:         "MOB geborgen",
+        type:         eventTyp[mobTyp] || "MOB geborgen",
         kategorie:    "Allgemein",
         antrieb:      "",
         zeit:         lokalZeitIso(),
