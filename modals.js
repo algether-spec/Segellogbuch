@@ -287,6 +287,7 @@ function mobTypSetzen(typ) {
         const typen = { mob: "MOB", boje: "Boje über Bord", uebung: "MOB Übung" };
         _mobEvent.type = typen[typ] || "MOB";
         if (typeof toernSpeichern === "function") toernSpeichern(aktuellerToern);
+        if (typeof zeigeLogs === "function") zeigeLogs();
     }
     mobMaydayTextAktualisieren(_mobPos?.lat, _mobPos?.lon);
 }
