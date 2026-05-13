@@ -14,6 +14,11 @@ let _logbuchKarte = null;
 let _logbuchLiveMarker = null;
 let _logbuchLiveCircle = null;
 let _logbuchAnsicht = "daten";
+let _logbuchSeaLayer      = null;
+let _logbuchTiefenLayer   = null;
+let _logbuchTiefenAbort   = null;
+let _logbuchEmodnetAktiv  = false;
+let _logbuchSeeModus      = "aus"; /* "aus" | "see" | "tiefen" */
 
 /* haversineKm() → track.js */
 
@@ -348,18 +353,99 @@ function logbuchAnsichtWechseln(ansicht) {
     const karteContainer = document.getElementById("logbuch-karte-container");
     const btnDaten       = document.getElementById("btn-logbuch-daten");
     const btnKarte       = document.getElementById("btn-logbuch-karte");
+    const btnSee         = document.getElementById("btn-logbuch-opensea");
 
     if (btnDaten) btnDaten.classList.toggle("aktiv", ansicht === "daten");
     if (btnKarte) btnKarte.classList.toggle("aktiv", ansicht === "karte");
 
+    if (ansicht === "opensea") {
+        /* Zyklus: see → tiefen → see → ... */
+        _logbuchSeeModus = (_logbuchSeeModus === "see") ? "tiefen" : "see";
+        if (btnSee) { btnSee.classList.add("aktiv"); btnSee.textContent = _logbuchSeeModus === "tiefen" ? "⚓ See 📊" : "⚓ See"; }
+        logbuchTiefenToggeln(_logbuchSeeModus === "tiefen");
+    } else {
+        _logbuchSeeModus = "aus";
+        if (btnSee) { btnSee.classList.remove("aktiv"); btnSee.textContent = "⚓ See"; }
+        logbuchTiefenToggeln(false);
+        if (_logbuchKarte) _logbuchKarte.off("moveend", _logbuchTiefenOnMove);
+    }
+
     if (ansicht === "daten") {
         if (datenScroll)    datenScroll.style.display    = "";
         if (karteContainer) karteContainer.style.display = "none";
+        logbuchSeaLayerAnpassen();
     } else {
         if (datenScroll)    datenScroll.style.display    = "none";
         if (karteContainer) karteContainer.style.display = "block";
         logbuchKarteRendern();
+        logbuchSeaLayerAnpassen();
         requestAnimationFrame(logbuchKarteHoeheAnpassen);
+    }
+}
+
+function logbuchTiefenToggeln(aktiv) {
+    _logbuchEmodnetAktiv = aktiv;
+    if (!aktiv) {
+        if (_logbuchTiefenAbort) { _logbuchTiefenAbort.abort(); _logbuchTiefenAbort = null; }
+        if (_logbuchTiefenLayer && _logbuchKarte) { _logbuchKarte.removeLayer(_logbuchTiefenLayer); _logbuchTiefenLayer = null; }
+        return;
+    }
+    if (!_logbuchKarte) return;
+    logbuchTiefenLaden();
+    _logbuchKarte.on("moveend", _logbuchTiefenOnMove);
+}
+
+function _logbuchTiefenOnMove() {
+    if (_logbuchEmodnetAktiv) logbuchTiefenLaden();
+}
+
+async function logbuchTiefenLaden() {
+    if (!_logbuchKarte || !_logbuchEmodnetAktiv) return;
+    if (_logbuchTiefenAbort) _logbuchTiefenAbort.abort();
+    _logbuchTiefenAbort = new AbortController();
+    if (_logbuchTiefenLayer) { _logbuchKarte.removeLayer(_logbuchTiefenLayer); _logbuchTiefenLayer = null; }
+
+    const b = _logbuchKarte.getBounds();
+    const url = "https://ows.emodnet-bathymetry.eu/wfs?SERVICE=WFS&VERSION=2.0.0" +
+        "&REQUEST=GetFeature&TYPENAMES=emodnet:contours&OUTPUTFORMAT=application/json" +
+        "&BBOX=" + b.getWest() + "," + b.getSouth() + "," + b.getEast() + "," + b.getNorth() + ",EPSG:4326" +
+        "&count=300";
+    try {
+        const res  = await fetch(url, { signal: _logbuchTiefenAbort.signal });
+        const data = await res.json();
+        _logbuchTiefenLayer = L.geoJSON(data, {
+            style: f => {
+                const d = Math.abs(f.properties.elevation || 0);
+                return {
+                    color:   d < 20 ? "#93c5fd" : d < 50 ? "#60a5fa" : d < 100 ? "#2563eb" : d < 200 ? "#1d4ed8" : "#1e3a8a",
+                    weight:  d % 100 === 0 ? 2.5 : 1,
+                    opacity: 0.75
+                };
+            },
+            onEachFeature: (f, layer) => {
+                layer.bindTooltip(Math.abs(f.properties.elevation || 0) + " m",
+                    { sticky: true, direction: "top" });
+            }
+        }).addTo(_logbuchKarte);
+    } catch (e) {
+        if (e.name !== "AbortError") console.warn("Tiefenlinien:", e);
+    }
+}
+
+function logbuchSeaLayerAnpassen() {
+    if (!_logbuchKarte) return;
+    if (_logbuchAnsicht === "opensea") {
+        if (!_logbuchSeaLayer) {
+            _logbuchSeaLayer = L.tileLayer(
+                "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
+                { attribution: "© OpenSeaMap", maxZoom: 18, opacity: 0.85 }
+            ).addTo(_logbuchKarte);
+        }
+    } else {
+        if (_logbuchSeaLayer) {
+            _logbuchKarte.removeLayer(_logbuchSeaLayer);
+            _logbuchSeaLayer = null;
+        }
     }
 }
 
