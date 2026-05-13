@@ -9,12 +9,12 @@ let _notizResolve        = null;
 let _notizSpeechRunning  = false;
 let _notizSpeechRecog    = null;
 
-function notizUndSpeichern(typ) {
+function notizUndSpeichern(typ, autoNotiz) {
     if (ANTRIEB_PFLICHT_TYPEN.has(typ) && !antriebAktiv()) {
         validierungsWarnung("Bitte zuerst Motor oder Segeln aktivieren");
         return;
     }
-    _pendingNote = "";
+    if (!_pendingNote) _pendingNote = autoNotiz || "";
     schnellEintragSpeichern(typ).then(() => notizButtonBlinken());
 }
 

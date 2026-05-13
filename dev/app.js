@@ -187,13 +187,15 @@ const ERLAUBTE_ZUSTAENDE = {
     "Wende":         ["fahrt"],
     "Halse":         ["fahrt"],
     "Reffen":        ["fahrt"],
+    "Reffen 1":      ["fahrt"],
+    "Reffen 2":      ["fahrt"],
     /* Motor an, Segeln, Ruderwechsel: kein Eintrag → immer erlaubt (LOGIK.md: "immer sichtbar") */
 };
 
 
 /* Kategorie-Mapping */
 const KATEGORIE_MAP = {
-    "Wende": "Segeln", "Halse": "Segeln", "Reffen": "Segeln",
+    "Wende": "Segeln", "Halse": "Segeln", "Reffen": "Segeln", "Reffen 1": "Segeln", "Reffen 2": "Segeln",
     "Segel setzen": "Segeln", "Segel bergen": "Segeln",
     "Aufschießer": "Segeln", "Beidrehen": "Segeln", "Segeln": "Segeln",
     "Ablegen": "Motor", "Anlegen": "Motor", "Motor an": "Motor", "Motor aus": "Motor",
@@ -287,7 +289,26 @@ function startButtonsSperren(stopp) {
 }
 
 function zustandSetzen(zustand) {
-    notizUndSpeichern(zustand === "motor" ? "Motor an" : "Segeln");
+    const aktuell = zustandErmitteln()?.zustand;
+    if (aktuell === zustand) return; /* Punkt 3: kein Doppeleintrag */
+    /* Punkt 4: automatische Statuswechsel-Notiz */
+    let autoNote = "";
+    if      (zustand === "motor"  && aktuell === "segeln") autoNote = "Segel geborgen, Motor an";
+    else if (zustand === "segeln" && aktuell === "motor")  autoNote = "Motor aus, Segel gesetzt";
+    else if (zustand === "motor")  autoNote = "Motor an";
+    else if (zustand === "segeln") autoNote = "Segeln gesetzt";
+    notizUndSpeichern(zustand === "motor" ? "Motor an" : "Segeln", autoNote);
+}
+
+function reffenAuswaehlen() {
+    const div = document.getElementById("reffen-auswahl");
+    if (div) div.hidden = !div.hidden;
+}
+
+function reffenKlick(typ) {
+    const div = document.getElementById("reffen-auswahl");
+    if (div) div.hidden = true;
+    notizUndSpeichern(typ);
 }
 
 /* --- Stopp-Zustand (hafen / anker / boje / fahrt) --------------- */
@@ -1164,7 +1185,7 @@ function eventErlaubt(typ, zustand) {
 
 
 function antriebKonsistenzPruefen(typ, antrieb) {
-    if (["Wende", "Halse", "Reffen"].includes(typ) && antrieb !== "segeln") {
+    if (["Wende", "Halse", "Reffen", "Reffen 1", "Reffen 2"].includes(typ) && antrieb !== "segeln") {
         return `⚠️ „${typ}" nur bei aktivem Segeln möglich`;
     }
     return null;
@@ -1212,9 +1233,16 @@ async function schnellEintragSpeichern(typ) {
         return;
     }
 
-    /* _pendingNote vor Schritt 1 sichern */
-    const note = _pendingNote;
+    /* _pendingNote vor Schritt 1 sichern; Auto-Notiz für Anlegen/Ablegen */
+    let note = _pendingNote;
     _pendingNote = "";
+    if (!note) {
+        const _antriebJetzt = zustandErmitteln()?.zustand;
+        if (["Anlegen", "Ankern", "An Boje"].includes(typ) && _antriebJetzt)
+            note = _antriebJetzt === "motor" ? "Motor gestoppt" : "Segel geborgen";
+        else if (["Ablegen", "Von Boje", "Anker lichten"].includes(typ))
+            note = "Motor an";
+    }
 
     /* 1. Event sofort erstellen — ohne GPS/Wetter */
     const ev = {
