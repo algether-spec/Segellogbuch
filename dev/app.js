@@ -1258,8 +1258,11 @@ async function schnellEintragSpeichern(typ) {
     if (!note) {
         if (["Anlegen", "Ankern", "An Boje"].includes(typ) && (_antriebJetzt === "segeln" || _antriebJetzt === "motorsegeln"))
             note = "Segel geborgen";
-        else if (["Ablegen", "Von Boje", "Anker lichten"].includes(typ))
-            note = "Motor an";
+        else if (["Ablegen", "Von Boje", "Anker lichten"].includes(typ)) {
+            if (_antriebJetzt === "segeln")          note = "Segeln aktiv";
+            else if (_antriebJetzt === "motorsegeln") note = "Motorsegeln";
+            /* Motor war schon an: keine Note → kein Verwirrungs-Doppelklick */
+        }
     }
 
     /* 1. Event sofort erstellen — ohne GPS/Wetter */
