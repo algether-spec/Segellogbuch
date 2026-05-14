@@ -1254,10 +1254,10 @@ async function schnellEintragSpeichern(typ) {
     /* _pendingNote vor Schritt 1 sichern; Auto-Notiz für Anlegen/Ablegen */
     let note = _pendingNote;
     _pendingNote = "";
+    const _antriebJetzt = zustandErmitteln()?.zustand;
     if (!note) {
-        const _antriebJetzt = zustandErmitteln()?.zustand;
-        if (["Anlegen", "Ankern", "An Boje"].includes(typ) && _antriebJetzt)
-            note = _antriebJetzt === "motor" ? "Motor gestoppt" : "Segel geborgen";
+        if (["Anlegen", "Ankern", "An Boje"].includes(typ) && (_antriebJetzt === "segeln" || _antriebJetzt === "motorsegeln"))
+            note = "Segel geborgen";
         else if (["Ablegen", "Von Boje", "Anker lichten"].includes(typ))
             note = "Motor an";
     }
@@ -1278,6 +1278,15 @@ async function schnellEintragSpeichern(typ) {
 
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+
+    /* Automatisch "Motor aus" wenn Stopp-Event bei aktivem Motor */
+    if (STOPP_EREIGNISSE[typ] && (_antriebJetzt === "motor" || _antriebJetzt === "motorsegeln")) {
+        aktuellerToern.events.push({
+            id: generateId(), type: "Motor aus", kategorie: "Motor", antrieb: "",
+            zeit: zeitIso, ort: "", rudergaenger: ruder ? { name: ruder } : null,
+            note: "Motor gestoppt beim " + typ, weather: null, pos: null
+        });
+    }
 
     /* 2. Stopp-Zustand sofort setzen */
     if (STOPP_EREIGNISSE[typ])          stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
