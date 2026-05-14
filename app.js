@@ -198,7 +198,7 @@ const KATEGORIE_MAP = {
     "Wende": "Segeln", "Halse": "Segeln", "Reffen": "Segeln", "Reffen 1": "Segeln", "Reffen 2": "Segeln",
     "Segel setzen": "Segeln", "Segel bergen": "Segeln",
     "Aufschießer": "Segeln", "Beidrehen": "Segeln", "Segeln": "Segeln",
-    "Ablegen": "Motor", "Anlegen": "Motor", "Motor an": "Motor", "Motor aus": "Motor",
+    "Ablegen": "Motor", "Anlegen": "Motor", "Motor an": "Motor", "Motor aus": "Motor", "Motorsegeln": "Motor",
     "Drehen Motor": "Motor", "Box-Manöver": "Motor", "Mooring": "Motor",
     "Ankern": "Anker", "Anker lichten": "Anker",
     "An Boje": "Boje", "Von Boje": "Boje",
@@ -222,6 +222,7 @@ function antriebAusUI() {
 }
 
 function antriebFuerTyp(typ) {
+    if (typ === "Motorsegeln") return "motorsegeln";
     if (MOTOR_TYPEN.has(typ)) return "motor";
     if (SEGEL_TYPEN.has(typ)) return "segeln";
     /* Ablegen/Abfahrt: Zustand → UI-Buttons → Standardwert motor */
@@ -242,6 +243,9 @@ function zustandErmitteln() {
     console.log("[zustandErmitteln] scanne", sorted.length, "Events rückwärts | MOTOR_TYPEN:", [...MOTOR_TYPEN], "| SEGEL_TYPEN:", [...SEGEL_TYPEN]);
     for (let i = sorted.length - 1; i >= 0; i--) {
         const typ = sorted[i].type;
+        if (typ === "Motorsegeln") {
+            return { zustand: "motorsegeln", event: sorted[i] };
+        }
         if (MOTOR_TYPEN.has(typ)) {
             console.log("[zustandErmitteln] → motor via", typ, "| Event-Index:", i);
             return { zustand: "motor", event: sorted[i] };
@@ -261,11 +265,12 @@ function zustandAktualisieren() {
     const btnS = document.getElementById("btn-zustand-segeln");
     const btnM = document.getElementById("btn-zustand-motor");
     if (!btnS || !btnM) return;
-    btnS.classList.toggle("btn-zustand-aktiv", result?.zustand === "segeln");
-    btnM.classList.toggle("btn-zustand-aktiv", result?.zustand === "motor");
+    const istMotorsegeln = result?.zustand === "motorsegeln";
+    btnS.classList.toggle("btn-zustand-aktiv", result?.zustand === "segeln" || istMotorsegeln);
+    btnM.classList.toggle("btn-zustand-aktiv", result?.zustand === "motor"  || istMotorsegeln);
 
-    /* Wende/Halse/Reffen nur bei Segel-Zustand aktiv */
-    const istSegeln = result?.zustand === "segeln";
+    /* Wende/Halse/Reffen bei Segeln oder Motorsegeln aktiv */
+    const istSegeln = result?.zustand === "segeln" || istMotorsegeln;
     const btnWende  = document.getElementById("btn-wende");
     const btnHalse  = document.getElementById("btn-halse");
     const btnReffen = document.getElementById("btn-reffen");
@@ -273,8 +278,8 @@ function zustandAktualisieren() {
     if (btnHalse)  btnHalse.disabled  = !istSegeln;
     if (btnReffen) btnReffen.disabled = !istSegeln;
 
-    /* Anlegen nur bei Motor-Zustand aktiv */
-    const istMotor = result?.zustand === "motor";
+    /* Anlegen bei Motor oder Motorsegeln aktiv */
+    const istMotor = result?.zustand === "motor" || istMotorsegeln;
     const btnAnlegen = document.getElementById("btn-anlegen");
     if (btnAnlegen) btnAnlegen.disabled = !istMotor;
 }
@@ -290,14 +295,24 @@ function startButtonsSperren(stopp) {
 
 function zustandSetzen(zustand) {
     const aktuell = zustandErmitteln()?.zustand;
-    if (aktuell === zustand) return; /* Punkt 3: kein Doppeleintrag */
-    /* Punkt 4: automatische Statuswechsel-Notiz */
-    let autoNote = "";
-    if      (zustand === "motor"  && aktuell === "segeln") autoNote = "Segel geborgen, Motor an";
-    else if (zustand === "segeln" && aktuell === "motor")  autoNote = "Motor aus, Segel gesetzt";
-    else if (zustand === "motor")  autoNote = "Motor an";
-    else if (zustand === "segeln") autoNote = "Segeln gesetzt";
-    notizUndSpeichern(zustand === "motor" ? "Motor an" : "Segeln", autoNote);
+
+    if (zustand === "motor") {
+        if (aktuell === "motor") return;
+        if (aktuell === "motorsegeln") {
+            notizUndSpeichern("Segeln", "Motor gestoppt, Segel aktiv"); return;
+        }
+        const note = aktuell === "segeln" ? "Motor gestartet, Segel aktiv" : "Motor an";
+        const typ  = aktuell === "segeln" ? "Motorsegeln" : "Motor an";
+        notizUndSpeichern(typ, note);
+    } else {
+        if (aktuell === "segeln") return;
+        if (aktuell === "motorsegeln") {
+            notizUndSpeichern("Motor an", "Segel geborgen, Motor läuft"); return;
+        }
+        const note = aktuell === "motor" ? "Segel gesetzt, Motor läuft" : "Segeln gesetzt";
+        const typ  = aktuell === "motor" ? "Motorsegeln" : "Segeln";
+        notizUndSpeichern(typ, note);
+    }
 }
 
 function reffenAuswaehlen() {
@@ -1185,7 +1200,7 @@ function eventErlaubt(typ, zustand) {
 
 
 function antriebKonsistenzPruefen(typ, antrieb) {
-    if (["Wende", "Halse", "Reffen", "Reffen 1", "Reffen 2"].includes(typ) && antrieb !== "segeln") {
+    if (["Wende", "Halse", "Reffen", "Reffen 1", "Reffen 2"].includes(typ) && antrieb !== "segeln" && antrieb !== "motorsegeln") {
         return `⚠️ „${typ}" nur bei aktivem Segeln möglich`;
     }
     return null;
