@@ -246,6 +246,7 @@ function zustandErmitteln() {
         if (typ === "Motorsegeln") {
             return { zustand: "motorsegeln", event: sorted[i] };
         }
+        if (typ === "Motor aus") { return null; }
         if (MOTOR_TYPEN.has(typ)) {
             console.log("[zustandErmitteln] → motor via", typ, "| Event-Index:", i);
             return { zustand: "motor", event: sorted[i] };
@@ -297,7 +298,9 @@ function zustandSetzen(zustand) {
     const aktuell = zustandErmitteln()?.zustand;
 
     if (zustand === "motor") {
-        if (aktuell === "motor") return;
+        if (aktuell === "motor") {
+            notizUndSpeichern("Motor aus", "Motor gestoppt"); return;
+        }
         if (aktuell === "motorsegeln") {
             notizUndSpeichern("Segeln", "Motor gestoppt, Segel aktiv"); return;
         }
