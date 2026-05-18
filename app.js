@@ -953,9 +953,10 @@ function toernLaden(tripId) {
 function neuerToernAnlegen() {
     trackStoppen();
     aktuellerToern = neuerToern();
-    /* Rudergänger aus last_values beibehalten */
     const _lvN = ladeLetzteWerte() || {};
-    speichereLetzteWerte(_lvN.wind || "", _lvN.rudergaenger || "");
+    speichereLetzteWerte(_lvN.wind || "", ""); /* Rudergänger für neuen Törn leeren */
+    const _btnR = document.getElementById("btn-rudergaenger");
+    if (_btnR) _btnR.textContent = "👤 Rudergänger: —";
     formularFuellen(aktuellerToern);
     formSection.hidden = false;
     btnToernLoeschen.hidden = true;
