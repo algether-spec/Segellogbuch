@@ -352,11 +352,9 @@ function logbuchAnsichtWechseln(ansicht) {
     const datenScroll    = document.getElementById("logbuch-daten-scroll");
     const karteContainer = document.getElementById("logbuch-karte-container");
     const btnDaten       = document.getElementById("btn-logbuch-daten");
-    const btnKarte       = document.getElementById("btn-logbuch-karte");
     const btnSee         = document.getElementById("btn-logbuch-opensea");
 
     if (btnDaten) btnDaten.classList.toggle("aktiv", ansicht === "daten");
-    if (btnKarte) btnKarte.classList.toggle("aktiv", ansicht === "karte");
 
     if (ansicht === "opensea") {
         /* Zyklus: see → tiefen → see → ... */

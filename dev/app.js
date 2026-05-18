@@ -906,9 +906,7 @@ function toernLaden(tripId) {
     _logbuchLiveCircle = null;
     _logbuchAnsicht = "daten";
     const _btnD = document.getElementById("btn-logbuch-daten");
-    const _btnK = document.getElementById("btn-logbuch-karte");
     if (_btnD) _btnD.classList.add("aktiv");
-    if (_btnK) _btnK.classList.remove("aktiv");
     const _kc = document.getElementById("logbuch-karte-container");
     if (_kc) _kc.style.display = "none";
     const _ds = document.getElementById("logbuch-daten-scroll");
@@ -1503,7 +1501,7 @@ function logbuchScrollHoeheAnpassen() {
 
 window.addEventListener("resize", () => {
     logbuchScrollHoeheAnpassen();
-    if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "karte")
+    if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "opensea")
         logbuchKarteHoeheAnpassen();
 });
 
