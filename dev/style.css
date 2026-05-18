@@ -1269,6 +1269,28 @@ button:active { opacity: 0.75; }
     border: none;
 }
 
+.btn-crew-restore {
+    padding: 4px 9px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+}
+
+.event-item-storniert {
+    opacity: 0.45;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.event-item-storniert .event-time-label,
+.event-item-storniert .event-note-text,
+.event-item-storniert .event-pos {
+    text-decoration: line-through;
+}
+
 .crew-empty {
     font-size: 13px;
     color: #94a3b8;
