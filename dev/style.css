@@ -683,6 +683,11 @@ button:active { opacity: 0.75; }
     overflow-y: auto;
 }
 
+#log-liste-scroll {
+    min-height: 200px;
+    overflow-y: auto;
+}
+
 #logbuch-karte {
     isolation: isolate;
 }

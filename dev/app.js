@@ -797,7 +797,7 @@ function zeigeLogs() {
     logbuchStatusAktualisieren();
     logVorschauAktualisieren();
     letzteTrackPunkteZeigen();
-    requestAnimationFrame(() => window.scrollTo(0, _scrollY));
+    requestAnimationFrame(() => { window.scrollTo(0, _scrollY); logScrollHoeheAnpassen(); });
 }
 
 function letzteTrackPunkteZeigen() {
@@ -1414,6 +1414,7 @@ function hauptTabWechseln(tabId) {
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(!!aktuellerToern && !_aktiveSeitenId && tabId === "tab-logbuch");
     requestAnimationFrame(logbuchScrollHoeheAnpassen);
+    if (tabId === "tab-log") requestAnimationFrame(logScrollHoeheAnpassen);
     /* Klick-Modus abbrechen wenn Karte verlassen */
     if (tabId !== "tab-karte" && _karteKlickModus) trackPunktHinzufuegen();
     /* Popup und Sidebar schließen wenn Karte verlassen */
@@ -1496,7 +1497,18 @@ function tabInhaltToggeln() {
 }
 
 
-/* --- Logbuch Scroll-Höhe ---------------------------------------- */
+/* --- Log-Tab + Logbuch Scroll-Höhe ------------------------------ */
+
+function logScrollHoeheAnpassen() {
+    const scroll = document.getElementById("log-liste-scroll");
+    if (!scroll) return;
+    const filterBar = scroll.previousElementSibling;
+    const bottomBar = document.querySelector(".bottom-bar");
+    const filterBottom = filterBar ? filterBar.getBoundingClientRect().bottom : 126;
+    const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
+    const hoehe = Math.max(200, window.innerHeight - filterBottom - bottomH - 8);
+    scroll.style.height = hoehe + "px";
+}
 
 function logbuchScrollHoeheAnpassen() {
     const sticky = document.getElementById("logbuch-sticky");
@@ -1511,6 +1523,7 @@ function logbuchScrollHoeheAnpassen() {
 
 window.addEventListener("resize", () => {
     logbuchScrollHoeheAnpassen();
+    logScrollHoeheAnpassen();
     if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "opensea")
         logbuchKarteHoeheAnpassen();
 });
