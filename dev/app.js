@@ -1448,6 +1448,10 @@ function seitenWechseln(seiteId) {
         });
         if (seiteId === "tab-trackliste" && aktuellerToern) {
             tracklisteRendern(aktuellerToern);
+            requestAnimationFrame(tracklisteScrollHoeheAnpassen);
+        }
+        if (seiteId === "tab-toern") {
+            requestAnimationFrame(toernUebersichtScrollHoeheAnpassen);
         }
         if (seiteId === "tab-sicherheit") {
             sicherheitSeiteAktualisieren();
@@ -1499,6 +1503,28 @@ function tabInhaltToggeln() {
 
 /* --- Log-Tab + Logbuch Scroll-Höhe ------------------------------ */
 
+function tracklisteScrollHoeheAnpassen() {
+    const scroll = document.getElementById("trackliste-scroll");
+    if (!scroll) return;
+    const header = scroll.closest(".tab-panel")?.querySelector(".seite-header");
+    const bottomBar = document.querySelector(".bottom-bar");
+    const headerBottom = header ? header.getBoundingClientRect().bottom : 126;
+    const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
+    const hoehe = Math.max(200, window.innerHeight - headerBottom - bottomH - 8);
+    scroll.style.height = hoehe + "px";
+}
+
+function toernUebersichtScrollHoeheAnpassen() {
+    const scroll = document.getElementById("toern-uebersicht-scroll");
+    if (!scroll) return;
+    const toernBar = scroll.previousElementSibling;
+    const bottomBar = document.querySelector(".bottom-bar");
+    const barBottom = toernBar ? toernBar.getBoundingClientRect().bottom : 126;
+    const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
+    const hoehe = Math.max(200, window.innerHeight - barBottom - bottomH - 8);
+    scroll.style.height = hoehe + "px";
+}
+
 function logScrollHoeheAnpassen() {
     const scroll = document.getElementById("log-liste-scroll");
     if (!scroll) return;
@@ -1524,6 +1550,8 @@ function logbuchScrollHoeheAnpassen() {
 window.addEventListener("resize", () => {
     logbuchScrollHoeheAnpassen();
     logScrollHoeheAnpassen();
+    tracklisteScrollHoeheAnpassen();
+    toernUebersichtScrollHoeheAnpassen();
     if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "opensea")
         logbuchKarteHoeheAnpassen();
 });
