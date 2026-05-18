@@ -240,9 +240,10 @@ function zustandErmitteln() {
     for (let i = sorted.length - 1; i >= 0; i--) {
         const typ = sorted[i].type;
         if (typ === "Motorsegeln") return { zustand: "motorsegeln", event: sorted[i] };
-        if (typ === "Motor aus")   return null;
-        if (MOTOR_TYPEN.has(typ))  return { zustand: "motor",        event: sorted[i] };
-        if (SEGEL_TYPEN.has(typ))  return { zustand: "segeln",       event: sorted[i] };
+        if (typ === "Motor aus")        return null;
+        if (STOPP_EREIGNISSE?.[typ])    return null; /* Ankern/Anlegen/An Boje = Antrieb aus */
+        if (MOTOR_TYPEN.has(typ))       return { zustand: "motor",        event: sorted[i] };
+        if (SEGEL_TYPEN.has(typ))       return { zustand: "segeln",       event: sorted[i] };
     }
     return null;
 }
