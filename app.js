@@ -238,6 +238,7 @@ function zustandErmitteln() {
         evZeitIso(a) < evZeitIso(b) ? -1 : 1
     );
     for (let i = sorted.length - 1; i >= 0; i--) {
+        if (sorted[i].storniert) continue;
         const typ = sorted[i].type;
         if (typ === "Motorsegeln") return { zustand: "motorsegeln", event: sorted[i] };
         if (typ === "Motor aus")        return null;
@@ -763,20 +764,27 @@ function zeigeLogs() {
                 posHtml = `<a class="event-pos" href="${mapsUrl}" target="_blank" rel="noopener">📍 ${latDisp}, ${lonDisp}${sog}</a>`;
             }
 
-            return `<li class="event-item">
+            const istStorniert = !!ev.storniert;
+            const itemKlasse   = istStorniert ? "event-item event-item-storniert" : "event-item";
+            const btnKlasse    = istStorniert ? "btn-crew-restore" : "btn-crew-del";
+            const btnSymbol    = istStorniert ? "↺" : "✕";
+            return `<li class="${itemKlasse}">
                 <span class="event-info">
                     <span class="event-time-label">${info}</span>
                     ${ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : ''}
                     ${posHtml}
                     ${ev.unterschrift ? '<img src="' + ev.unterschrift + '" style="display:block;max-width:100%;height:60px;margin-top:6px;border-radius:6px;border:1px solid var(--border);background:#fff">' : ''}
                 </span>
-                <button type="button" class="btn-crew-del" data-id="${ev.id}">✕</button>
+                <button type="button" class="${btnKlasse}" data-id="${ev.id}">${btnSymbol}</button>
             </li>`;
         }).join("");
         logListe.innerHTML = `<ul class="log-liste-ul" style="list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:14px">${zeilen}</ul>`;
         logListe.querySelectorAll("[data-id]").forEach(btn => {
             btn.onclick = () => {
-                aktuellerToern.events = aktuellerToern.events.filter(e => e.id !== btn.dataset.id);
+                const _ev = aktuellerToern.events.find(e => e.id === btn.dataset.id);
+                if (!_ev) return;
+                if (_ev.storniert) delete _ev.storniert; /* Wiederherstellen */
+                else _ev.storniert = true;               /* Stornieren */
                 toernSpeichern(aktuellerToern);
                 autoBackupSpeichern();
                 backupStatusAktualisieren();
