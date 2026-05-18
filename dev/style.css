@@ -1280,15 +1280,25 @@ button:active { opacity: 0.75; }
 }
 
 .event-item-storniert {
-    opacity: 0.45;
-    background: #fef2f2;
-    border-color: #fecaca;
+    background: #fee2e2;
+    border-color: #fca5a5;
+    border-left: 4px solid #dc2626;
 }
 
-.event-item-storniert .event-time-label,
-.event-item-storniert .event-note-text,
+.event-item-storniert .event-time-label {
+    text-decoration: line-through;
+    color: #9ca3af;
+}
+
+.event-item-storniert .event-note-text {
+    text-decoration: line-through;
+    color: #9ca3af;
+    font-style: normal;
+}
+
 .event-item-storniert .event-pos {
     text-decoration: line-through;
+    opacity: 0.5;
 }
 
 .crew-empty {
