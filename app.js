@@ -233,31 +233,17 @@ function antriebFuerTyp(typ) {
 }
 
 function zustandErmitteln() {
-    if (!aktuellerToern || !(aktuellerToern.events || []).length) {
-        console.log("[zustandErmitteln] kein aktiver Törn oder keine Events → null");
-        return null;
-    }
+    if (!aktuellerToern || !(aktuellerToern.events || []).length) return null;
     const sorted = aktuellerToern.events.slice().sort((a, b) =>
         evZeitIso(a) < evZeitIso(b) ? -1 : 1
     );
-    console.log("[zustandErmitteln] scanne", sorted.length, "Events rückwärts | MOTOR_TYPEN:", [...MOTOR_TYPEN], "| SEGEL_TYPEN:", [...SEGEL_TYPEN]);
     for (let i = sorted.length - 1; i >= 0; i--) {
         const typ = sorted[i].type;
-        if (typ === "Motorsegeln") {
-            return { zustand: "motorsegeln", event: sorted[i] };
-        }
-        if (typ === "Motor aus") { return null; }
-        if (MOTOR_TYPEN.has(typ)) {
-            console.log("[zustandErmitteln] → motor via", typ, "| Event-Index:", i);
-            return { zustand: "motor", event: sorted[i] };
-        }
-        if (SEGEL_TYPEN.has(typ)) {
-            console.log("[zustandErmitteln] → segeln via", typ, "| Event-Index:", i);
-            return { zustand: "segeln", event: sorted[i] };
-        }
-        console.log("[zustandErmitteln] übersprungen:", typ);
+        if (typ === "Motorsegeln") return { zustand: "motorsegeln", event: sorted[i] };
+        if (typ === "Motor aus")   return null;
+        if (MOTOR_TYPEN.has(typ))  return { zustand: "motor",        event: sorted[i] };
+        if (SEGEL_TYPEN.has(typ))  return { zustand: "segeln",       event: sorted[i] };
     }
-    console.log("[zustandErmitteln] kein Motor/Segeln-Event gefunden → null");
     return null;
 }
 
@@ -1286,7 +1272,8 @@ async function schnellEintragSpeichern(typ) {
     if (STOPP_EREIGNISSE[typ] && (_antriebJetzt === "motor" || _antriebJetzt === "motorsegeln")) {
         aktuellerToern.events.push({
             id: generateId(), type: "Motor aus", kategorie: "Motor", antrieb: "",
-            zeit: zeitIso, ort: "", rudergaenger: ruder ? { name: ruder } : null,
+            zeit: new Date(new Date(zeitIso).getTime() + 1000).toISOString().slice(0, 19),
+            ort: "", rudergaenger: ruder ? { name: ruder } : null,
             note: "Motor gestoppt beim " + typ, weather: null, pos: null
         });
     }
