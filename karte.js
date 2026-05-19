@@ -494,7 +494,7 @@ function logbuchKarteRendern() {
 }
 
 function logbuchKarteLiveAktualisieren(lat, lon) {
-    if (_logbuchAnsicht !== "karte" || !_logbuchKarte) return;
+    if ((_logbuchAnsicht !== "karte" && _logbuchAnsicht !== "opensea") || !_logbuchKarte) return;
 
     if (!_logbuchLiveMarker) {
         _logbuchLiveMarker = L.circleMarker([lat, lon], {
