@@ -378,7 +378,7 @@ function toernUebersichtRendern() {
             '<span class="tu-meta">' + zeitraum + '</span>' +
             '<span class="tu-meta">' + (t.skipper ? '👤 ' + t.skipper : '') + '</span>' +
             '<span class="tu-badge">' + anzahl + ' Ereignis' + (anzahl !== 1 ? 'se' : '') + '</span>';
-        main.onclick = () => toernLaden(t.tripId);
+        main.onclick = () => { toernLaden(t.tripId); if (typeof seitenWechseln === "function") seitenWechseln(null); };
 
         const del = document.createElement("button");
         del.type = "button";
@@ -411,5 +411,183 @@ function toernUebersichtRendern() {
 
     toernUebersicht.innerHTML = '<div class="card"><h2>🗂 Alle Törns</h2></div>';
     toernUebersicht.querySelector(".card").appendChild(ul);
+}
+
+
+/* ── Rechtlich korrektes Logbuch-PDF ──────────────────────────── */
+
+function logbuchPdfErstellen() {
+    if (!aktuellerToern) { alert("Bitte zuerst einen Törn auswählen."); return; }
+    const t  = aktuellerToern;
+    const sd = t.shipData || {};
+    const stat = toernStatistikBerechnen(t);
+    const events = (t.events || []).slice().sort((a, b) => evZeitIso(a) < evZeitIso(b) ? -1 : 1);
+
+    /* Hilfsfunktionen */
+    const fmt = iso => iso ? isoZuDatum(iso.slice(0, 10)) : "—";
+    const fmtZ = iso => iso ? iso.slice(11, 16) : "—";
+    const nm = (a, b) => [a, b].filter(Boolean).join(" – ") || "—";
+
+    /* Statistik-Zeiten */
+    const zeitenHtml = [
+        ["Unter Segel", stat.unterSegel],
+        ["Mit Motor",   stat.mitMotor],
+        ["Im Hafen",    stat.hafen],
+        ["Vor Anker",   stat.anker]
+    ].filter(([, m]) => m > 0)
+     .map(([l, m]) => `<tr><td>${l}</td><td><strong>${zeitFormatieren(m)}</strong></td></tr>`)
+     .join("");
+
+    /* Seemeilen */
+    const nmGesamt = typeof trackDistanzNm === "function"
+        ? trackDistanzNm((t.track?.points || []).slice().sort((a, b) => a.zeit < b.zeit ? -1 : 1))
+        : "—";
+
+    /* Crew */
+    const crewZeilen = (t.crew || []).map(p =>
+        `<tr><td>${p.name || ""}</td><td>${p.role || ""}</td></tr>`).join("");
+
+    /* Ereignisse */
+    const eventZeilen = events.map(ev => {
+        const w   = ev.weather;
+        const iso = evZeitIso(ev);
+        const sog = ev.pos?.sog != null && ev.pos.sog > 0 ? ev.pos.sog + " kn" : "";
+        const pos = ev.pos ? ev.pos.lat.toFixed(4) + ", " + ev.pos.lon.toFixed(4) : "";
+        const stil = ev.storniert ? "text-decoration:line-through;color:#9ca3af" : "";
+        const label = ev.storniert ? '<span class="lpdf-storniert">STORNIERT</span>' : "";
+        const unterschrift = ev.unterschrift
+            ? `<tr class="lpdf-unterschrift-row"><td colspan="10" style="text-align:center;padding:3mm 0">
+                 <img src="${ev.unterschrift}" style="height:15mm;max-width:50mm"><br>
+                 <small>${ev.rudergaenger?.name || ""}</small></td></tr>`
+            : "";
+        return `<tr style="${stil}">
+            <td>${fmt(iso)}</td>
+            <td>${fmtZ(iso)}</td>
+            <td>${ev.type || ""}${label}</td>
+            <td>${ev.ort || ""}</td>
+            <td>${ev.rudergaenger?.name || ""}</td>
+            <td>${w ? (w.windKnots || "") : ""}</td>
+            <td>${w ? (w.windDirection || "") : ""}</td>
+            <td>${sog}</td>
+            <td>${ev.note || ""}</td>
+            <td>${pos}</td>
+        </tr>${unterschrift}`;
+    }).join("");
+
+    /* Letzter Schiffsführer für Unterschrift */
+    const letzterSF = [...events].reverse().find(e => e.type === "Schiffsführerwechsel" && e.unterschrift);
+    const sfName    = letzterSF?.rudergaenger?.name || t.skipper || "—";
+    const sfUnterschrift = letzterSF?.unterschrift
+        ? `<img src="${letzterSF.unterschrift}" style="display:block;height:25mm;max-width:80mm;margin:3mm 0">`
+        : '<div style="height:25mm;border-bottom:1px solid #000;width:80mm"></div>';
+
+    /* Notizen */
+    const notizHtml = t.notes ? `<p style="margin:0;font-size:9pt">${t.notes}</p>` : "";
+
+    /* HTML zusammenbauen */
+    const html = `
+<div class="lpdf-doc">
+
+  <!-- Deckblatt -->
+  <div class="lpdf-deckblatt">
+    <div class="lpdf-titel">⛵ SEGELLOGBUCH</div>
+    <table class="lpdf-meta">
+      <tr><td>Törn:</td><td><strong>${t.tripName || "—"}</strong></td></tr>
+      <tr><td>Zeitraum:</td><td>${nm(fmt(t.startDate), fmt(t.endDate))}</td></tr>
+      <tr><td>Schiffsführer:</td><td>${t.skipper || "—"}</td></tr>
+      <tr><td>Schiff:</td><td>${[sd.name, sd.type].filter(Boolean).join(", ") || "—"}</td></tr>
+      ${sd.registration ? `<tr><td>Kennzeichen:</td><td>${sd.registration}</td></tr>` : ""}
+      ${sd.engine       ? `<tr><td>Motor:</td><td>${sd.engine}</td></tr>` : ""}
+    </table>
+    ${(t.crew || []).length ? `
+    <table class="lpdf-crew">
+      <thead><tr><th>Besatzung</th><th>Funktion</th></tr></thead>
+      <tbody>${crewZeilen}</tbody>
+    </table>` : ""}
+    <table class="lpdf-stat">
+      <thead><tr><th>Statistik</th><th>Dauer</th></tr></thead>
+      <tbody>
+        ${zeitenHtml}
+        <tr><td>Seemeilen gesamt</td><td><strong>${nmGesamt} nm</strong></td></tr>
+      </tbody>
+    </table>
+    ${notizHtml ? `<div class="lpdf-notizen"><strong>Notizen:</strong> ${notizHtml}</div>` : ""}
+  </div>
+
+  <!-- Ereignisjournal -->
+  <div class="lpdf-journal">
+    <h2 class="lpdf-section-titel">Ereignisjournal</h2>
+    <table class="lpdf-tabelle">
+      <thead><tr>
+        <th>Datum</th><th>Zeit</th><th>Ereignis</th><th>Ort</th>
+        <th>Rudergänger</th><th>Wind kn</th><th>Richtung</th>
+        <th>SOG kn</th><th>Notiz</th><th>GPS</th>
+      </tr></thead>
+      <tbody>${eventZeilen}</tbody>
+    </table>
+  </div>
+
+  <!-- Routenkarte + Unterschriften -->
+  <div class="lpdf-karte-seite">
+    <h2 class="lpdf-section-titel">Route</h2>
+    <div id="lpdf-karte" style="width:100%;height:450px"></div>
+    <div class="lpdf-signatur">
+      <div class="lpdf-signatur-block">
+        <div>Schiffsführer: <strong>${sfName}</strong></div>
+        <div>Abschluss: ${fmt(t.endDate || t.startDate)}</div>
+        ${sfUnterschrift}
+        <div class="lpdf-signatur-linie">Unterschrift Schiffsführer</div>
+      </div>
+      <div class="lpdf-signatur-block">
+        <div>Ort, Datum:</div>
+        <div style="height:25mm;border-bottom:1px solid #000;width:80mm;margin:3mm 0"></div>
+        <div class="lpdf-signatur-linie">Ort &amp; Datum</div>
+      </div>
+    </div>
+  </div>
+
+</div>`;
+
+    const bereich = document.getElementById("logbuch-pdf-bereich");
+    bereich.innerHTML = html;
+
+    /* Container temporär sichtbar (off-screen) damit Leaflet Größe berechnen kann */
+    bereich.style.position = "fixed";
+    bereich.style.left = "-9999px";
+    bereich.style.top = "0";
+    bereich.style.display = "block";
+
+    /* Karte rendern */
+    const pts = (t.track?.points || []).slice().sort((a, b) => a.zeit < b.zeit ? -1 : 1);
+    let printMap = null;
+    if (pts.length >= 2) {
+        const latlngs = pts.map(p => [p.lat, p.lon]);
+        printMap = L.map("lpdf-karte", { zoomControl: false, attributionControl: false });
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 16 }).addTo(printMap);
+        L.polyline(latlngs, { color: "#0ea5e9", weight: 2 }).addTo(printMap);
+        const startIcon = L.divIcon({ className: "", html: "<div style='background:#16a34a;border:2px solid #fff;border-radius:50%;width:10px;height:10px'></div>", iconSize: [10, 10], iconAnchor: [5, 5] });
+        const endeIcon  = L.divIcon({ className: "", html: "<div style='background:#dc2626;border:2px solid #fff;border-radius:50%;width:10px;height:10px'></div>", iconSize: [10, 10], iconAnchor: [5, 5] });
+        L.marker(latlngs[0], { icon: startIcon }).addTo(printMap);
+        L.marker(latlngs[latlngs.length - 1], { icon: endeIcon }).addTo(printMap);
+        /* invalidateSize zwingt Leaflet die echte Container-Größe zu lesen */
+        printMap.invalidateSize();
+        printMap.fitBounds(L.latLngBounds(latlngs).pad(0.1));
+    } else {
+        document.getElementById("lpdf-karte").innerHTML = "<p style='padding:20px;color:#9ca3af;text-align:center'>Keine Track-Daten vorhanden</p>";
+    }
+
+    setTimeout(() => {
+        /* Container-Positionierung zurücksetzen (print-CSS übernimmt) */
+        bereich.style.position = "";
+        bereich.style.left = "";
+        bereich.style.top = "";
+        bereich.style.display = "";
+        if (printMap) printMap.invalidateSize();
+        window.print();
+        setTimeout(() => {
+            bereich.innerHTML = "";
+            if (printMap) { printMap.remove(); printMap = null; }
+        }, 1000);
+    }, pts.length >= 2 ? 1200 : 100);
 }
 

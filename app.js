@@ -233,31 +233,19 @@ function antriebFuerTyp(typ) {
 }
 
 function zustandErmitteln() {
-    if (!aktuellerToern || !(aktuellerToern.events || []).length) {
-        console.log("[zustandErmitteln] kein aktiver Törn oder keine Events → null");
-        return null;
-    }
+    if (!aktuellerToern || !(aktuellerToern.events || []).length) return null;
     const sorted = aktuellerToern.events.slice().sort((a, b) =>
         evZeitIso(a) < evZeitIso(b) ? -1 : 1
     );
-    console.log("[zustandErmitteln] scanne", sorted.length, "Events rückwärts | MOTOR_TYPEN:", [...MOTOR_TYPEN], "| SEGEL_TYPEN:", [...SEGEL_TYPEN]);
     for (let i = sorted.length - 1; i >= 0; i--) {
+        if (sorted[i].storniert) continue;
         const typ = sorted[i].type;
-        if (typ === "Motorsegeln") {
-            return { zustand: "motorsegeln", event: sorted[i] };
-        }
-        if (typ === "Motor aus") { return null; }
-        if (MOTOR_TYPEN.has(typ)) {
-            console.log("[zustandErmitteln] → motor via", typ, "| Event-Index:", i);
-            return { zustand: "motor", event: sorted[i] };
-        }
-        if (SEGEL_TYPEN.has(typ)) {
-            console.log("[zustandErmitteln] → segeln via", typ, "| Event-Index:", i);
-            return { zustand: "segeln", event: sorted[i] };
-        }
-        console.log("[zustandErmitteln] übersprungen:", typ);
+        if (typ === "Motorsegeln") return { zustand: "motorsegeln", event: sorted[i] };
+        if (typ === "Motor aus")        return null;
+        if (STOPP_EREIGNISSE?.[typ])    return null; /* Ankern/Anlegen/An Boje = Antrieb aus */
+        if (MOTOR_TYPEN.has(typ))       return { zustand: "motor",        event: sorted[i] };
+        if (SEGEL_TYPEN.has(typ))       return { zustand: "segeln",       event: sorted[i] };
     }
-    console.log("[zustandErmitteln] kein Motor/Segeln-Event gefunden → null");
     return null;
 }
 
@@ -776,20 +764,27 @@ function zeigeLogs() {
                 posHtml = `<a class="event-pos" href="${mapsUrl}" target="_blank" rel="noopener">📍 ${latDisp}, ${lonDisp}${sog}</a>`;
             }
 
-            return `<li class="event-item">
+            const istStorniert = !!ev.storniert;
+            const itemKlasse   = istStorniert ? "event-item event-item-storniert" : "event-item";
+            const btnKlasse    = istStorniert ? "btn-crew-restore" : "btn-crew-del";
+            const btnSymbol    = istStorniert ? "↺" : "✕";
+            return `<li class="${itemKlasse}">
                 <span class="event-info">
                     <span class="event-time-label">${info}</span>
                     ${ev.note ? '<span class="event-note-text">' + ev.note + '</span>' : ''}
                     ${posHtml}
                     ${ev.unterschrift ? '<img src="' + ev.unterschrift + '" style="display:block;max-width:100%;height:60px;margin-top:6px;border-radius:6px;border:1px solid var(--border);background:#fff">' : ''}
                 </span>
-                <button type="button" class="btn-crew-del" data-id="${ev.id}">✕</button>
+                <button type="button" class="${btnKlasse}" data-id="${ev.id}">${btnSymbol}</button>
             </li>`;
         }).join("");
         logListe.innerHTML = `<ul class="log-liste-ul" style="list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:14px">${zeilen}</ul>`;
         logListe.querySelectorAll("[data-id]").forEach(btn => {
             btn.onclick = () => {
-                aktuellerToern.events = aktuellerToern.events.filter(e => e.id !== btn.dataset.id);
+                const _ev = aktuellerToern.events.find(e => e.id === btn.dataset.id);
+                if (!_ev) return;
+                if (_ev.storniert) delete _ev.storniert; /* Wiederherstellen */
+                else _ev.storniert = true;               /* Stornieren */
                 toernSpeichern(aktuellerToern);
                 autoBackupSpeichern();
                 backupStatusAktualisieren();
@@ -802,7 +797,7 @@ function zeigeLogs() {
     logbuchStatusAktualisieren();
     logVorschauAktualisieren();
     letzteTrackPunkteZeigen();
-    requestAnimationFrame(() => window.scrollTo(0, _scrollY));
+    requestAnimationFrame(() => { window.scrollTo(0, _scrollY); logScrollHoeheAnpassen(); });
 }
 
 function letzteTrackPunkteZeigen() {
@@ -920,9 +915,7 @@ function toernLaden(tripId) {
     _logbuchLiveCircle = null;
     _logbuchAnsicht = "daten";
     const _btnD = document.getElementById("btn-logbuch-daten");
-    const _btnK = document.getElementById("btn-logbuch-karte");
     if (_btnD) _btnD.classList.add("aktiv");
-    if (_btnK) _btnK.classList.remove("aktiv");
     const _kc = document.getElementById("logbuch-karte-container");
     if (_kc) _kc.style.display = "none";
     const _ds = document.getElementById("logbuch-daten-scroll");
@@ -968,9 +961,10 @@ function toernLaden(tripId) {
 function neuerToernAnlegen() {
     trackStoppen();
     aktuellerToern = neuerToern();
-    /* Rudergänger aus last_values beibehalten */
     const _lvN = ladeLetzteWerte() || {};
-    speichereLetzteWerte(_lvN.wind || "", _lvN.rudergaenger || "");
+    speichereLetzteWerte(_lvN.wind || "", ""); /* Rudergänger für neuen Törn leeren */
+    const _btnR = document.getElementById("btn-rudergaenger");
+    if (_btnR) _btnR.textContent = "👤 Rudergänger: —";
     formularFuellen(aktuellerToern);
     formSection.hidden = false;
     btnToernLoeschen.hidden = true;
@@ -1254,12 +1248,15 @@ async function schnellEintragSpeichern(typ) {
     /* _pendingNote vor Schritt 1 sichern; Auto-Notiz für Anlegen/Ablegen */
     let note = _pendingNote;
     _pendingNote = "";
+    const _antriebJetzt = zustandErmitteln()?.zustand;
     if (!note) {
-        const _antriebJetzt = zustandErmitteln()?.zustand;
-        if (["Anlegen", "Ankern", "An Boje"].includes(typ) && _antriebJetzt)
-            note = _antriebJetzt === "motor" ? "Motor gestoppt" : "Segel geborgen";
-        else if (["Ablegen", "Von Boje", "Anker lichten"].includes(typ))
-            note = "Motor an";
+        if (["Anlegen", "Ankern", "An Boje"].includes(typ) && (_antriebJetzt === "segeln" || _antriebJetzt === "motorsegeln"))
+            note = "Segel geborgen";
+        else if (["Ablegen", "Von Boje", "Anker lichten"].includes(typ)) {
+            if (_antriebJetzt === "segeln")          note = "Segeln aktiv";
+            else if (_antriebJetzt === "motorsegeln") note = "Motorsegeln";
+            /* Motor war schon an: keine Note → kein Verwirrungs-Doppelklick */
+        }
     }
 
     /* 1. Event sofort erstellen — ohne GPS/Wetter */
@@ -1278,6 +1275,16 @@ async function schnellEintragSpeichern(typ) {
 
     if (!aktuellerToern.events) aktuellerToern.events = [];
     aktuellerToern.events.push(ev);
+
+    /* Automatisch "Motor aus" wenn Stopp-Event bei aktivem Motor */
+    if (STOPP_EREIGNISSE[typ] && (_antriebJetzt === "motor" || _antriebJetzt === "motorsegeln")) {
+        aktuellerToern.events.push({
+            id: generateId(), type: "Motor aus", kategorie: "Motor", antrieb: "",
+            zeit: new Date(new Date(zeitIso).getTime() + 1000).toISOString().slice(0, 19),
+            ort: "", rudergaenger: ruder ? { name: ruder } : null,
+            note: "Motor gestoppt beim " + typ, weather: null, pos: null
+        });
+    }
 
     /* 2. Stopp-Zustand sofort setzen */
     if (STOPP_EREIGNISSE[typ])          stoppZustandSpeichern(STOPP_EREIGNISSE[typ]);
@@ -1407,6 +1414,7 @@ function hauptTabWechseln(tabId) {
     const sticky = document.getElementById("logbuch-sticky");
     if (sticky) sticky.hidden = !(!!aktuellerToern && !_aktiveSeitenId && tabId === "tab-logbuch");
     requestAnimationFrame(logbuchScrollHoeheAnpassen);
+    if (tabId === "tab-log") requestAnimationFrame(logScrollHoeheAnpassen);
     /* Klick-Modus abbrechen wenn Karte verlassen */
     if (tabId !== "tab-karte" && _karteKlickModus) trackPunktHinzufuegen();
     /* Popup und Sidebar schließen wenn Karte verlassen */
@@ -1419,7 +1427,7 @@ function hauptTabWechseln(tabId) {
 }
 
 function seitenWechseln(seiteId) {
-    const seitenPanels = ["tab-toern", "tab-crew", "tab-sicherheit", "tab-kontrolle", "tab-statistik", "tab-trackliste", "tab-einstellungen"];
+    const seitenPanels = ["tab-toern", "tab-toernuebersicht", "tab-crew", "tab-sicherheit", "tab-kontrolle", "tab-statistik", "tab-trackliste", "tab-einstellungen"];
     const hauptBereich = document.getElementById("haupt-bereich");
 
     _aktiveSeitenId = seiteId || null;
@@ -1440,6 +1448,11 @@ function seitenWechseln(seiteId) {
         });
         if (seiteId === "tab-trackliste" && aktuellerToern) {
             tracklisteRendern(aktuellerToern);
+            requestAnimationFrame(tracklisteScrollHoeheAnpassen);
+        }
+        if (seiteId === "tab-toernuebersicht") {
+            toernUebersichtRendern();
+            requestAnimationFrame(toernuebersichtScrollHoeheAnpassen);
         }
         if (seiteId === "tab-sicherheit") {
             sicherheitSeiteAktualisieren();
@@ -1489,7 +1502,39 @@ function tabInhaltToggeln() {
 }
 
 
-/* --- Logbuch Scroll-Höhe ---------------------------------------- */
+/* --- Log-Tab + Logbuch Scroll-Höhe ------------------------------ */
+
+function tracklisteScrollHoeheAnpassen() {
+    const scroll = document.getElementById("trackliste-scroll");
+    if (!scroll) return;
+    const header = scroll.closest(".tab-panel")?.querySelector(".seite-header");
+    const bottomBar = document.querySelector(".bottom-bar");
+    const headerBottom = header ? header.getBoundingClientRect().bottom : 126;
+    const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
+    const hoehe = Math.max(200, window.innerHeight - headerBottom - bottomH - 8);
+    scroll.style.height = hoehe + "px";
+}
+
+function toernuebersichtScrollHoeheAnpassen() {
+    const scroll = document.getElementById("toernuebersicht-scroll");
+    if (!scroll) return;
+    const header = scroll.previousElementSibling;
+    const bottomBar = document.querySelector(".bottom-bar");
+    const headerBottom = header ? header.getBoundingClientRect().bottom : 126;
+    const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
+    scroll.style.height = Math.max(200, window.innerHeight - headerBottom - bottomH - 8) + "px";
+}
+
+function logScrollHoeheAnpassen() {
+    const scroll = document.getElementById("log-liste-scroll");
+    if (!scroll) return;
+    const filterBar = scroll.previousElementSibling;
+    const bottomBar = document.querySelector(".bottom-bar");
+    const filterBottom = filterBar ? filterBar.getBoundingClientRect().bottom : 126;
+    const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
+    const hoehe = Math.max(200, window.innerHeight - filterBottom - bottomH - 8);
+    scroll.style.height = hoehe + "px";
+}
 
 function logbuchScrollHoeheAnpassen() {
     const sticky = document.getElementById("logbuch-sticky");
@@ -1504,7 +1549,10 @@ function logbuchScrollHoeheAnpassen() {
 
 window.addEventListener("resize", () => {
     logbuchScrollHoeheAnpassen();
-    if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "karte")
+    logScrollHoeheAnpassen();
+    tracklisteScrollHoeheAnpassen();
+    toernuebersichtScrollHoeheAnpassen();
+    if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "opensea")
         logbuchKarteHoeheAnpassen();
 });
 

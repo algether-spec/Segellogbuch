@@ -683,6 +683,13 @@ button:active { opacity: 0.75; }
     overflow-y: auto;
 }
 
+#log-liste-scroll,
+#trackliste-scroll,
+#toernuebersicht-scroll {
+    min-height: 200px;
+    overflow-y: auto;
+}
+
 #logbuch-karte {
     isolation: isolate;
 }
@@ -1269,6 +1276,39 @@ button:active { opacity: 0.75; }
     border: none;
 }
 
+.btn-crew-restore {
+    padding: 4px 9px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+}
+
+/* Spezifität erhöht mit li. damit event-item nicht gewinnt */
+li.event-item-storniert {
+    background: #fee2e2 !important;
+    border: 1px solid #fca5a5 !important;
+    border-left: 4px solid #dc2626 !important;
+}
+
+li.event-item-storniert .event-time-label {
+    text-decoration: line-through;
+    color: #9ca3af !important;
+}
+
+li.event-item-storniert .event-note-text {
+    text-decoration: line-through;
+    color: #9ca3af !important;
+    font-style: normal;
+}
+
+li.event-item-storniert .event-pos {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
 .crew-empty {
     font-size: 13px;
     color: #94a3b8;
@@ -1744,6 +1784,7 @@ button:active { opacity: 0.75; }
 
 #druck-bereich         { display: none; }
 #abschluss-druck-bereich { display: none; }
+#logbuch-pdf-bereich   { display: none; }
 
 /* --- Druck-Styles ----------------------------------------------- */
 
@@ -1751,6 +1792,7 @@ button:active { opacity: 0.75; }
     body > * { display: none !important; }
     #druck-bereich           { display: block !important; }
     #abschluss-druck-bereich { display: block !important; }
+    #logbuch-pdf-bereich     { display: block !important; }
 
     body {
         font-family: Georgia, serif;
@@ -2623,4 +2665,43 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
     background: rgba(255,255,255,0.22);
     border-color: #fff;
     color: #fff;
+}
+
+/* --- Logbuch-PDF ------------------------------------------------ */
+
+.lpdf-doc { font-family: Arial, sans-serif; font-size: 9pt; color: #000; }
+.lpdf-titel { font-size: 18pt; font-weight: 900; text-align: center; margin-bottom: 6mm; letter-spacing: 2px; }
+.lpdf-deckblatt { margin-bottom: 8mm; padding-bottom: 6mm; border-bottom: 2px solid #000; }
+.lpdf-section-titel { font-size: 11pt; font-weight: 700; margin: 4mm 0 2mm; border-bottom: 1px solid #000; }
+
+.lpdf-meta { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+.lpdf-meta td { padding: 1.5mm 3mm; vertical-align: top; }
+.lpdf-meta td:first-child { width: 35mm; color: #555; }
+
+.lpdf-crew, .lpdf-stat { width: 100%; border-collapse: collapse; margin-bottom: 4mm; font-size: 8.5pt; }
+.lpdf-crew th, .lpdf-stat th { background: #e8e8e8; padding: 1.5mm 3mm; text-align: left; border: 0.5pt solid #ccc; }
+.lpdf-crew td, .lpdf-stat td { padding: 1.5mm 3mm; border: 0.5pt solid #ccc; }
+
+.lpdf-notizen { font-size: 8.5pt; color: #333; border-left: 3mm solid #ccc; padding-left: 3mm; margin-top: 3mm; }
+
+.lpdf-tabelle { width: 100%; border-collapse: collapse; font-size: 7.5pt; }
+.lpdf-tabelle th { background: #e8e8e8; padding: 1.5mm 2mm; border: 0.5pt solid #ccc; text-align: left; font-size: 7pt; }
+.lpdf-tabelle td { padding: 1.5mm 2mm; border: 0.5pt solid #ccc; vertical-align: top; }
+.lpdf-tabelle tr:nth-child(even) { background: #f9f9f9; }
+
+.lpdf-storniert { display: inline-block; background: #f97316; color: #fff; font-size: 6pt; font-weight: 700; padding: 0 2mm; border-radius: 2px; margin-left: 2mm; vertical-align: middle; }
+
+.lpdf-karte-seite { margin-top: 6mm; }
+.lpdf-signatur { display: flex; gap: 20mm; margin-top: 8mm; }
+.lpdf-signatur-block { flex: 1; font-size: 9pt; }
+.lpdf-signatur-linie { font-size: 8pt; color: #555; border-top: 1px solid #000; padding-top: 1mm; margin-top: 1mm; }
+.lpdf-unterschrift-row td { background: #f9f9f9; border-top: 1pt solid #e0e0e0; }
+
+@media print {
+    .lpdf-doc { margin: 0; padding: 0; }
+    .lpdf-journal { page-break-before: always; }
+    .lpdf-karte-seite { page-break-before: always; }
+    #lpdf-karte { height: 450px !important; page-break-inside: avoid; isolation: isolate; }
+    .lpdf-tabelle { page-break-inside: auto; }
+    .lpdf-tabelle tr { page-break-inside: avoid; }
 }

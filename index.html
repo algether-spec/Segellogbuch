@@ -40,6 +40,7 @@
             </button>
             <div id="acc-toern" class="sidebar-acc-body">
                 <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-toern')">📋 Törn</button>
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-toernuebersicht')">🗂 Alle Törns</button>
                 <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-crew')">👥 Crew</button>
             </div>
 
@@ -92,8 +93,6 @@
             </select>
             <button type="button" id="btn-neuer-toern" class="btn-primary">+ Neuer Törn</button>
         </div>
-
-        <div id="toern-uebersicht"></div>
 
         <div id="form-section" hidden>
 
@@ -174,6 +173,17 @@
         </div><!-- /form-section -->
 
     </div><!-- /tab-toern -->
+
+    <!-- ═══ Alle Törns ════════════════════════════════════════════ -->
+    <div id="tab-toernuebersicht" class="tab-panel tab-hidden">
+        <div class="seite-header">
+            <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
+            <h1 class="seite-titel">🗂 Alle Törns</h1>
+        </div>
+        <div id="toernuebersicht-scroll" style="overflow-y:auto">
+            <div id="toern-uebersicht"></div>
+        </div>
+    </div><!-- /tab-toernuebersicht -->
 
     <!-- ═══ Tab 2: Crew ════════════════════════════════════════════ -->
     <div id="tab-crew" class="tab-panel tab-hidden">
@@ -393,7 +403,6 @@
                 <!-- Daten/Karte Toggle -->
                 <div id="logbuch-toggle-bar" style="display:flex;gap:8px;margin:4px 0 0">
                     <button type="button" id="btn-logbuch-daten" class="logbuch-toggle-btn aktiv" onclick="logbuchAnsichtWechseln('daten')">📋 Daten</button>
-                    <button type="button" id="btn-logbuch-karte" class="logbuch-toggle-btn" onclick="logbuchAnsichtWechseln('karte')">🗺 Karte</button>
                     <button type="button" id="btn-logbuch-opensea" class="logbuch-toggle-btn" onclick="logbuchAnsichtWechseln('opensea')">⚓ See</button>
                 </div>
 
@@ -450,7 +459,9 @@
                 <button type="button" class="filter-btn filter-btn-aktiv" id="log-filter-gesamt" onclick="logFilterSetzen('gesamt')">Gesamt</button>
                 <button type="button" class="filter-btn" id="log-filter-heute" onclick="logFilterSetzen('heute')">Heute</button>
             </div>
-            <div id="log-liste"></div>
+            <div id="log-liste-scroll" style="overflow-y:auto">
+                <div id="log-liste"></div>
+            </div>
         </div>
 
     </div><!-- /tab-log -->
@@ -496,6 +507,7 @@
             <button type="button" id="btn-track-csv-export" class="btn-export">📥 Track als CSV exportieren</button>
             <button type="button" id="btn-drucken"         class="btn-export">🖨 Drucken / PDF</button>
             <button type="button" id="btn-abschluss-druck" class="btn-export">📋 Törnabschluss / PDF</button>
+            <button type="button" onclick="logbuchPdfErstellen()" class="btn-export">📄 Logbuch PDF (rechtl.)</button>
         </div>
 
     </div><!-- /tab-statistik -->
@@ -506,6 +518,7 @@
             <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
             <h1 class="seite-titel">📍 Trackliste</h1>
         </div>
+        <div id="trackliste-scroll" style="overflow-y:auto">
         <div id="trackliste-leer" class="tab-leer">
             <p>⬆ Bitte zuerst einen Törn auswählen.</p>
         </div>
@@ -522,6 +535,7 @@
                 </div>
             </div>
         </div>
+        </div><!-- /trackliste-scroll -->
     </div><!-- /tab-trackliste -->
 
     <!-- ═══ Einstellungen ══════════════════════════════════════════ -->
@@ -641,6 +655,7 @@
 <!-- Druckbereich (nur beim Drucken sichtbar) -->
 <div id="druck-bereich"></div>
 <div id="abschluss-druck-bereich"></div>
+<div id="logbuch-pdf-bereich"></div>
 
 <!-- Notiz-Popup (erscheint nach jedem Schnell-Eintrag) -->
 <div id="notiz-popup-overlay" class="notiz-popup-overlay" style="display:none">
@@ -713,13 +728,13 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.133"></script>
-<script src="config.js?v=2.5.133"></script>
-<script src="track.js?v=2.5.133"></script>
-<script src="karte.js?v=2.5.133"></script>
-<script src="statistik.js?v=2.5.133"></script>
-<script src="modals.js?v=2.5.133"></script>
-<script src="app.js?v=2.5.133"></script>
+<script src="storage.js?v=2.5.148"></script>
+<script src="config.js?v=2.5.148"></script>
+<script src="track.js?v=2.5.148"></script>
+<script src="karte.js?v=2.5.148"></script>
+<script src="statistik.js?v=2.5.148"></script>
+<script src="modals.js?v=2.5.148"></script>
+<script src="app.js?v=2.5.148"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
