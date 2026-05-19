@@ -530,7 +530,7 @@ function logbuchPdfErstellen() {
   <!-- Routenkarte + Unterschriften -->
   <div class="lpdf-karte-seite">
     <h2 class="lpdf-section-titel">Route</h2>
-    <div id="lpdf-karte" style="width:100%;height:120mm"></div>
+    <div id="lpdf-karte" style="width:100%;height:450px"></div>
     <div class="lpdf-signatur">
       <div class="lpdf-signatur-block">
         <div>Schiffsführer: <strong>${sfName}</strong></div>
@@ -551,6 +551,12 @@ function logbuchPdfErstellen() {
     const bereich = document.getElementById("logbuch-pdf-bereich");
     bereich.innerHTML = html;
 
+    /* Container temporär sichtbar (off-screen) damit Leaflet Größe berechnen kann */
+    bereich.style.position = "fixed";
+    bereich.style.left = "-9999px";
+    bereich.style.top = "0";
+    bereich.style.display = "block";
+
     /* Karte rendern */
     const pts = (t.track?.points || []).slice().sort((a, b) => a.zeit < b.zeit ? -1 : 1);
     let printMap = null;
@@ -563,17 +569,25 @@ function logbuchPdfErstellen() {
         const endeIcon  = L.divIcon({ className: "", html: "<div style='background:#dc2626;border:2px solid #fff;border-radius:50%;width:10px;height:10px'></div>", iconSize: [10, 10], iconAnchor: [5, 5] });
         L.marker(latlngs[0], { icon: startIcon }).addTo(printMap);
         L.marker(latlngs[latlngs.length - 1], { icon: endeIcon }).addTo(printMap);
+        /* invalidateSize zwingt Leaflet die echte Container-Größe zu lesen */
+        printMap.invalidateSize();
         printMap.fitBounds(L.latLngBounds(latlngs).pad(0.1));
     } else {
         document.getElementById("lpdf-karte").innerHTML = "<p style='padding:20px;color:#9ca3af;text-align:center'>Keine Track-Daten vorhanden</p>";
     }
 
     setTimeout(() => {
+        /* Container-Positionierung zurücksetzen (print-CSS übernimmt) */
+        bereich.style.position = "";
+        bereich.style.left = "";
+        bereich.style.top = "";
+        bereich.style.display = "";
+        if (printMap) printMap.invalidateSize();
         window.print();
         setTimeout(() => {
             bereich.innerHTML = "";
             if (printMap) { printMap.remove(); printMap = null; }
         }, 1000);
-    }, pts.length >= 2 ? 900 : 100);
+    }, pts.length >= 2 ? 1200 : 100);
 }
 
