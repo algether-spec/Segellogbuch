@@ -1784,6 +1784,7 @@ li.event-item-storniert .event-pos {
 
 #druck-bereich         { display: none; }
 #abschluss-druck-bereich { display: none; }
+#logbuch-pdf-bereich   { display: none; }
 
 /* --- Druck-Styles ----------------------------------------------- */
 
@@ -1791,6 +1792,7 @@ li.event-item-storniert .event-pos {
     body > * { display: none !important; }
     #druck-bereich           { display: block !important; }
     #abschluss-druck-bereich { display: block !important; }
+    #logbuch-pdf-bereich     { display: block !important; }
 
     body {
         font-family: Georgia, serif;
@@ -2663,4 +2665,43 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
     background: rgba(255,255,255,0.22);
     border-color: #fff;
     color: #fff;
+}
+
+/* --- Logbuch-PDF ------------------------------------------------ */
+
+.lpdf-doc { font-family: Arial, sans-serif; font-size: 9pt; color: #000; }
+.lpdf-titel { font-size: 18pt; font-weight: 900; text-align: center; margin-bottom: 6mm; letter-spacing: 2px; }
+.lpdf-deckblatt { margin-bottom: 8mm; padding-bottom: 6mm; border-bottom: 2px solid #000; }
+.lpdf-section-titel { font-size: 11pt; font-weight: 700; margin: 4mm 0 2mm; border-bottom: 1px solid #000; }
+
+.lpdf-meta { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+.lpdf-meta td { padding: 1.5mm 3mm; vertical-align: top; }
+.lpdf-meta td:first-child { width: 35mm; color: #555; }
+
+.lpdf-crew, .lpdf-stat { width: 100%; border-collapse: collapse; margin-bottom: 4mm; font-size: 8.5pt; }
+.lpdf-crew th, .lpdf-stat th { background: #e8e8e8; padding: 1.5mm 3mm; text-align: left; border: 0.5pt solid #ccc; }
+.lpdf-crew td, .lpdf-stat td { padding: 1.5mm 3mm; border: 0.5pt solid #ccc; }
+
+.lpdf-notizen { font-size: 8.5pt; color: #333; border-left: 3mm solid #ccc; padding-left: 3mm; margin-top: 3mm; }
+
+.lpdf-tabelle { width: 100%; border-collapse: collapse; font-size: 7.5pt; }
+.lpdf-tabelle th { background: #e8e8e8; padding: 1.5mm 2mm; border: 0.5pt solid #ccc; text-align: left; font-size: 7pt; }
+.lpdf-tabelle td { padding: 1.5mm 2mm; border: 0.5pt solid #ccc; vertical-align: top; }
+.lpdf-tabelle tr:nth-child(even) { background: #f9f9f9; }
+
+.lpdf-storniert { display: inline-block; background: #f97316; color: #fff; font-size: 6pt; font-weight: 700; padding: 0 2mm; border-radius: 2px; margin-left: 2mm; vertical-align: middle; }
+
+.lpdf-karte-seite { margin-top: 6mm; }
+.lpdf-signatur { display: flex; gap: 20mm; margin-top: 8mm; }
+.lpdf-signatur-block { flex: 1; font-size: 9pt; }
+.lpdf-signatur-linie { font-size: 8pt; color: #555; border-top: 1px solid #000; padding-top: 1mm; margin-top: 1mm; }
+.lpdf-unterschrift-row td { background: #f9f9f9; border-top: 1pt solid #e0e0e0; }
+
+@media print {
+    .lpdf-doc { margin: 0; padding: 0; }
+    .lpdf-journal { page-break-before: always; }
+    .lpdf-karte-seite { page-break-before: always; }
+    #lpdf-karte { height: 120mm !important; page-break-inside: avoid; isolation: isolate; }
+    .lpdf-tabelle { page-break-inside: auto; }
+    .lpdf-tabelle tr { page-break-inside: avoid; }
 }

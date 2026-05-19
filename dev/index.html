@@ -507,6 +507,7 @@
             <button type="button" id="btn-track-csv-export" class="btn-export">📥 Track als CSV exportieren</button>
             <button type="button" id="btn-drucken"         class="btn-export">🖨 Drucken / PDF</button>
             <button type="button" id="btn-abschluss-druck" class="btn-export">📋 Törnabschluss / PDF</button>
+            <button type="button" onclick="logbuchPdfErstellen()" class="btn-export">📄 Logbuch PDF (rechtl.)</button>
         </div>
 
     </div><!-- /tab-statistik -->
@@ -654,6 +655,7 @@
 <!-- Druckbereich (nur beim Drucken sichtbar) -->
 <div id="druck-bereich"></div>
 <div id="abschluss-druck-bereich"></div>
+<div id="logbuch-pdf-bereich"></div>
 
 <!-- Notiz-Popup (erscheint nach jedem Schnell-Eintrag) -->
 <div id="notiz-popup-overlay" class="notiz-popup-overlay" style="display:none">
@@ -726,13 +728,13 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.146-dev"></script>
-<script src="config.js?v=2.5.146-dev"></script>
-<script src="track.js?v=2.5.146-dev"></script>
-<script src="karte.js?v=2.5.146-dev"></script>
-<script src="statistik.js?v=2.5.146-dev"></script>
-<script src="modals.js?v=2.5.146-dev"></script>
-<script src="app.js?v=2.5.146-dev"></script>
+<script src="storage.js?v=2.5.147-dev"></script>
+<script src="config.js?v=2.5.147-dev"></script>
+<script src="track.js?v=2.5.147-dev"></script>
+<script src="karte.js?v=2.5.147-dev"></script>
+<script src="statistik.js?v=2.5.147-dev"></script>
+<script src="modals.js?v=2.5.147-dev"></script>
+<script src="app.js?v=2.5.147-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
