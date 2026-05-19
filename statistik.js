@@ -378,7 +378,7 @@ function toernUebersichtRendern() {
             '<span class="tu-meta">' + zeitraum + '</span>' +
             '<span class="tu-meta">' + (t.skipper ? '👤 ' + t.skipper : '') + '</span>' +
             '<span class="tu-badge">' + anzahl + ' Ereignis' + (anzahl !== 1 ? 'se' : '') + '</span>';
-        main.onclick = () => toernLaden(t.tripId);
+        main.onclick = () => { toernLaden(t.tripId); if (typeof seitenWechseln === "function") seitenWechseln(null); };
 
         const del = document.createElement("button");
         del.type = "button";

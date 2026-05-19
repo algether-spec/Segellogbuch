@@ -685,7 +685,7 @@ button:active { opacity: 0.75; }
 
 #log-liste-scroll,
 #trackliste-scroll,
-#toern-uebersicht-scroll {
+#toernuebersicht-scroll {
     min-height: 200px;
     overflow-y: auto;
 }
