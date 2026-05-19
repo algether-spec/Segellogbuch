@@ -2701,7 +2701,7 @@ body.sonnenmodus .toern-bar select { background: #132036; color: #e2e8f0; border
     .lpdf-doc { margin: 0; padding: 0; }
     .lpdf-journal { page-break-before: always; }
     .lpdf-karte-seite { page-break-before: always; }
-    #lpdf-karte { height: 120mm !important; page-break-inside: avoid; isolation: isolate; }
+    #lpdf-karte { height: 450px !important; page-break-inside: avoid; isolation: isolate; }
     .lpdf-tabelle { page-break-inside: auto; }
     .lpdf-tabelle tr { page-break-inside: avoid; }
 }
