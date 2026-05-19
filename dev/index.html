@@ -40,6 +40,7 @@
             </button>
             <div id="acc-toern" class="sidebar-acc-body">
                 <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-toern')">📋 Törn</button>
+                <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-toernuebersicht')">🗂 Alle Törns</button>
                 <button type="button" class="sidebar-acc-btn" onclick="seitenWechseln('tab-crew')">👥 Crew</button>
             </div>
 
@@ -91,10 +92,6 @@
                 <option value="">— Törn auswählen —</option>
             </select>
             <button type="button" id="btn-neuer-toern" class="btn-primary">+ Neuer Törn</button>
-        </div>
-
-        <div id="toern-uebersicht-scroll" style="overflow-y:auto">
-            <div id="toern-uebersicht"></div>
         </div>
 
         <div id="form-section" hidden>
@@ -176,6 +173,17 @@
         </div><!-- /form-section -->
 
     </div><!-- /tab-toern -->
+
+    <!-- ═══ Alle Törns ════════════════════════════════════════════ -->
+    <div id="tab-toernuebersicht" class="tab-panel tab-hidden">
+        <div class="seite-header">
+            <button type="button" class="btn-zurueck" onclick="seitenWechseln(null)">← Zurück</button>
+            <h1 class="seite-titel">🗂 Alle Törns</h1>
+        </div>
+        <div id="toernuebersicht-scroll" style="overflow-y:auto">
+            <div id="toern-uebersicht"></div>
+        </div>
+    </div><!-- /tab-toernuebersicht -->
 
     <!-- ═══ Tab 2: Crew ════════════════════════════════════════════ -->
     <div id="tab-crew" class="tab-panel tab-hidden">
@@ -718,13 +726,13 @@
 </div>
 
 <script src="./leaflet.js"></script>
-<script src="storage.js?v=2.5.145-dev"></script>
-<script src="config.js?v=2.5.145-dev"></script>
-<script src="track.js?v=2.5.145-dev"></script>
-<script src="karte.js?v=2.5.145-dev"></script>
-<script src="statistik.js?v=2.5.145-dev"></script>
-<script src="modals.js?v=2.5.145-dev"></script>
-<script src="app.js?v=2.5.145-dev"></script>
+<script src="storage.js?v=2.5.146-dev"></script>
+<script src="config.js?v=2.5.146-dev"></script>
+<script src="track.js?v=2.5.146-dev"></script>
+<script src="karte.js?v=2.5.146-dev"></script>
+<script src="statistik.js?v=2.5.146-dev"></script>
+<script src="modals.js?v=2.5.146-dev"></script>
+<script src="app.js?v=2.5.146-dev"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")

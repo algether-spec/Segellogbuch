@@ -1427,7 +1427,7 @@ function hauptTabWechseln(tabId) {
 }
 
 function seitenWechseln(seiteId) {
-    const seitenPanels = ["tab-toern", "tab-crew", "tab-sicherheit", "tab-kontrolle", "tab-statistik", "tab-trackliste", "tab-einstellungen"];
+    const seitenPanels = ["tab-toern", "tab-toernuebersicht", "tab-crew", "tab-sicherheit", "tab-kontrolle", "tab-statistik", "tab-trackliste", "tab-einstellungen"];
     const hauptBereich = document.getElementById("haupt-bereich");
 
     _aktiveSeitenId = seiteId || null;
@@ -1450,8 +1450,9 @@ function seitenWechseln(seiteId) {
             tracklisteRendern(aktuellerToern);
             requestAnimationFrame(tracklisteScrollHoeheAnpassen);
         }
-        if (seiteId === "tab-toern") {
-            requestAnimationFrame(toernUebersichtScrollHoeheAnpassen);
+        if (seiteId === "tab-toernuebersicht") {
+            toernUebersichtRendern();
+            requestAnimationFrame(toernuebersichtScrollHoeheAnpassen);
         }
         if (seiteId === "tab-sicherheit") {
             sicherheitSeiteAktualisieren();
@@ -1514,15 +1515,14 @@ function tracklisteScrollHoeheAnpassen() {
     scroll.style.height = hoehe + "px";
 }
 
-function toernUebersichtScrollHoeheAnpassen() {
-    const scroll = document.getElementById("toern-uebersicht-scroll");
+function toernuebersichtScrollHoeheAnpassen() {
+    const scroll = document.getElementById("toernuebersicht-scroll");
     if (!scroll) return;
-    const toernBar = scroll.previousElementSibling;
+    const header = scroll.previousElementSibling;
     const bottomBar = document.querySelector(".bottom-bar");
-    const barBottom = toernBar ? toernBar.getBoundingClientRect().bottom : 126;
+    const headerBottom = header ? header.getBoundingClientRect().bottom : 126;
     const bottomH = bottomBar ? bottomBar.offsetHeight : 70;
-    const hoehe = Math.max(200, window.innerHeight - barBottom - bottomH - 8);
-    scroll.style.height = hoehe + "px";
+    scroll.style.height = Math.max(200, window.innerHeight - headerBottom - bottomH - 8) + "px";
 }
 
 function logScrollHoeheAnpassen() {
@@ -1551,7 +1551,7 @@ window.addEventListener("resize", () => {
     logbuchScrollHoeheAnpassen();
     logScrollHoeheAnpassen();
     tracklisteScrollHoeheAnpassen();
-    toernUebersichtScrollHoeheAnpassen();
+    toernuebersichtScrollHoeheAnpassen();
     if (typeof _logbuchAnsicht !== "undefined" && _logbuchAnsicht === "opensea")
         logbuchKarteHoeheAnpassen();
 });
