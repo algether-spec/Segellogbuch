@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tiles.openseamap.org https://ows.emodnet-bathymetry.eu; connect-src 'self' https://api.open-meteo.com https://archive-api.open-meteo.com https://marine-api.open-meteo.com https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org https://tiles.openseamap.org https://ows.emodnet-bathymetry.eu; font-src 'self' data:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+    <title>Segellogbuch</title>
+    <!-- Bewusst OHNE viewport-fit=cover: damit rutschte die App am iPhone unter die Statusleiste bzw. Safari
+         zeigte mal Glas, mal nicht. Die Statusleiste färbt Safari in der Farbe des klebenden Kopfs (header sticky).
+         Die iOS-App schaltet cover selbst ein (domain/anzeige.ts viewportInhalt, „randlos“). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a3a5c">   <!-- dunkel: core/oberflaeche.ts (sonnenmodus) -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+  <script type="module" crossorigin src="./assets/index-BCRaT01d.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BUz5s45s.css">
+</head>
+<!-- ohne-toern: bis der letzte Törn geladen ist (navigation.ts), Status/MOB/Törn-Menüs aus – kein Aufblitzen beim Start -->
+<body class="ohne-toern">
+
+    <!-- Kopf: randlos über die volle Breite; Titelzeile + Haupt-Tabs. Steht AUSSERHALB des Scrollbereichs –
+         federt der Inhalt beim Scrollen nach, bleibt der Kopf stehen -->
+    <header>
+        <div class="header-content">
+            <button type="button" id="btn-hamburger" class="btn-hamburger" data-aktion="hamburgerKlick" aria-label="Menü"><span class="sym" data-symbol="menue"></span></button>
+            <button type="button" id="btn-zurueck" class="btn-hamburger" data-aktion="zurueckZumHaupt" title="Zurück" aria-label="Zurück" hidden><span class="sym" data-symbol="zurueck"></span></button>
+            <div class="header-titel">
+                <h1 class="nur-vorlesen">Segellogbuch</h1>
+                <span id="header-symbol" class="sym" hidden></span>
+                <p id="header-subtitle">Törns erfassen und verwalten</p>
+            </div>
+            <!-- Fahrtzustand: reine Anzeige (kein Knopf), gesetzt von logbuch/fahrtzustand.ts -->
+            <div id="btn-fahrt-status" class="btn-fahrt-status btn-fahrt-stopp" role="status" data-braucht-toern>
+                <span id="btn-fahrt-status-text">STOPP</span>
+            </div>
+            <button type="button" id="btn-sonnenmodus" class="btn-sonnenmodus" data-aktion="sonnenmodusToggle" aria-label="Sonnenmodus"><span class="sym" data-symbol="sonne"></span></button>
+        </div>
+        <!-- Haupt-Tabs (auf Seiten aus der Seitenleiste ausgeblendet – navigation.ts) -->
+        <nav id="haupt-tab-nav" class="haupt-tab-nav">
+            <button type="button" class="haupt-tab-btn" data-tab="tab-log" data-aktion="hauptTabWechseln" data-wert="tab-log"><span class="sym" data-symbol="logbuch"></span>Logbuch</button>
+            <button type="button" class="haupt-tab-btn haupt-tab-aktiv" data-tab="tab-logbuch" data-aktion="hauptTabWechseln" data-wert="tab-logbuch"><span class="sym" data-symbol="karte"></span>Karte</button>
+        </nav>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Seitenleiste: Törn-Karte oben, darunter gruppierte Einträge (Stil wie iOS-Einstellungen).
+         Einträge mit data-seite öffnen eine Seite (Pfeil rechts, aktive Seite hervorgehoben). -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-top">
+            <span class="sidebar-titel">Menü</span>
+            <button type="button" class="btn-sidebar-close" data-aktion="sidebarSchliessen" aria-label="Menü schließen"><span class="sym" data-symbol="schliessen"></span></button>
+        </div>
+        <nav class="sidebar-nav">
+            <!-- aktiver Törn (Texte setzt navigation.ts) – antippen öffnet die Törn-Seite -->
+            <button type="button" class="menue-toern-karte" data-aktion="seitenWechseln" data-wert="tab-toern" data-seite="tab-toern">
+                <span class="menue-toern-symbol"><span class="sym" data-symbol="segelboot"></span></span>
+                <span class="menue-toern-texte">
+                    <span id="menue-toern-name" class="menue-toern-name">Kein Törn aktiv</span>
+                    <span id="menue-toern-info" class="menue-toern-info">Antippen zum Anlegen oder Auswählen</span>
+                </span>
+                <span class="sym menue-pfeil" data-symbol="aufklappen"></span>
+            </button>
+
+            <div class="menue-gruppe-titel">Törn</div>
+            <div class="menue-gruppe farbe-toern">
+                <button type="button" class="menue-eintrag" data-aktion="seitenWechseln" data-wert="tab-toernuebersicht" data-seite="tab-toernuebersicht"><span class="menue-kachel"><span class="sym" data-symbol="alleToerns"></span></span><span class="menue-text">Alle Törns</span><span class="sym menue-pfeil" data-symbol="aufklappen"></span></button>
+            </div>
+            <div class="menue-gruppe-titel" data-braucht-toern>An Bord</div>
+            <div class="menue-gruppe farbe-bord" data-braucht-toern>
+                <button type="button" class="menue-eintrag" data-aktion="seitenWechseln" data-wert="tab-sicherheit" data-seite="tab-sicherheit"><span class="menue-kachel"><span class="sym" data-symbol="sicherheit"></span></span><span class="menue-text">Sicherheitseinweisung</span><span class="sym menue-pfeil" data-symbol="aufklappen"></span></button>
+                <button type="button" class="menue-eintrag" data-aktion="seitenWechseln" data-wert="tab-kontrolle" data-seite="tab-kontrolle"><span class="menue-kachel"><span class="sym" data-symbol="kontrolle"></span></span><span class="menue-text">Tageskontrolle</span><span class="sym menue-pfeil" data-symbol="aufklappen"></span></button>
+                <button type="button" class="menue-eintrag" data-aktion="schiffsfuehrerWechselnDialog sidebarSchliessen"><span class="menue-kachel"><span class="sym" data-symbol="schiffsfuehrer"></span></span><span class="menue-text">Schiffsführer wechseln</span></button>
+            </div>
+            <div class="menue-gruppe-titel">Auswertung &amp; Daten</div>
+            <div class="menue-gruppe farbe-auswertung">
+                <button data-braucht-toern type="button" class="menue-eintrag" data-aktion="seitenWechseln" data-wert="tab-statistik" data-seite="tab-statistik"><span class="menue-kachel"><span class="sym" data-symbol="statistik"></span></span><span class="menue-text">Statistik</span><span class="sym menue-pfeil" data-symbol="aufklappen"></span></button>
+                <button data-braucht-toern type="button" class="menue-eintrag" data-aktion="sidebarSchliessen logbuchPdfErstellen"><span class="menue-kachel"><span class="sym" data-symbol="pdf"></span></span><span class="menue-text">Logbuch-PDF</span></button>
+                <button type="button" class="menue-eintrag" data-aktion="sidebarSchliessen exportierenDialog"><span class="menue-kachel"><span class="sym" data-symbol="sicherung"></span></span><span class="menue-text">Export / Import</span></button>
+            </div>
+            <div class="menue-gruppe-titel">Navigation</div>
+            <div class="menue-gruppe farbe-navigation">
+                <button type="button" class="menue-eintrag" data-aktion="seitenWechseln" data-wert="tab-routenplanung" data-seite="tab-routenplanung"><span class="menue-kachel"><span class="sym" data-symbol="routenplanung"></span></span><span class="menue-text">Routenplanung</span><span class="sym menue-pfeil" data-symbol="aufklappen"></span></button>
+                <button data-braucht-toern type="button" class="menue-eintrag" data-aktion="seitenWechseln" data-wert="tab-karte" data-seite="tab-karte"><span class="menue-kachel"><span class="sym" data-symbol="karte"></span></span><span class="menue-text">Track bearbeiten</span><span class="sym menue-pfeil" data-symbol="aufklappen"></span></button>
+            </div>
+            <div class="menue-gruppe-titel">System</div>
+            <div class="menue-gruppe farbe-system">
+                <button type="button" class="menue-eintrag" data-aktion="seitenWechseln" data-wert="tab-einstellungen" data-seite="tab-einstellungen"><span class="menue-kachel"><span class="sym" data-symbol="einstellungen"></span></span><span class="menue-text">Einstellungen</span><span class="sym menue-pfeil" data-symbol="aufklappen"></span></button>
+                <button type="button" class="menue-eintrag" data-aktion="sidebarSchliessen einfuehrungZeigen"><span class="menue-kachel"><span class="sym" data-symbol="info"></span></span><span class="menue-text">Einführung</span></button>
+            </div>
+        </nav>
+        <!-- Version + Backup-Zeit (früher im Kopf); antippen = Update erzwingen -->
+        <div class="sidebar-version">
+            <span id="version-label" class="bottom-bar-version" data-aktion="updateErzwingen"></span>
+            <span class="bottom-bar-autor">Al.Gether</span>
+        </div>
+    </div>
+
+    <!-- Rudergänger-Pille + Manöver-Panel: in beiden Haupt-Tabs oben rechts (navigation.ts) -->
+    <div id="logbuch-sticky" class="logbuch-sticky" hidden>
+        <!-- Kopfzeile: Pille rechts, Schnellmanöver schwebend links daneben (höchstens zwei Zeilen) oder „groß“ darunter -->
+        <div class="logbuch-kopfzeile">
+        <!-- Pille: zu = öffnet das Panel; offen = Kopf des Panels, Tipp auf den Namen = Rudergänger-Auswahl -->
+        <div id="logbuch-panel-pille" class="logbuch-panel-pille">
+            <button type="button" id="logbuch-pille-ruder" class="logbuch-pille-ruder" data-aktion="logbuchPilleTippen" aria-haspopup="listbox" aria-expanded="false">
+                <span id="logbuch-pille-avatar" class="logbuch-pille-avatar">?</span>
+                <span id="logbuch-pille-text">—</span>
+                <span class="logbuch-pille-ruder-pfeil sym" data-symbol="runter"></span>
+            </button>
+            <button type="button" class="logbuch-pille-chev-btn" data-aktion="logbuchPanelToggeln" aria-label="Panel auf/zu">
+                <span id="logbuch-pille-chev" class="logbuch-pille-chev sym" data-symbol="runter"></span>
+            </button>
+            <div id="ruder-dropdown" class="ruder-dropdown" role="listbox" hidden></div>
+        </div>
+        <div id="logbuch-blase" class="logbuch-blase" hidden></div>
+        </div><!-- /logbuch-kopfzeile -->
+        <div id="logbuch-panel-inhalt" class="logbuch-panel-inhalt">
+        <div id="panel-bestaetigung" class="panel-bestaetigung" hidden></div>
+        <div id="zustand-bar" class="zustand-bar">
+            <button type="button" id="btn-zustand-segeln" class="btn-zustand" data-aktion="zustandSetzen" data-wert="segeln">
+                <span class="sym" data-symbol="segel"></span>Segeln
+            </button>
+            <button type="button" id="btn-zustand-motor" class="btn-zustand" data-aktion="zustandSetzen" data-wert="motor">
+                <span class="sym" data-symbol="motor"></span>Motor
+            </button>
+            <button type="button" id="btn-zustand-motorsegeln" class="btn-zustand btn-zustand-motorsegeln" data-aktion="motorsegelnBestaetigen">
+                <span class="sym" data-symbol="motorsegeln"></span>
+                <span style="font-size:11px;line-height:1.2">Motor&shy;segeln</span>
+            </button>
+        </div>
+
+        <!-- Fahrt-Start Buttons (wenn gestoppt) -->
+        <div id="fahrt-start-bar" class="hafenmanover-bar" hidden>
+            <button type="button" class="btn-hafenmanover btn-ablegen" data-aktion="notizUndSpeichern" data-wert="Ablegen"><span class="sym" data-symbol="schiff"></span>Ablegen</button>
+            <button type="button" class="btn-hafenmanover btn-anker-lichten" data-aktion="notizUndSpeichern" data-wert="Anker lichten"><span class="sym" data-symbol="anker"></span>Anker auf</button>
+            <button type="button" class="btn-hafenmanover btn-von-boje" data-aktion="notizUndSpeichern" data-wert="Von Boje"><span class="sym" data-symbol="boje"></span>Von Boje</button>
+        </div>
+
+        <!-- Fahrt-Stopp Buttons (wenn unterwegs) -->
+        <div id="fahrt-stopp-bar" class="hafenmanover-bar">
+            <button type="button" id="btn-anlegen" class="btn-hafenmanover btn-anlegen" data-aktion="notizUndSpeichern" data-wert="Anlegen"><span class="sym" data-symbol="ziel"></span>Anlegen</button>
+            <button type="button" class="btn-hafenmanover btn-ankern" data-aktion="notizUndSpeichern" data-wert="Ankern"><span class="sym" data-symbol="anker"></span>Ankern</button>
+            <button type="button" class="btn-hafenmanover btn-an-boje" data-aktion="notizUndSpeichern" data-wert="An Boje"><span class="sym" data-symbol="boje"></span>An Boje</button>
+        </div>
+
+        <!-- Manöver-Schnellbuttons -->
+        <div id="manoever-grid" class="schnell-grid">
+            <button type="button" id="btn-wende" class="btn-schnell-card btn-wende-card" data-aktion="notizUndSpeichern" data-wert="Wende">
+                <span class="sym" data-symbol="wende"></span><span>Wende</span>
+            </button>
+            <button type="button" id="btn-halse" class="btn-schnell-card btn-halse-card" data-aktion="notizUndSpeichern" data-wert="Halse">
+                <span class="sym" data-symbol="halse"></span><span>Halse</span>
+            </button>
+            <button type="button" id="btn-reffen" class="btn-schnell-card" data-aktion="reffenAuswaehlen">
+                <span class="sym" data-symbol="segelboot"></span><span id="btn-reffen-text">Reffen</span>
+            </button>
+        </div>
+        <div id="reffen-auswahl" class="reffen-auswahl">
+            <button type="button" class="reff-stufe reff-voll" data-reff-typ="Ausreffen" data-aktion="reffenKlick" data-wert="Ausreffen">Ausreffen</button>
+            <button type="button" class="reff-stufe reff-1" data-reff-typ="Reffen 1" data-aktion="reffenKlick" data-wert="Reffen 1">Reff 1</button>
+            <button type="button" class="reff-stufe reff-2" data-reff-typ="Reffen 2" data-aktion="reffenKlick" data-wert="Reffen 2">Reff 2</button>
+            <button type="button" class="reff-stufe reff-gen" data-reff-typ="Reffen" data-aktion="reffenKlick" data-wert="Reffen">Reff</button>
+        </div>
+
+        <!-- Aktions-Zeile: Detail + Notiz -->
+        <div class="eintrag-aktionen-zeile">
+            <button type="button" class="btn-detail-eintrag" data-aktion="logModalOeffnen"><span class="sym" data-symbol="bearbeiten"></span>Händisch</button>
+            <button type="button" class="btn-detail-eintrag" data-aktion="neueNotiz"><span class="sym" data-symbol="notiz"></span>Neue Notiz</button>
+            <button type="button" id="btn-notiz-ergaenzen" class="btn-notiz-ergaenzen" data-aktion="notizZumLetztenEintrag"><span class="sym" data-symbol="kommentar"></span><span id="btn-notiz-ergaenzen-text">Ergänzen</span></button>
+        </div>
+
+        </div><!-- /logbuch-panel-inhalt -->
+    </div><!-- /logbuch-sticky -->
+
+    <!-- ⋯-Menü eines Eintrags der Liste (eines für alle, eintraege.ts füllt und setzt es fest unter den Knopf) -->
+    <div id="log-eintrag-menue" class="karte-mehr-menue log-eintrag-menue" role="menu" hidden></div>
+
+    <!-- Menüs der Logbuch-Karte: außerhalb der Karte, damit sie über Pille und Schnellmanövern liegen
+         (die Karte ist eine eigene Ebene darunter); nur auf der Logbuch-Karte sichtbar (CSS) -->
+    <div id="logbuch-modus-menue" class="logbuch-karten-menue logbuch-modus-menue" role="menu" aria-label="Ausrichtung der Karte" hidden>
+        <button type="button" class="km-schliessen" data-aktion="logbuchModusMenueSchliessen" aria-label="Schließen" title="Schließen"><span class="sym" data-symbol="schliessen"></span></button>
+        <div class="km-titel">Ausrichtung</div>
+        <button type="button" class="km-zeile km-wahl" role="menuitemradio" aria-checked="true" data-modus="kurs" data-aktion="logbuchKarteModusSetzen logbuchModusMenueSchliessen" data-wert="kurs"><span class="sym" data-symbol="kursOben"></span><span class="km-text">Kurs oben<small>Dreht mit dem Kompass – voraus ist oben</small></span><span class="sym km-haken" data-symbol="ok"></span></button>
+        <button type="button" class="km-zeile km-wahl" role="menuitemradio" aria-checked="false" data-modus="track" data-aktion="logbuchKarteModusSetzen logbuchModusMenueSchliessen" data-wert="track"><span class="sym" data-symbol="trackOben"></span><span class="km-text">Track oben<small>Dreht nach dem Kurs über Grund (GPS) – ohne Kompass</small></span><span class="sym km-haken" data-symbol="ok"></span></button>
+        <button type="button" class="km-zeile km-wahl" role="menuitemradio" aria-checked="false" data-modus="nord" data-aktion="logbuchKarteModusSetzen logbuchModusMenueSchliessen" data-wert="nord"><span class="sym" data-symbol="nordOben"></span><span class="km-text">Norden oben<small>Karte steht still wie die Seekarte, das Boot dreht sich</small></span><span class="sym km-haken" data-symbol="ok"></span></button>
+    </div>
+    <!-- Karteneinstellungen (Zahnrad): in Gruppen mit kurzer Erklärung; Schalter bleiben offen, Aktionen schließen
+         bzw. zeigen ihren Fortschritt -->
+    <div id="logbuch-karten-menue" class="logbuch-karten-menue" hidden>
+        <button type="button" class="km-schliessen" data-aktion="logbuchMenueSchliessen" aria-label="Schließen" title="Schließen"><span class="sym" data-symbol="schliessen"></span></button>
+        <div class="km-titel">Manöver</div>
+        <div class="km-zeile km-zeile-wahl"><span class="sym" data-symbol="blase"></span><span class="km-text">Schnellmanöver<small>Knöpfe oben rechts für häufige Manöver</small></span>
+            <span id="km-schnellknoepfe" class="km-segment" role="group" aria-label="Anzahl Schnellmanöver">
+                <button type="button" data-aktion="logbuchSchnellknoepfeSetzen" data-wert="0" aria-pressed="true">Aus</button>
+                <button type="button" data-aktion="logbuchSchnellknoepfeSetzen" data-wert="2" aria-pressed="false">2</button>
+                <button type="button" data-aktion="logbuchSchnellknoepfeSetzen" data-wert="3" aria-pressed="false">3</button>
+            </span>
+        </div>
+        <button type="button" id="btn-schnell-gross" class="km-zeile km-unterzeile" data-aktion="logbuchSchnellGrossUmschalten" aria-pressed="false" hidden><span class="sym" data-symbol="aufklappen"></span><span class="km-text">Groß, unter der Rudergänger-Anzeige<small>Leichter zu treffen</small></span><span class="km-schalter"></span></button>
+        <button type="button" id="btn-panel-autozu" class="km-zeile" data-aktion="logbuchPanelAutoZuUmschalten" aria-pressed="true"><span class="sym" data-symbol="erledigt"></span><span class="km-text">Manöver-Panel schließt selbst<small>Klappt nach einem Eintrag zu</small></span><span class="km-schalter"></span></button>
+        <div class="km-trenner"></div>
+        <div class="km-titel">Kartenanzeige</div>
+        <div class="km-zeile km-zeile-wahl"><span class="sym" data-symbol="kalender"></span><span class="km-text">Track farbig<small>Je Tag oder Rudergänger</small></span>
+            <span id="km-track-farbe" class="km-segment" role="group" aria-label="Track farbig">
+                <button type="button" data-aktion="logbuchTrackFarbeSetzen" data-wert="aus" aria-pressed="true">Aus</button>
+                <button type="button" data-aktion="logbuchTrackFarbeSetzen" data-wert="tage" aria-pressed="false" title="Jeder Tag in eigener Farbe">Tage</button>
+                <button type="button" data-aktion="logbuchTrackFarbeSetzen" data-wert="ruder" aria-pressed="false" title="Jeder Rudergänger in eigener Farbe">Ruder</button>
+            </span>
+        </div>
+        <button type="button" id="btn-logbuch-eintraege" class="km-zeile" data-aktion="logbuchEintraegeUmschalten" aria-pressed="true"><span class="sym" data-symbol="ort"></span><span class="km-text">Einträge anzeigen<small>Punkte am Track</small></span><span class="km-schalter"></span></button>
+        <button type="button" id="btn-logbuch-tiefe" class="km-zeile" data-aktion="logbuchTiefeUmschalten" aria-pressed="false"><span class="sym" data-symbol="tiefe"></span><span class="km-text">Tiefenlinien<small>Wassertiefen, braucht Internet</small></span><span class="km-schalter"></span></button>
+        <div class="km-trenner"></div>
+        <div class="km-titel">Werkzeuge</div>
+        <button type="button" id="btn-logbuch-ziel" class="km-zeile" data-aktion="logbuchZielModusToggeln logbuchMenueSchliessen"><span class="sym" data-symbol="zielpunkt"></span>Ziel setzen</button>
+        <button type="button" id="btn-logbuch-offline" class="km-zeile" data-aktion="logbuchGebietOfflineSpeichern"><span class="sym" data-symbol="offline"></span><span class="km-text">Gebiet offline speichern<small>Ausschnitt für unterwegs laden</small></span></button>
+        <div id="logbuch-offline-status" class="km-status"></div>
+    </div>
+
+<!-- Scrollbereich: alles zwischen Kopf und Fußleiste. Scrollt selbst (statt der ganzen Seite) und darf
+     nachfedern; fest positionierte Teile (Kopf, Seitenleiste, Pille, Menüs) liegen bewusst außerhalb -->
+<main id="inhalt" class="inhalt">
+<div class="app">
+
+    <!-- hier fügt daten-sicherung.ts das Backup-Banner ein (Statusmeldung steht in der Fußleiste) -->
+    <div id="banner-anker" hidden></div>
+
+    <!-- ═══ Tab 1: Törn ═══════════════════════════════════════════ -->
+    <div id="tab-toern" class="tab-panel" data-titel="Törn" data-titel-symbol="toern">
+
+        <!-- Auswahl des aktiven Törns + neuer Törn -->
+        <div class="toern-auswahl">
+            <label for="toern-select" class="toern-auswahl-label">Aktiver Törn</label>
+            <div class="toern-auswahl-zeile">
+                <div class="toern-select-huelle">
+                    <select id="toern-select">
+                        <option value="">— Törn auswählen —</option>
+                    </select>
+                    <span class="sym toern-select-pfeil" data-symbol="runter"></span>
+                </div>
+                <button type="button" id="btn-neuer-toern" class="btn-neuer-toern"><span class="sym" data-symbol="plus"></span>Neu</button>
+            </div>
+        </div>
+
+        <div id="form-section" hidden>
+
+            <!-- abgeschlossener Törn: nur Ansicht (toern-verwaltung.ts → formularSperren) -->
+            <p id="toern-gesperrt-hinweis" class="toern-gesperrt-hinweis" hidden><span class="sym" data-symbol="schloss"></span>Törn abgeschlossen – gegen Änderungen gesperrt. Aufheben ganz unten.</p>
+
+            <div class="card">
+                <h2><span class="sym" data-symbol="toern"></span>Törn-Stammdaten</h2>
+                <div class="field-group">
+                    <div class="field">
+                        <label for="fld-tripname">Törnname *</label>
+                        <input type="text" id="fld-tripname" placeholder="z. B. Ostsee-Runde 2025">
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="fld-start-date">Startdatum</label>
+                            <input type="date" id="fld-start-date">
+                        </div>
+                        <div class="field">
+                            <label for="fld-start-time">Startzeit</label>
+                            <input type="time" id="fld-start-time">
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="fld-end-date">Enddatum</label>
+                            <input type="date" id="fld-end-date">
+                        </div>
+                        <div class="field">
+                            <label for="fld-end-time">Endzeit</label>
+                            <input type="time" id="fld-end-time">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="fld-skipper">Schiffsführer *</label>
+                        <input type="text" id="fld-skipper" placeholder="Vor- und Nachname">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><span class="sym" data-symbol="schiff"></span>Schiffsdaten</h2>
+                <div class="field-group">
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="fld-ship-name">Schiffsname</label>
+                            <input type="text" id="fld-ship-name" placeholder="z. B. Albatros">
+                        </div>
+                        <div class="field">
+                            <label for="fld-ship-type">Bootstyp</label>
+                            <input type="text" id="fld-ship-type" placeholder="z. B. Bavaria 38">
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="fld-ship-reg">Kennzeichen</label>
+                            <input type="text" id="fld-ship-reg" placeholder="z. B. WÜ-12345">
+                        </div>
+                        <div class="field">
+                            <label for="fld-ship-engine">Motor</label>
+                            <input type="text" id="fld-ship-engine" placeholder="z. B. Volvo 30 PS">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><span class="sym" data-symbol="crew"></span>Crew</h2>
+                <div class="crew-add-row">
+                    <div class="field">
+                        <label for="crew-input">Name</label>
+                        <input type="text" id="crew-input" placeholder="Crew-Mitglied">
+                    </div>
+                    <div class="field field-role">
+                        <label for="crew-role">Rolle</label>
+                        <input type="text" id="crew-role" value="Crew" placeholder="Rolle">
+                    </div>
+                    <button type="button" id="btn-crew-add">+ Hinzufügen</button>
+                </div>
+                <ul id="crew-list"></ul>
+            </div>
+
+            <div class="card">
+                <h2><span class="sym" data-symbol="notiz"></span>Notizen</h2>
+                <div class="field">
+                    <textarea id="fld-notes" placeholder="Freie Notizen zum Törn…" rows="4"></textarea>
+                </div>
+            </div>
+
+            <!-- Abschließen und Löschen: bewusst am Ende und zurückhaltend -->
+            <div class="card toern-ende-karte">
+                <button type="button" id="btn-abschliessen" class="btn-abschliessen"><span class="sym" data-symbol="ziel"></span>Törn abschließen</button>
+                <p id="toern-ende-hinweis" class="toern-ende-hinweis">Setzt das Enddatum auf jetzt – ein bereits vergangenes Enddatum bleibt stehen – und sperrt den Törn gegen Änderungen.</p>
+                <button type="button" id="btn-toern-loeschen" class="btn-loeschen-leise"><span class="sym" data-symbol="loeschen"></span>Törn löschen</button>
+            </div>
+
+            <!-- Speichern: schwebt über der Fußleiste, nur bei ungespeicherten Änderungen
+                 (toern-verwaltung.ts); nach dem Speichern kurz grün „Gespeichert“ -->
+            <div id="toern-speichern-leiste" class="toern-speichern-leiste" hidden>
+                <button type="button" id="btn-speichern" class="btn-save"><span class="sym" data-symbol="speichern"></span><span id="btn-speichern-text">Änderungen speichern</span></button>
+            </div>
+
+        </div><!-- /form-section -->
+
+    </div><!-- /tab-toern -->
+
+    <!-- ═══ Alle Törns ════════════════════════════════════════════ -->
+    <div id="tab-toernuebersicht" class="tab-panel tab-hidden" data-titel="Alle Törns" data-titel-symbol="alleToerns">
+        <div id="toernuebersicht-scroll" style="overflow-y:auto">
+            <div id="toern-uebersicht"></div>
+        </div>
+    </div><!-- /tab-toernuebersicht -->
+
+
+    <div id="tab-sicherheit" class="tab-panel tab-hidden" data-titel="Sicherheitseinweisung" data-titel-symbol="sicherheit">
+        <div id="sicherheit-leer" class="tab-leer">
+            <p><span class="sym" data-symbol="info"></span>Bitte zuerst einen Törn auswählen.</p>
+        </div>
+        <div id="sicherheit-inhalt" hidden>
+            <div class="cl-kopf">
+                <p id="sicherheit-datum" class="cl-datum"></p>
+                <p id="sicherheit-warnung-aus" class="cl-datum" hidden>Warnung in der Fußleiste ist für diesen Törn ausgeblendet. <button type="button" class="cl-link" data-aktion="sicherheitWarnungWiederAn">Wieder anzeigen</button></p>
+            </div>
+            <div class="cl-gruppe-titel">10 Sicherheitspunkte</div>
+            <div class="cl-gruppe">
+                <label class="cl-zeile"><span class="cl-nr">1</span><span class="cl-text"><span class="cl-titel">Rettungswesten</span><span class="cl-detail">Standort, Anlegen, Tragepflicht, Lifebelt</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="1"></label>
+                <label class="cl-zeile"><span class="cl-nr">2</span><span class="cl-text"><span class="cl-titel">Mann über Bord</span><span class="cl-detail">Rufen, Sichtkontakt, Ring, Finger, MOB-Knopf</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="2"></label>
+                <label class="cl-zeile"><span class="cl-nr">3</span><span class="cl-text"><span class="cl-titel">Feuerlöscher</span><span class="cl-detail">Standort, Löschdecke, Gas-Haupthahn</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="3"></label>
+                <label class="cl-zeile"><span class="cl-nr">4</span><span class="cl-text"><span class="cl-titel">Seeventile</span><span class="cl-detail">Standort, Schließen bei Wassereinbruch</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="4"></label>
+                <label class="cl-zeile"><span class="cl-nr">5</span><span class="cl-text"><span class="cl-titel">Notruf</span><span class="cl-detail">Funk Kanal 16, Mayday, Position, Personen an Bord</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="5"></label>
+                <label class="cl-zeile"><span class="cl-nr">6</span><span class="cl-text"><span class="cl-titel">Erste Hilfe</span><span class="cl-detail">Verbandskasten, Medikamente, med. Kenntnisse</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="6"></label>
+                <label class="cl-zeile"><span class="cl-nr">7</span><span class="cl-text"><span class="cl-titel">Bedienung</span><span class="cl-detail">Motor, Autopilot, Segel bergen, Anker, Funk, GPS</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="7"></label>
+                <label class="cl-zeile"><span class="cl-nr">8</span><span class="cl-text"><span class="cl-titel">Verhalten an Deck</span><span class="cl-detail">Hand fürs Schiff, kein Griff vor den Baum</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="8"></label>
+                <label class="cl-zeile"><span class="cl-nr">9</span><span class="cl-text"><span class="cl-titel">Toilette</span><span class="cl-detail">Was nicht ins WC, Seeventil öffnen/schließen</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="9"></label>
+                <label class="cl-zeile"><span class="cl-nr">10</span><span class="cl-text"><span class="cl-titel">Dokumente</span><span class="cl-detail">Schiffspapiere, Versicherung, Crew-Liste</span></span><input type="checkbox" class="sich-check cl-haken" data-punkt="10"></label>
+            </div>
+
+            <div class="cl-gruppe-titel"><label for="sicherheit-notiz">Bemerkungen</label></div>
+            <div class="cl-gruppe cl-notiz">
+                <textarea id="sicherheit-notiz" rows="3" placeholder="Besonderheiten, Ausrüstung, Hinweise…"></textarea>
+            </div>
+
+            <!-- Crew-Bestätigung (checklisten.ts) -->
+            <div id="sicherheit-crew-liste"></div>
+
+            <button type="button" class="btn-primary cl-abschliessen" data-aktion="sicherheitAbschliessen"><span class="sym" data-symbol="erledigt"></span>Einweisung abschließen &amp; ins Logbuch</button>
+        </div>
+    </div><!-- /tab-sicherheit -->
+
+    <div id="tab-kontrolle" class="tab-panel tab-hidden" data-titel="Tageskontrolle" data-titel-symbol="kontrolle">
+        <div id="kontrolle-leer" class="tab-leer">
+            <p><span class="sym" data-symbol="info"></span>Bitte zuerst einen Törn auswählen.</p>
+        </div>
+        <div id="kontrolle-inhalt" hidden>
+            <div class="cl-kopf">
+                <p id="kontrolle-datum" class="cl-datum"></p>
+            </div>
+            <div class="cl-gruppe-titel">Tägliche Kontrolle</div>
+            <div class="cl-gruppe">
+                <label class="cl-zeile"><span class="cl-nr">1</span><span class="cl-text"><span class="cl-titel">Bilge</span><span class="cl-detail">Wasser, Bilgepumpe manuell + elektrisch, Wasseranstieg</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="1"></label>
+                <label class="cl-zeile"><span class="cl-nr">2</span><span class="cl-text"><span class="cl-titel">Motor</span><span class="cl-detail">Ölstand, Kühlwasser, Keilriemen, Geräusche</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="2"></label>
+                <label class="cl-zeile"><span class="cl-nr">3</span><span class="cl-text"><span class="cl-titel">Batterie / Strom</span><span class="cl-detail">Ladestand, Landstrom, Navigation + Funk</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="3"></label>
+                <label class="cl-zeile"><span class="cl-nr">4</span><span class="cl-text"><span class="cl-titel">Seeventile</span><span class="cl-detail">Stellung, Dichtigkeit, WC / Küche / Motor</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="4"></label>
+                <label class="cl-zeile"><span class="cl-nr">5</span><span class="cl-text"><span class="cl-titel">Gas-Anlage</span><span class="cl-detail">Hahn geschlossen, kein Geruch, Schlauch in Ordnung</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="5"></label>
+                <label class="cl-zeile"><span class="cl-nr">6</span><span class="cl-text"><span class="cl-titel">Deck / Takelage</span><span class="cl-detail">Leinen, Fallen, Schoten, Splinte, Segel, nichts lose</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="6"></label>
+                <label class="cl-zeile"><span class="cl-nr">7</span><span class="cl-text"><span class="cl-titel">Navigation / Sicherheit</span><span class="cl-detail">GPS, Funk, Lichter, Rettungsmittel griffbereit</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="7"></label>
+                <label class="cl-zeile"><span class="cl-nr">8</span><span class="cl-text"><span class="cl-titel">Wettercheck</span><span class="cl-detail">Lage, Windentwicklung, Tagesentscheidung</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="8"></label>
+                <label class="cl-zeile"><span class="cl-nr">9</span><span class="cl-text"><span class="cl-titel">Wasser / Vorräte</span><span class="cl-detail">Trinkwasser, Treibstoff, Proviant</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="9"></label>
+                <label class="cl-zeile"><span class="cl-nr">10</span><span class="cl-text"><span class="cl-titel">Allgemeiner Zustand</span><span class="cl-detail">Ordnung, nichts lose, Crew über Tagesplan informiert</span></span><input type="checkbox" class="kontr-check cl-haken" data-punkt="10"></label>
+            </div>
+
+            <div class="cl-gruppe-titel"><label for="kontrolle-notiz">Auffälligkeiten / Bemerkungen</label></div>
+            <div class="cl-gruppe cl-notiz">
+                <textarea id="kontrolle-notiz" rows="3" placeholder="z.B. leicht Wasser in Bilge, Pumpe aktiviert…"></textarea>
+            </div>
+
+            <button type="button" class="btn-primary cl-abschliessen" data-aktion="kontrolleAbschliessen"><span class="sym" data-symbol="erledigt"></span>Kontrolle abschließen &amp; ins Logbuch</button>
+        </div>
+    </div><!-- /tab-kontrolle -->
+
+    <!-- ═══ Hauptbereich: Karte (tab-logbuch) + Logbuch-Liste (tab-log) ══════════════════ -->
+    <div id="haupt-bereich">
+
+    <!-- Karte (Hauptbildschirm; Id historisch tab-logbuch) -->
+    <div id="tab-logbuch" class="tab-panel">
+
+        <!-- Karte immer, auch ohne Törn (dann Hinweis über der Fußleiste, navigation.ts) -->
+        <div id="tab-logbuch-inhalt">
+
+            <!-- Karte: permanenter Hintergrund des Logbuch-Tabs -->
+            <div id="logbuch-karte-container" class="logbuch-karte-container">
+                <div id="logbuch-karte"></div>
+                <div class="logbuch-karte-modus">
+                    <!-- ein Knopf für die Ausrichtung: zeigt die gewählte, Tipp öffnet die Auswahl darunter -->
+                    <button type="button" id="logbuch-modus-btn" class="karten-knopf logbuch-modus-btn" data-aktion="logbuchModusMenueToggeln" title="Ausrichtung: Kurs oben" aria-label="Ausrichtung: Kurs oben" aria-expanded="false" aria-controls="logbuch-modus-menue"><span class="sym" data-symbol="kursOben"></span></button>
+                    <button type="button" id="logbuch-zoom-plus" class="karten-knopf logbuch-zoom-btn logbuch-zoom-erster" data-aktion="logbuchZoomen" data-wert="1" title="Hineinzoomen" aria-label="Hineinzoomen"><span class="sym" data-symbol="plus"></span></button>
+                    <button type="button" id="logbuch-zoom-minus" class="karten-knopf logbuch-zoom-btn" data-aktion="logbuchZoomen" data-wert="-1" title="Herauszoomen" aria-label="Herauszoomen"><span class="sym" data-symbol="minus"></span></button>
+                    <button type="button" id="logbuch-menue-btn" class="karten-knopf logbuch-zoom-btn logbuch-menue-btn" data-aktion="logbuchMenueToggeln" title="Karteneinstellungen" aria-label="Karteneinstellungen" aria-expanded="false" aria-controls="logbuch-karten-menue"><span class="sym" data-symbol="einstellungen"></span></button>
+                </div>
+                <!-- Ausrichtung der Karte: Auswahl mit Beschreibung (gleiche Optik wie die Karteneinstellungen) -->
+                <!-- Legende „Track farbig“: Tipp auf einen Tag/Rudergänger zeigt seine Strecke (logbuch-karte.ts füllt die Liste) -->
+                <div id="logbuch-tage-legende" class="logbuch-tage-legende" hidden>
+                    <button type="button" class="tl-kopf" data-aktion="logbuchTagesLegendeToggeln" aria-expanded="false" aria-controls="logbuch-tage-liste"><span class="sym" data-symbol="kalender"></span><span class="tl-titel">Tage</span><span class="sym tl-pfeil" data-symbol="runter"></span></button>
+                    <div id="logbuch-tage-liste" class="tl-liste"></div>
+                </div>
+                <!-- Entwicklermodus, GPS-Simulation läuft (body.gps-simulation): Kurs direkt auf der Karte ändern -->
+                <div class="logbuch-sim-leiste" aria-label="GPS-Simulation">
+                    <button type="button" class="karten-knopf" data-aktion="simDrehen" data-wert="-90" aria-label="Kurs −90°">−90</button>
+                    <button type="button" class="karten-knopf" data-aktion="simDrehen" data-wert="-10" aria-label="Kurs −10°">−10</button>
+                    <span id="logbuch-sim-text" class="logbuch-sim-text"></span>
+                    <button type="button" id="logbuch-sim-halt" class="karten-knopf" data-aktion="simAnhalten" aria-label="Anhalten"><span class="sym" data-symbol="stopp"></span></button>
+                    <button type="button" class="karten-knopf" data-aktion="simDrehen" data-wert="10" aria-label="Kurs +10°">+10</button>
+                    <button type="button" class="karten-knopf" data-aktion="simDrehen" data-wert="90" aria-label="Kurs +90°">+90</button>
+                </div>
+                <button type="button" id="logbuch-recenter-btn" class="logbuch-recenter-btn" data-aktion="logbuchZurPositionZurueck" aria-label="Zur Position" title="Zur Position" hidden><span class="sym" data-symbol="position"></span></button>
+                <!-- Tipp auf den Track: Stelle markiert, Manöver dort nachtragen -->
+                <div id="logbuch-nachtrag-leiste" class="logbuch-nachtrag-leiste" hidden>
+                    <span class="sym" data-symbol="uhr"></span><span id="logbuch-nachtrag-text"></span>
+                    <!-- Tipp auf einen Eintrag: seine Zeile wie in der Liste (logbuch-karte.ts füllt sie), Hinweis darunter -->
+                    <ul id="logbuch-nachtrag-zeile" class="logbuch-nachtrag-zeile" hidden></ul>
+                    <div id="logbuch-nachtrag-hinweis" class="logbuch-nachtrag-hinweis" hidden></div>
+                    <button type="button" class="logbuch-nachtrag-knopf" data-aktion="logbuchNachtragAmTrack">Nachtragen</button>
+                    <!-- rechts neben der Zeile, Optik wie die Knöpfe in der Liste -->
+                    <div class="logbuch-leiste-knoepfe">
+                        <!-- direkt nach dem Verschieben am Track: zurücknehmen (betont); in der Reihe, damit die Leiste ihre Höhe behält -->
+                        <button type="button" id="logbuch-rueckgaengig-knopf" class="logbuch-rueckgaengig-knopf" data-aktion="logbuchVerschiebenRueckgaengig" aria-label="Verschieben rückgängig" title="Verschieben rückgängig" hidden><span class="sym" data-symbol="rueckgaengig"></span></button>
+                        <button type="button" class="logbuch-eintrag-knopf" data-aktion="eventBearbeitenDialog logbuchNachtragAbbrechen" aria-label="Bearbeiten" title="Bearbeiten" hidden><span class="sym" data-symbol="bearbeiten"></span></button>
+                        <button type="button" class="logbuch-verschieben-knopf" data-aktion="logbuchVerschiebenStarten" aria-label="Am Track verschieben" title="Am Track verschieben" hidden><span class="sym" data-symbol="verschieben"></span></button>
+                        <button type="button" class="logbuch-eintrag-knopf" data-aktion="eintragInListeZeigen logbuchNachtragAbbrechen" aria-label="In Liste zeigen" title="In Liste zeigen" hidden><span class="sym" data-symbol="log"></span></button>
+                    </div>
+                    <!-- Eintrag am Track verschieben: ◀ ▶ je ein Trackpunkt, oder Griff ziehen / auf den Track tippen -->
+                    <div id="logbuch-verschieben-knoepfe" class="logbuch-verschieben-knoepfe" hidden>
+                        <button type="button" class="logbuch-schritt-knopf" data-aktion="logbuchVerschiebenSchritt" data-wert="-1" aria-label="Einen Trackpunkt früher" title="Einen Trackpunkt früher">◀</button>
+                        <button type="button" class="logbuch-schritt-knopf" data-aktion="logbuchVerschiebenSchritt" data-wert="1" aria-label="Einen Trackpunkt später" title="Einen Trackpunkt später">▶</button>
+                        <button type="button" class="logbuch-verschieben-abbrechen" data-aktion="logbuchVerschiebenAbbrechen">Abbrechen</button>
+                        <button type="button" class="logbuch-nachtrag-knopf logbuch-verschieben-ok" data-aktion="logbuchVerschiebenUebernehmen">Übernehmen</button>
+                    </div>
+                    <!-- mehrere Einträge übereinander: erst wählen, welcher gemeint ist (logbuch-karte.ts füllt die Knöpfe) -->
+                    <div id="logbuch-nachtrag-auswahl" class="logbuch-nachtrag-auswahl" hidden></div>
+                </div>
+                <div id="logbuch-boot-overlay" class="logbuch-boot-overlay" hidden>
+                    <div class="logbuch-boot-heading-gruppe" id="logbuch-boot-heading-gruppe">
+                        <div class="logbuch-boot-linie" id="logbuch-boot-linie"></div>
+                        <div class="logbuch-boot-halo"></div>
+                        <svg class="logbuch-boot-icon" width="26" height="26" viewBox="0 0 26 26">
+                            <polygon points="13,2 20,22 13,17 6,22" fill="#0ea5e9" stroke="#fff" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <div class="logbuch-boot-cog-linie" id="logbuch-boot-cog-linie" hidden></div>
+                    <div class="logbuch-boot-sog" id="logbuch-boot-sog"></div>
+                </div>
+            </div>
+
+            <!-- Speed/Krängung stehen jetzt in der zusammengeführten Footer-Pille (#footer-metrik) -->
+
+        </div>
+
+    </div><!-- /tab-logbuch -->
+
+    <!-- Logbuch: Liste der Einträge (Id historisch tab-log) -->
+    <div id="tab-log" class="tab-panel tab-hidden">
+
+        <div class="tab-leer" id="tab-log-leer">
+            <p><span class="sym" data-symbol="info"></span>Bitte zuerst einen Törn auswählen oder anlegen.</p>
+        </div>
+
+        <div id="tab-log-inhalt" hidden>
+            <!-- Nach Tagen gruppiert, Tage aufklappbar (eintraege.ts); beginnt unter der Kopfzeile der Pille; scrollt mit dem Inhalt (#inhalt) -->
+            <div id="log-liste"></div>
+        </div>
+
+    </div><!-- /tab-log -->
+
+
+    </div><!-- /haupt-bereich -->
+
+    <!-- ═══ Track bearbeiten (Seite aus dem Menü) ═══════════════ -->
+    <div id="tab-karte" class="tab-panel tab-hidden" data-titel="Track bearbeiten" data-titel-symbol="karte">
+
+        <div class="tab-leer" id="tab-karte-leer">
+            <p><span class="sym" data-symbol="info"></span>Bitte zuerst einen Törn auswählen oder anlegen.</p>
+        </div>
+
+        <div id="tab-karte-inhalt" hidden>
+            <!-- Karte randlos über die volle Höhe; Filter, Zoom und Bearbeiten-Leiste schweben darauf -->
+            <div id="haupt-karte-viewport" class="haupt-karte">
+                <div id="haupt-karte"></div>
+                <div class="filter-bar karte-filter-schwebend">
+                    <!-- Tagesauswahl wie in der Statistik (haupt-karte.ts füllt sie; nur bei mehreren Tagen) -->
+                    <select id="karte-tag-sel" class="karten-pille karten-auswahl" aria-label="Tag" hidden></select>
+                    <button type="button" class="karten-pille" id="btn-karte-bearbeiten-start" data-aktion="karteBearbeitenModusToggeln"><span class="sym" data-symbol="bearbeiten"></span>Bearbeiten</button>
+                    <!-- Trackliste: Unterseite von Track bearbeiten („Zurück“ führt hierher) -->
+                    <button type="button" class="karten-pille" id="btn-karte-trackliste" data-aktion="seitenWechseln" data-wert="tab-trackliste" title="Trackliste"><span class="sym" data-symbol="trackliste"></span>Liste</button>
+                    <!-- Bearbeiten: rechts in derselben Zeile – Rückgängig, Punkt setzen, Seltenes im ⋯-Menü;
+                         „Fertig“ (der Bearbeiten-Knopf) übernimmt, „Änderungen verwerfen“ nimmt alles seit Beginn zurück -->
+                    <div class="karte-knopfreihe karte-knopfreihe-rechts" id="karte-aktionen-row" hidden>
+                        <button type="button" class="karten-knopf" id="btn-track-undo" data-aktion="trackRueckgaengig" title="Rückgängig" aria-label="Rückgängig" disabled><span class="sym" data-symbol="rueckgaengig"></span></button>
+                        <button type="button" class="karten-knopf" id="btn-track-punkt" data-aktion="trackPunktHinzufuegen" title="Punkt setzen" aria-label="Punkt setzen" aria-pressed="false"><span class="sym" data-symbol="ortNeu"></span></button>
+                        <button type="button" class="karten-knopf karte-mehr-btn" id="btn-karte-mehr" data-aktion="karteMehrMenueToggeln" title="Weitere Aktionen" aria-label="Weitere Aktionen" aria-expanded="false" aria-controls="karte-mehr-menue"><span class="sym" data-symbol="mehr"></span></button>
+                        <div id="karte-mehr-menue" class="karte-mehr-menue" hidden>
+                            <button type="button" class="km-zeile" data-aktion="karteMehrMenueSchliessen trackVereinfachen"><span class="sym" data-symbol="vereinfachen"></span>Track vereinfachen</button>
+                            <button type="button" class="km-zeile km-zeile-gefahr" data-aktion="karteMehrMenueSchliessen trackLoeschen"><span class="sym" data-symbol="loeschen"></span>Track löschen</button>
+                            <div class="km-trenner"></div>
+                            <button type="button" class="km-zeile" data-aktion="karteMehrMenueSchliessen trackAenderungenVerwerfen"><span class="sym" data-symbol="schliessen"></span>Änderungen verwerfen</button>
+                        </div>
+                    </div>
+                    <!-- Zoom wie auf der Logbuch-Karte – eigene Zeile IN der Filterleiste: bricht sie um, rückt der Zoom mit -->
+                    <div class="karte-zoom-leiste karte-zoom-in-zeile">
+                        <button type="button" id="haupt-karte-zoom-plus" class="karten-knopf karte-zoom-btn" title="Hineinzoomen" aria-label="Hineinzoomen"><span class="sym" data-symbol="plus"></span></button>
+                        <button type="button" id="haupt-karte-zoom-minus" class="karten-knopf karte-zoom-btn" title="Herauszoomen" aria-label="Herauszoomen"><span class="sym" data-symbol="minus"></span></button>
+                    </div>
+                </div>
+                <!-- Tipp-Modus-Hinweis unten -->
+                <div class="karte-aktionen karte-aktionen-schwebend">
+                    <span id="karte-aktion-status" class="karte-aktion-status" hidden></span>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /tab-karte -->
+
+    <!-- ═══ Tab 5: Statistik ═══════════════════════════════════════ -->
+    <div id="tab-statistik" class="tab-panel tab-hidden" data-titel="Statistik" data-titel-symbol="statistik">
+
+        <div class="tab-leer" id="tab-statistik-leer">
+            <p><span class="sym" data-symbol="info"></span>Bitte zuerst einen Törn auswählen oder anlegen.</p>
+        </div>
+
+        <div id="tab-statistik-inhalt" hidden>
+            <!-- Kopfzeile: Tagesauswahl links, Ergebnis der Datenprüfung rechts (statistik.ts; antippen zeigt die Liste) -->
+            <div class="statistik-kopfzeile">
+                <div id="statistik-datum-filter-container"></div>
+                <div id="statistik-pruefung"></div>
+            </div>
+            <div id="toern-statistik"></div>
+            <div id="toern-abschluss"></div>
+        </div>
+
+    </div><!-- /tab-statistik -->
+
+    <!-- ═══ Trackliste ════════════════════════════════════════════ -->
+    <div id="tab-trackliste" class="tab-panel tab-hidden" data-titel="Trackliste" data-titel-symbol="trackliste">
+        <div id="trackliste-scroll" style="overflow-y:auto">
+        <div id="trackliste-leer" class="tab-leer">
+            <p><span class="sym" data-symbol="info"></span>Bitte zuerst einen Törn auswählen.</p>
+        </div>
+        <div id="trackliste-inhalt" hidden>
+            <div class="card">
+                <div id="trackliste-info" class="trackliste-info"></div>
+                <div class="ab-tabelle-wrap">
+                    <table class="ab-tabelle">
+                        <thead><tr>
+                            <th>#</th><th>Zeit</th><th>Lat</th><th>Lon</th><th>SOG kn</th>
+                        </tr></thead>
+                        <tbody id="trackliste-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div><!-- /trackliste-scroll -->
+    </div><!-- /tab-trackliste -->
+
+    <!-- ═══ Routenplanung ══════════════════════════════════════════ -->
+    <div id="tab-routenplanung" class="tab-panel tab-hidden" data-titel="Routenplanung" data-titel-symbol="routenplanung">
+
+        <!-- Karte randlos; Zoom, Einstellungen, Aktionen und das Ergebnis (Bottom Sheet) schweben darauf -->
+        <div id="rp-karte-viewport" class="rp-karte-viewport">
+            <div id="rp-karte"></div>
+            <!-- Zoom wie auf der Logbuch-Karte (keine Modus-Leiste: Linie/Punkt antippen öffnet ein Menü) -->
+            <div class="karte-zoom-leiste karte-zoom-oben">
+                <button type="button" id="rp-zoom-plus" class="karten-knopf karte-zoom-btn" title="Hineinzoomen" aria-label="Hineinzoomen"><span class="sym" data-symbol="plus"></span></button>
+                <button type="button" id="rp-zoom-minus" class="karten-knopf karte-zoom-btn" title="Herauszoomen" aria-label="Herauszoomen"><span class="sym" data-symbol="minus"></span></button>
+                <button type="button" id="rp-position-btn" class="karten-knopf karte-zoom-btn karte-zoom-abstand" title="Auf meine Position" aria-label="Auf meine Position"><span class="sym" data-symbol="position"></span></button>
+                <button type="button" id="rp-einstellungen-btn" class="karten-knopf karte-zoom-btn karte-zoom-abstand" title="Einstellungen" aria-label="Einstellungen" aria-expanded="false" aria-controls="rp-einstellungen"><span class="sym" data-symbol="einstellungen"></span></button>
+            </div>
+            <div id="rp-einstellungen" class="rp-einstellungen rp-einstellungen-schwebend" hidden>
+                <label class="rp-feld">Ø-Speed
+                    <span class="rp-feld-inp"><input type="number" id="rp-speed" min="0.5" step="0.5" value="5" inputmode="decimal"> kn</span>
+                </label>
+                <label class="rp-feld">Std./Tag (max)
+                    <span class="rp-feld-inp"><input type="number" id="rp-stdtag" min="0" step="1" value="8" inputmode="numeric"> h</span>
+                </label>
+                <label class="rp-feld">Kreuz-Faktor
+                    <span class="rp-feld-inp"><select id="rp-kreuzfaktor">
+                        <option value="1.2">leicht ×1,2</option>
+                        <option value="1.4" selected>normal ×1,4</option>
+                        <option value="1.6">hart ×1,6</option>
+                    </select></span>
+                </label>
+                <label class="rp-feld">Punkte/Abschnitt
+                    <span class="rp-feld-inp"><input type="number" id="rp-anzahl" min="1" max="50" step="1" value="4" inputmode="numeric"></span>
+                </label>
+                <button type="button" class="btn-karte-aktion" id="rp-ausduennen-btn"><span class="sym" data-symbol="ausduennen"></span>Formpunkte ausdünnen</button>
+            </div>
+            <!-- Bedien-Hinweis unten, über dem Ergebnis -->
+            <div class="karte-aktionen karte-aktionen-schwebend rp-hinweis-unten">
+                <span id="rp-einfuegen-hint" class="karte-aktion-status" hidden></span>
+            </div>
+            <!-- Aktionen oben rechts: Rückgängig sichtbar, der Rest im ⋯-Menü (Einstellungen: Zahnrad links) -->
+            <div class="karte-knopfreihe rp-aktionen-oben">
+                <div id="rp-mehr-menue" class="karte-mehr-menue" hidden>
+                    <button type="button" class="km-zeile" id="rp-neu-btn"><span class="sym" data-symbol="neueKarte"></span>Neu</button>
+                    <button type="button" class="km-zeile" id="rp-speichern-btn"><span class="sym" data-symbol="speichern"></span>Speichern</button>
+                    <button type="button" class="km-zeile" id="rp-laden-btn"><span class="sym" data-symbol="oeffnen"></span>Laden</button>
+                    <button type="button" class="km-zeile" id="rp-drucken-btn"><span class="sym" data-symbol="drucken"></span>PDF</button>
+                    <div class="km-trenner"></div>
+                    <button type="button" class="km-zeile km-zeile-gefahr" id="rp-aktive-loeschen-btn"><span class="sym" data-symbol="loeschen"></span>Löschen</button>
+                </div>
+                <button type="button" class="karten-knopf" id="rp-undo" title="Rückgängig" aria-label="Rückgängig" disabled><span class="sym" data-symbol="rueckgaengig"></span></button>
+                <button type="button" class="karten-knopf karte-mehr-btn" id="rp-mehr-btn" title="Weitere Aktionen" aria-label="Weitere Aktionen" aria-expanded="false" aria-controls="rp-mehr-menue"><span class="sym" data-symbol="mehr"></span></button>
+            </div>
+            <!-- Ergebnis als Bottom Sheet: erst wenn es eine Route gibt, schaut ein Stück von unten herein;
+                 am Griff größer ziehen, Antippen klappt auf/zu -->
+            <div id="rp-sheet" class="rp-sheet" hidden>
+                <button type="button" id="rp-sheet-griff" class="rp-sheet-griff" aria-label="Ergebnis auf- oder zuklappen" aria-expanded="false"><span></span></button>
+                <div class="rp-sheet-inhalt">
+                    <div id="rp-ergebnis" class="rp-ergebnis"></div>
+                    <div id="rp-tagesplan" class="rp-tagesplan"></div>
+                    <div id="rp-etappen" class="rp-etappen"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Laden-Overlay -->
+        <div id="rp-laden-overlay" class="rp-laden-overlay" style="display:none">
+            <div class="rp-laden-box">
+                <div class="rp-laden-header">
+                    <strong><span class="sym" data-symbol="oeffnen"></span>Gespeicherte Routen</strong>
+                    <button type="button" class="rp-laden-close" id="rp-laden-schliessen-btn" aria-label="Schließen"><span class="sym" data-symbol="schliessen"></span></button>
+                </div>
+                <div id="rp-laden-liste" class="rp-laden-liste"></div>
+            </div>
+        </div>
+    </div><!-- /tab-routenplanung -->
+
+    <!-- ═══ Einstellungen ══════════════════════════════════════════ -->
+    <div id="tab-einstellungen" class="tab-panel tab-hidden" data-titel="Einstellungen" data-titel-symbol="einstellungen">
+        <div class="card einstellungen-card">
+            <h2 class="einstellungen-gruppe-titel"><span class="sym" data-symbol="ort"></span>Track-Aufzeichnung</h2>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="track-distanz-select">Track-Auflösung</label>
+                <select id="track-distanz-select" class="einstellung-select">
+                    <option value="0.01">0,01 nm (~19 m)</option>
+                    <option value="0.02">0,02 nm (~37 m)</option>
+                    <option value="0.03">0,03 nm (~56 m)</option>
+                    <option value="0.05">0,05 nm (~93 m) Standard</option>
+                    <option value="0.1">0,1 nm (~185 m)</option>
+                    <option value="0.2">0,2 nm (~370 m)</option>
+                    <option value="0.3">0,3 nm (~556 m)</option>
+                    <option value="0.4">0,4 nm (~741 m)</option>
+                    <option value="0.5">0,5 nm (~926 m)</option>
+                </select>
+            </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="track-kurspunkt-select">Punkt bei Kursänderung</label>
+                <select id="track-kurspunkt-select" class="einstellung-select">
+                    <option value="0">Aus</option>
+                    <option value="10">ab 10°</option>
+                    <option value="15">ab 15°</option>
+                    <option value="20">ab 20°</option>
+                    <option value="30">ab 30° Standard</option>
+                    <option value="45">ab 45°</option>
+                    <option value="60">ab 60°</option>
+                </select>
+            </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="track-accuracy-select">Max. GPS Ungenauigkeit</label>
+                <select id="track-accuracy-select" class="einstellung-select">
+                    <option value="10">10 m (streng)</option>
+                    <option value="25">25 m (sehr genau)</option>
+                    <option value="50">50 m (genau)</option>
+                    <option value="100">100 m (Standard)</option>
+                    <option value="200">200 m (tolerant)</option>
+                </select>
+            </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="sog-schwelle-select">GPS-Jitter-Filter (SOG)</label>
+                <select id="sog-schwelle-select" class="einstellung-select">
+                    <option value="0.05">0,05 kn</option>
+                    <option value="0.1">0,1 kn (Standard)</option>
+                    <option value="0.2">0,2 kn</option>
+                    <option value="0.3">0,3 kn</option>
+                    <option value="0.4">0,4 kn</option>
+                    <option value="0.5">0,5 kn</option>
+                </select>
+            </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="track-intervall-select">Fallback-Intervall</label>
+                <select id="track-intervall-select" class="einstellung-select">
+                    <option value="5">5 s</option>
+                    <option value="10">10 s</option>
+                    <option value="15">15 s</option>
+                    <option value="30">0,5 min (30s)</option>
+                    <option value="60">1 min (60s)</option>
+                    <option value="90">1,5 min (90s)</option>
+                    <option value="120">2 min (120s) Standard</option>
+                    <option value="150">2,5 min (150s)</option>
+                    <option value="180">3 min (180s)</option>
+                </select>
+            </div>
+            <h3 class="einstellung-untertitel">Automatische Hinweise</h3>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="bereitschaft-select"><span class="sym bereitschaft-sym" data-symbol="funk"></span>Bereitschaft im Hafen/Anker <span class="beta-marke">Beta</span></label>
+                <select id="bereitschaft-select" class="einstellung-select">
+                    <option value="an">An</option>
+                    <option value="aus">Aus</option>
+                </select>
+            </div>
+            <p class="einstellung-hinweis einstellung-hinweis-unten">Im Hafen und vor Anker bleibt das GPS grob eingeschaltet. Entfernt sich das Boot, fragt die App, ob das Ablegen nachgetragen werden soll – eingetragen wird nie automatisch. Solange die Bereitschaft läuft, zeigt die Fußleiste neben dem Liegeplatz das Symbol <span class="sym bereitschaft-sym" data-symbol="funk"></span>. Zuverlässig nur in der App (Android, iPhone) – im Browser stoppt das GPS, sobald der Bildschirm aus ist.</p>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="anlegen-hinweis-select">Vergessenes Anlegen melden <span class="beta-marke">Beta</span></label>
+                <select id="anlegen-hinweis-select" class="einstellung-select">
+                    <option value="an">An</option>
+                    <option value="aus">Aus</option>
+                </select>
+            </div>
+            <p class="einstellung-hinweis einstellung-hinweis-unten">Steht das Boot in Fahrt länger am selben Ort, fragt die App, ob Anlegen, Ankern oder Boje nachgetragen werden soll.</p>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="manoever-erkennung-select">Wende/Halse erkennen <span class="beta-marke">Beta</span></label>
+                <select id="manoever-erkennung-select" class="einstellung-select">
+                    <option value="aus">Aus</option>
+                    <option value="an">An</option>
+                </select>
+            </div>
+            <p class="einstellung-hinweis einstellung-hinweis-unten">Unter Segeln erkennt die App deutliche Kursänderungen im GPS-Track und fragt, ob eine Wende oder Halse eingetragen werden soll – eingetragen wird nie automatisch. Fehlalarme sind möglich.</p>
+        </div>
+        <div class="card einstellungen-card">
+            <h2 class="einstellungen-gruppe-titel"><span class="sym" data-symbol="einstellungen"></span>Anzeige</h2>
+            <p class="einstellung-hinweis">Vergrößert die ganze Oberfläche. „Automatisch“ macht sie auf Tablets etwas größer, am Handy bleibt sie unverändert.</p>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="anzeige-groesse-select">Anzeigegröße</label>
+                <select id="anzeige-groesse-select" class="einstellung-select">
+                    <option value="auto">Automatisch</option>
+                    <option value="100">100 %</option>
+                    <option value="115">115 %</option>
+                    <option value="130">130 %</option>
+                    <option value="150">150 %</option>
+                </select>
+            </div>
+        </div>
+        <div class="card einstellungen-card">
+            <h2 class="einstellungen-gruppe-titel"><span class="sym" data-symbol="blase"></span>Drittes Schnellmanöver</h2>
+            <p class="einstellung-hinweis">Für die Schnellmanöver neben der Rudergänger-Anzeige in Fahrt („Segeln“ gilt auch für Motorsegeln). Die Anzahl stellst du im Zahnrad-Menü der Karte ein.</p>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="sk-dritter-segeln">Segeln</label>
+                <select id="sk-dritter-segeln" class="einstellung-select" data-lage="segeln"></select>
+            </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="sk-dritter-motor">Motor</label>
+                <select id="sk-dritter-motor" class="einstellung-select" data-lage="motor"></select>
+            </div>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="sk-dritter-ohne">Ohne Antrieb</label>
+                <select id="sk-dritter-ohne" class="einstellung-select" data-lage="ohne"></select>
+            </div>
+        </div>
+        <div class="card einstellungen-card">
+            <h2 class="einstellungen-gruppe-titel"><span class="sym" data-symbol="karte"></span>Offline-Karten</h2>
+            <div id="offline-karten-gesamt" class="offline-karten-gesamt"></div>
+            <div id="offline-karten-karte" class="offline-karten-karte" hidden></div>
+            <div id="offline-karten-liste" class="offline-karten-liste"></div>
+            <p class="offline-karten-hinweis">Antippen zeigt das Gebiet rot auf der Karte. <span class="sym" data-symbol="loeschen"></span>fragt vorher nach.
+                Kacheln, die auch zu einem anderen Gebiet gehören, bleiben erhalten.</p>
+        </div>
+        <div class="card einstellungen-card">
+            <h2 class="einstellungen-gruppe-titel"><span class="sym" data-symbol="pruefen"></span>Entwickler</h2>
+            <div class="einstellung-zeile">
+                <span class="einstellung-label">App neu laden</span>
+                <button type="button" class="btn-secondary dev-update" data-aktion="updateErzwingen"><span class="sym" data-symbol="update"></span>Update erzwingen</button>
+            </div>
+            <p class="einstellung-hinweis einstellung-hinweis-unten">Löscht den App-Cache (Offline-Karten bleiben) und lädt die neueste Version. Deine Törns bleiben erhalten.</p>
+            <p class="einstellung-hinweis">Zum Testen auf See: Schwellen der automatischen Erkennungen einstellen. Ausgeschaltet gelten immer die Standardwerte.</p>
+            <div class="einstellung-zeile">
+                <label class="einstellung-label" for="dev-modus-select">Entwicklermodus</label>
+                <select id="dev-modus-select" class="einstellung-select">
+                    <option value="aus">Aus</option>
+                    <option value="an">An</option>
+                </select>
+            </div>
+            <div id="dev-bereich" hidden>
+                <div id="dev-parameter"></div>
+                <div id="dev-vergleich" hidden>
+                    <p id="dev-vergleich-text" class="einstellung-hinweis dev-hinweis"></p>
+                    <p class="einstellung-hinweis dev-hinweis">Auf der Logbuch-Karte: Track mit Ecken magenta, Punkte beider Tracks als Kreise. Der normale Track bleibt unverändert. Abweichung = Abstand der rohen GPS-Fixe (seit dem App-Start) vom jeweiligen Track zur selben Zeit. Mit GPS-Simulation zusätzlich vom wahren Weg des simulierten Boots (ohne den Fehler der Fixe).</p>
+                    <button type="button" class="btn-secondary dev-vergleich-loeschen" data-aktion="vergleichLoeschen"><span class="sym" data-symbol="loeschen"></span>Vergleichstrack löschen</button>
+                </div>
+                <p class="einstellung-hinweis dev-hinweis">Änderungen gelten ab dem nächsten GPS-Fix. Im Entwicklermodus meldet die App auch erkannte Manöver, die sie nicht anbietet (z.B. unter Motor oder schon eingetragen).</p>
+                <button type="button" class="btn-secondary dev-zuruecksetzen" data-aktion="devParameterZuruecksetzen"><span class="sym" data-symbol="rueckgaengig"></span>Standardwerte</button>
+                <h3 class="dev-gruppe">GPS-Simulation</h3>
+                <div class="einstellung-zeile dev-zeile">
+                    <label class="einstellung-label" for="dev-sim-select">Fahrt simulieren</label>
+                    <select id="dev-sim-select" class="einstellung-select">
+                        <option value="aus">Aus</option>
+                        <option value="an">An</option>
+                    </select>
+                </div>
+                <div id="dev-sim-steuerung" hidden>
+                    <div class="einstellung-zeile dev-zeile">
+                        <label class="einstellung-label" for="dev-sim-kurs">Kurs</label>
+                        <span class="dev-feld"><input id="dev-sim-kurs" type="number" inputmode="numeric" class="dev-zahl" min="0" max="359" step="5"><span class="dev-einheit">°</span></span>
+                    </div>
+                    <div class="einstellung-zeile dev-zeile">
+                        <label class="einstellung-label" for="dev-sim-fahrt">Fahrt</label>
+                        <span class="dev-feld"><input id="dev-sim-fahrt" type="number" inputmode="decimal" class="dev-zahl" min="0" max="30" step="0.5"><span class="dev-einheit">kn</span></span>
+                    </div>
+                    <div class="dev-sim-knoepfe">
+                        <button type="button" class="btn-secondary" data-aktion="simDrehen" data-wert="-90">−90°</button>
+                        <button type="button" class="btn-secondary" data-aktion="simDrehen" data-wert="-10">−10°</button>
+                        <button type="button" class="btn-secondary" data-aktion="simDrehen" data-wert="10">+10°</button>
+                        <button type="button" class="btn-secondary" data-aktion="simDrehen" data-wert="90">+90°</button>
+                    </div>
+                </div>
+                <p class="einstellung-hinweis dev-hinweis">Ersetzt das GPS durch ein erfundenes Boot (Track, Live-Position, Kompass, Positionen der Einträge). Es startet an der letzten Position des Törns und dreht mit 10°/s auf den neuen Kurs. Die Fixe bekommen Fehler wie ein Handy-GPS (oben unter „GPS-Simulation: Fehler des GPS“, alles auf 0 = exakt). Nach dem Neuladen ist die Simulation aus.</p>
+            </div>
+        </div>
+    </div><!-- /tab-einstellungen -->
+
+
+</div><!-- /app -->
+</main><!-- /inhalt -->
+
+<!-- Import File-Input (versteckt) -->
+<input type="file" id="import-file-input" accept=".json" style="display:none">
+
+<!-- Fixe Leiste unten (auf dem Logbuch-Tab als schwebende Pille inkl. Speed/Krängung); STOPP/FAHRT steht im Kopf -->
+<div class="bottom-bar">
+    <!-- Toasts schweben knapp über der Leiste und wandern mit ihr (Pille auf dem Logbuch, volle Breite sonst):
+         oben die Statusmeldung, darunter Knopf „Törn anlegen“ (kein Törn) / Hinweis „Sicherheitseinweisung fehlt“ (nur Logbuch-Tab) -->
+    <div class="fuss-toasts">
+        <div id="status-msg" class="status-msg" hidden></div>
+        <!-- Kein aktiver Törn: Knopf statt Warnung – „Törn anlegen“ bzw. „Törn wählen“ (navigation.ts) -->
+        <button type="button" id="ls-toern-knopf" class="fuss-hinweis fuss-toern-knopf" data-aktion="toernStarten" hidden><span id="ls-toern-knopf-sym" class="sym" data-symbol="plus"></span><span id="ls-toern-knopf-text">Törn anlegen</span></button>
+        <div id="ls-sicherheit-warnung" class="status-warn fuss-hinweis fuss-hinweis-mit-x" hidden>
+            <button type="button" class="fuss-hinweis-text" data-aktion="seitenWechseln" data-wert="tab-sicherheit"><span class="sym" data-symbol="warnung"></span>Sicherheitseinweisung fehlt – jetzt durchführen</button>
+            <button type="button" class="fuss-hinweis-x" data-aktion="sicherheitWarnungAusblenden" aria-label="Warnung ausblenden"><span class="sym" data-symbol="schliessen"></span></button>
+        </div>
+    </div>
+    <div id="footer-metrik" hidden>
+        <div class="fm-metrik">
+            <span class="fm-wert" id="ls-sog">—</span>
+            <span class="fm-label">Speed</span>
+        </div>
+        <!-- Ziel auf der Logbuch-Karte gesetzt (logbuch-karte.ts): VMG (grün = nähert sich, rot = entfernt sich) und Distanz -->
+        <div class="fm-metrik fm-ziel-metrik" id="fm-vmg" hidden>
+            <span class="fm-wert" id="ls-vmg">—</span>
+            <span class="fm-label">VMG kn</span>
+        </div>
+        <div class="fm-metrik fm-ziel-metrik" id="fm-ziel" hidden>
+            <span class="fm-wert" id="ls-ziel-nm">—</span>
+            <span class="fm-label">Ziel nm</span>
+        </div>
+        <div class="fm-metrik" id="ls-kraengung-box" data-aktion="kraengungErlauben kompassErlauben" style="cursor:pointer">
+            <span class="fm-wert fm-wert-symbol"><span class="sym" data-symbol="segelboot"></span><span id="ls-kraengung">—</span></span>
+            <span class="fm-label">Krängung</span>
+        </div>
+    </div>
+    <div id="btn-fahrt-mitte" class="btn-fahrt-mitte" hidden>
+        <!-- Antrieb in Fahrt als Kachel wie in der Logbuch-Liste (Segeln blau, Motor orange; fahrtzustand.ts) -->
+        <span id="ls-antrieb" class="fuss-antrieb" role="img" hidden><span class="sym" data-symbol="motor"></span></span>
+        <span class="btn-fahrt-mitte-text">
+            <!-- wie ein Eintrag der Logbuch-Liste: Zeit leise + Ereignis fett, darunter Angaben als Chips -->
+            <span class="btn-fahrt-mitte-zeile1" id="ls-mitte-zeile1">
+                <span id="ls-letztes-zeit" class="fm-log-zeit"></span>
+                <span id="ls-letztes-ereignis"></span>
+                <span id="ls-track" class="sym" hidden></span>
+            </span>
+            <span class="btn-fahrt-mitte-zeile2">
+                <!-- Wetter des neuesten Eintrags (höchstens 3 h alt): Wind und Wetterart je ein Chip. Passt ein Chip
+                     nicht mehr ganz in die Zeile, fällt er weg (CSS) – Reihenfolge = Wichtigkeit -->
+                <span id="ls-wind" class="fm-log-chip" hidden><span class="sym" data-symbol="wind"></span><span id="ls-wind-text"></span></span>
+                <span id="ls-wetter" class="fm-log-chip fm-log-chip-symbol" hidden><span id="ls-wetter-art" class="sym" data-symbol="wetterKlar"></span></span>
+                <span id="ls-nm-heute-wrap" class="fm-log-chip" title="Seemeilen heute" hidden><span class="sym" data-symbol="kalender"></span><span id="ls-nm-heute"></span></span>
+            </span>
+        </span>
+    </div>
+    <!-- Bilanz, solange das Boot liegt (nach dem ersten Ablegen, fahrtzustand.ts): heute bzw. ganzer Törn;
+         antippen öffnet die Statistik (gleicher Zeitraum) -->
+    <button type="button" id="fuss-bilanz" class="fuss-bilanz" data-aktion="bilanzStatistik" hidden>
+        <span class="fm-metrik"><span class="fm-wert" id="fb-nm">—</span><span class="fm-label" id="fb-nm-label">heute</span></span>
+        <span class="fm-metrik"><span class="fm-wert" id="fb-segel">—</span><span class="fm-label">Segel</span></span>
+        <span class="fm-metrik"><span class="fm-wert" id="fb-motor">—</span><span class="fm-label">Motor</span></span>
+        <span class="fuss-bilanz-liege">
+            <span class="fb-zeile1"><span id="fb-liege-sym" class="sym" data-symbol="ziel"></span><span id="fb-liege"></span><span id="fb-bereitschaft" class="sym bereitschaft-sym fb-bereitschaft" data-symbol="funk" title="Bereitschaft: GPS meldet, wenn das Boot ablegt" aria-label="Bereitschaft aktiv" role="img" hidden></span></span>
+            <span class="fb-zeile2" id="fb-zeile2"></span>
+        </span>
+    </button>
+    <!-- Fortschritt der offenen Checkliste (nur auf deren Seite, body[data-seite]) – bleibt beim Scrollen sichtbar -->
+    <div id="sicherheit-fuss" class="cl-fortschritt cl-fuss">
+        <div class="cl-fuss-zeile"><span class="cl-fuss-titel">Einweisung</span><span id="sicherheit-fortschritt" class="cl-zaehler">0 / 10</span></div>
+        <div class="cl-balken"><span id="sicherheit-fortschritt-balken"></span></div>
+    </div>
+    <div id="kontrolle-fuss" class="cl-fortschritt cl-fuss">
+        <div class="cl-fuss-zeile"><span class="cl-fuss-titel">Tageskontrolle</span><span id="kontrolle-fortschritt" class="cl-zaehler">0 / 10</span></div>
+        <div class="cl-balken"><span id="kontrolle-fortschritt-balken"></span></div>
+    </div>
+    <button type="button" id="btn-mob" class="btn-mob-float">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M9 8h6l-1 6"/><path d="M4 19c2-3 4.5-2 8-1s6 2 8-2"/><line x1="12" y1="14" x2="10" y2="19"/></svg>
+        <span>MOB</span>
+    </button>
+</div>
+
+<!-- MOB-Notfall-Overlay -->
+<div id="mob-overlay" class="mob-overlay" style="display:none">
+    <div class="mob-overlay-content">
+        <div class="mob-typ-bar">
+            <button id="mob-typ-mob"    class="mob-typ-btn aktiv" data-mob-typ="mob" type="button">🆘 MOB</button>
+            <button id="mob-typ-uebung" class="mob-typ-btn" data-mob-typ="uebung" type="button"><span class="sym" data-symbol="uebung"></span>Übung</button>
+        </div>
+        <div class="mob-titel">🆘 MANN ÜBER BORD</div>
+        <!-- das Wichtigste in einer Zeile, darunter Zeit und Ort klein – die Karte bekommt den Rest -->
+        <div class="mob-kacheln">
+            <div class="mob-kachel mob-kachel-haupt"><span class="mob-label">Zum MOB</span><span id="mob-abstand-wert" class="mob-wert">—</span></div>
+            <div class="mob-kachel"><span class="mob-label">Vergangen</span><span id="mob-timer-wert" class="mob-wert">00:00</span></div>
+            <div class="mob-kachel"><span class="mob-label">SOG</span><span id="mob-sog-wert" class="mob-wert">—</span></div>
+        </div>
+        <div class="mob-ort-zeile"><span>Zeit <b id="mob-zeit-wert">—</b></span><span>MOB-Ort <b id="mob-pos-wert">wird ermittelt…</b></span></div>
+        <!-- Karte: roter Punkt = MOB-Ort, blauer Punkt + Linie = Boot seit dem MOB, grau = Track davor (mob-karte.ts) -->
+        <div id="mob-karte" class="mob-karte">Position wird ermittelt…</div>
+        <button type="button" id="mob-geborgen" class="mob-geborgen-btn"><span class="sym" data-symbol="erledigt"></span>GEBORGEN</button>
+        <textarea id="mob-notiz" class="mob-notiz-feld" placeholder="Notiz (optional)…" rows="1"></textarea>
+        <details class="mob-mayday-details">
+            <summary><span class="sym" data-symbol="funk"></span>Mayday-Text (tippen zum öffnen)</summary>
+            <p id="mob-mayday-text-de" class="mob-mayday-text"></p>
+            <p id="mob-mayday-text-en" class="mob-mayday-text" style="margin-top:8px;opacity:0.75;font-style:italic"></p>
+        </details>
+    </div>
+</div>
+
+<!-- Notiz-Popup (erscheint nach jedem Schnell-Eintrag) -->
+<div id="notiz-popup-overlay" class="notiz-popup-overlay" style="display:none">
+    <div class="notiz-popup-box">
+        <div class="notiz-popup-header">
+            <span id="notiz-popup-typ" class="notiz-popup-typ-label"></span>
+        </div>
+        <textarea id="notiz-text" class="notiz-text" placeholder="Notiz (optional)…" rows="3"></textarea>
+        <div class="notiz-btn-zeile">
+            <button type="button" id="btn-notiz-mic" class="btn-notiz-aktion" data-aktion="notizMikrofonKlick" aria-label="Spracheingabe"><span class="sym" id="notiz-mic-symbol" data-symbol="mikrofon"></span></button>
+            <button type="button" class="btn-notiz-aktion" data-aktion="notizTextLeeren" aria-label="Text löschen"><span class="sym" data-symbol="loeschen"></span></button>
+            <button type="button" class="btn-secondary" data-aktion="notizPopupSchliessen"><span class="sym" data-symbol="schliessen"></span>Schließen</button>
+            <button type="button" class="btn-notiz-speichern" data-aktion="notizPopupSpeichern"><span class="sym" data-symbol="speichern"></span>Speichern</button>
+        </div>
+    </div>
+</div>
+
+<!-- Eintrag-Fenster (auch Nachtrag am Track / zu anderer Zeit) -->
+<div id="log-modal-overlay" class="modal-overlay" style="display:none">
+    <div class="modal-box log-modal-box">
+        <h2><span class="sym" data-symbol="bearbeiten"></span><span id="log-modal-titel">Neuer Eintrag</span></h2>
+        <p id="log-nachtrag-hinweis" class="log-nachtrag-hinweis" hidden></p>
+        <div class="log-modal-felder">
+            <div class="field">
+                <label for="log_zeit">Wann?</label>
+                <div class="log-zeit-zeile">
+                    <input type="datetime-local" id="log_zeit">
+                    <button type="button" id="btn-neuer-log" class="btn-secondary log-zeit-jetzt"><span class="sym" data-symbol="uhr"></span>Jetzt</button>
+                </div>
+                <!-- nur beim Bearbeiten (Eintrag mit Position + GPS-Track): Zeit, zu der der Track dort vorbeiführt – die Position bleibt.
+                     Unter dem Feld, damit das Datum die volle Breite behält -->
+                <button type="button" id="btn-log-zeit-track" class="log-track-knopf" hidden><span class="sym" data-symbol="uhr"></span>Zeit vom Track</button>
+                <p id="log-zeit-info" class="log-feld-info" hidden></p>
+            </div>
+            <div class="field">
+                <label for="log_typ">Was war?</label>
+                <!-- Optionen setzt eintraege.ts: passend zum Zustand zu dieser Zeit zuerst -->
+                <select id="log_typ"><option value="">— bitte wählen —</option></select>
+            </div>
+            <div class="field">
+                <label for="log_text" id="log_text_label">Notiz</label>
+                <textarea id="log_text" rows="2" placeholder="Was ist passiert? (optional)"></textarea>
+            </div>
+            <div class="field">
+                <label for="rudergaenger">Rudergänger</label>
+                <select id="rudergaenger"><option value="">— Rudergänger —</option></select>
+            </div>
+            <!-- nur beim Bearbeiten: Ort und Position (Position zur Zeit aus dem Track übernehmen) -->
+            <div class="field" id="log-ort-feld" hidden>
+                <label for="log_ort">Ort</label>
+                <input type="text" id="log_ort">
+            </div>
+            <div class="field" id="log-pos-feld" hidden>
+                <label>Position</label>
+                <div class="log-pos-zeile">
+                    <span id="log-pos-text" class="log-pos-text"></span>
+                    <button type="button" id="btn-log-pos-track" class="log-track-knopf"><span class="sym" data-symbol="ort"></span>Position vom Track</button>
+                </div>
+                <p id="log-pos-info" class="log-feld-info" hidden></p>
+            </div>
+            <div class="log-modal-zeile">
+                <div class="field">
+                    <label for="log_wind">Wind (kn) <span id="wind-loading" class="sym sym-dreht" data-symbol="laden" hidden></span></label>
+                    <input type="number" id="log_wind" step="0.1" min="0" max="99" placeholder="0.0">
+                </div>
+                <div class="field">
+                    <label for="log_wind_dir">Richtung</label>
+                    <select id="log_wind_dir">
+                        <option value="">—</option>
+                        <option>N</option><option>NE</option><option>E</option><option>SE</option>
+                        <option>S</option><option>SW</option><option>W</option><option>NW</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="log-modal-btns log-modal-btns-reihe">
+            <button type="button" id="btn-modal-abbrechen" class="btn-secondary">Abbrechen</button>
+            <button type="button" id="btn-log-speichern" class="btn-primary"><span class="sym" data-symbol="speichern"></span>Speichern</button>
+        </div>
+    </div>
+</div>
+
+<!-- Langer Druck auf einen Manöver-Knopf: vergessenes Manöver nachtragen -->
+<div id="nachtrag-overlay" class="modal-overlay" style="display:none">
+    <div class="modal-box nachtrag-box">
+        <h2><span class="sym" data-symbol="uhr"></span><span id="nachtrag-titel">Nachtragen</span></h2>
+        <p class="nachtrag-frage">Wann war es?</p>
+        <div class="nachtrag-minuten">
+            <button type="button" class="btn-secondary" data-aktion="nachtragVorMinuten" data-wert="5">vor 5 min</button>
+            <button type="button" class="btn-secondary" data-aktion="nachtragVorMinuten" data-wert="10">vor 10 min</button>
+            <button type="button" class="btn-secondary" data-aktion="nachtragVorMinuten" data-wert="15">vor 15 min</button>
+            <button type="button" class="btn-secondary" data-aktion="nachtragVorMinuten" data-wert="30">vor 30 min</button>
+        </div>
+        <div class="log-modal-btns">
+            <button type="button" class="btn-secondary" data-aktion="nachtragAndereZeit"><span class="sym" data-symbol="bearbeiten"></span>Andere Zeit …</button>
+            <button type="button" class="btn-secondary" data-aktion="nachtragSchliessen">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="trackpunkt-zeit-overlay" class="modal-overlay" style="display:none">
+    <div class="modal-box" style="max-width:320px">
+        <h2><span class="sym" data-symbol="ort"></span>Track-Punkt Zeit</h2>
+        <div class="field" style="margin-top:1rem">
+            <label for="trackpunkt-zeit-input">Uhrzeit</label>
+            <input type="time" id="trackpunkt-zeit-input" style="font-size:1.4rem;text-align:center;width:100%">
+        </div>
+        <div class="field" style="margin-top:0.75rem">
+            <label for="trackpunkt-datum-input">Datum</label>
+            <input type="date" id="trackpunkt-datum-input" style="font-size:1.1rem;text-align:center;width:100%">
+        </div>
+        <div class="log-modal-btns" style="margin-top:1rem">
+            <button type="button" class="btn-primary" data-aktion="trackpunktZeitBestaetigen"><span class="sym" data-symbol="ok"></span>Setzen</button>
+            <button type="button" class="btn-secondary" data-aktion="trackpunktZeitAbbrechen">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="schiffsfuehrer-modal" class="modal-overlay sf-overlay" style="display:none">
+  <div class="modal-box sf-box">
+    <h2 class="sf-titel"><span class="sym" data-symbol="schiffsfuehrer"></span>Schiffsführer wechseln</h2>
+    <p id="sf-bisher" class="sf-bisher"></p>
+
+    <label class="sf-label" for="sf-auswahl">Neuer Schiffsführer</label>
+    <select id="sf-auswahl" class="sf-feld"></select>
+    <input id="sf-name" class="sf-feld sf-name" type="text" placeholder="Name eingeben" autocomplete="off" enterkeyhint="done" hidden>
+
+    <div class="sf-zeile">
+      <label class="sf-spalte"><span class="sf-label">Datum</span><input id="sf-datum" class="sf-feld" type="date"></label>
+      <label class="sf-spalte"><span class="sf-label">Uhrzeit</span><input id="sf-zeit" class="sf-feld" type="time"></label>
+    </div>
+
+    <div class="sf-label sf-label-zeile">
+      <span>Unterschrift <span class="sf-optional">(optional)</span></span>
+      <button type="button" id="sf-leeren" class="sf-leeren" data-aktion="sfCanvasLeeren" disabled>Löschen</button>
+    </div>
+    <div class="sf-flaeche">
+      <canvas id="sf-canvas"></canvas>
+      <span id="sf-hinweis" class="sf-hinweis">Hier mit dem Finger unterschreiben</span>
+    </div>
+
+    <div class="sf-knoepfe">
+      <button type="button" class="wahl-btn" data-aktion="schiffsfuehrerModalSchliessen">Abbrechen</button>
+      <button type="button" id="sf-uebernehmen" class="wahl-btn wahl-btn-primaer" data-aktion="schiffsfuehrerWechselnSpeichern">Übernehmen</button>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
